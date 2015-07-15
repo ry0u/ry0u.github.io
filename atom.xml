@@ -4,7 +4,7 @@
   <title><![CDATA[ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2015-07-15T14:38:43+09:00</updated>
+  <updated>2015-07-16T03:27:52+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,159 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[SRM501 FoxPlayingGame]]></title>
+    <link href="http://ry0u.github.io/blog/2015/07/16/srm501-foxplayinggame/"/>
+    <updated>2015-07-16T02:56:16+09:00</updated>
+    <id>http://ry0u.github.io/blog/2015/07/16/srm501-foxplayinggame</id>
+    <content type="html"><![CDATA[<p>scoreAをnA回足す，scoreBをnB回掛ける．この操作による最大値を求める．また</p>
+
+<script type="math/tex; mode=display">
+scoreA = paramA / 1000.0 \\
+scoreB = paramB / 1000.0
+</script>
+
+
+<p>として与えられる．</p>
+
+<h1>考察</h1>
+
+<p>掛ける場合は最初の0の状態に掛けることができるので，回数を調整できるが，足す場合はそのようなことができない．よって，まずscoreAをnA回足す．また，この値が+か-かによって場合分けをする</p>
+
+<hr />
+
+<ul>
+<li>+の場合かつscoreBが1以上の場合は，全て掛ける．</li>
+<li>+の場合かつscoreBが-1以下の場合は，(scoreB)<sup>2</sup>は正なので偶数回掛けるのが最大</li>
+<li>+の場合かつscoreBがそれ以外の場合は，減少するため，最初の0に掛けて消す</li>
+</ul>
+
+
+<hr />
+
+<ul>
+<li>-の場合かつscoreBが1以上の場合は，負の値が増加してしまうので掛けない</li>
+<li>-の場合かつscoreBが-1以下の場合は，奇数回掛けることによって値を正にすることができる</li>
+<li>-の場合かつscoreBが0より大きく1以下の場合は，負の値を小さくすることができるので全部掛ける</li>
+<li>-の場合かつscoreBが-1以上0より小さい場合は，一度だけ掛けて値を正することが最大</li>
+</ul>
+
+
+<h1>Code</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &lt;iostream&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;vector&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;string&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;sstream&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;algorithm&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;set&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;map&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="cp">#define REP(i,k,n) for(int i=k;i&lt;n;i++)</span>
+</span><span class='line'><span class="cp">#define rep(i,n) for(int i=0;i&lt;n;i++)</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="p">;</span>
+</span><span class='line'><span class="k">typedef</span> <span class="kt">long</span> <span class="kt">long</span> <span class="n">ll</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">FoxPlayingGame</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">public</span><span class="o">:</span>
+</span><span class='line'>  <span class="kt">double</span> <span class="n">theMax</span><span class="p">(</span><span class="kt">int</span> <span class="n">nA</span><span class="p">,</span> <span class="kt">int</span> <span class="n">nB</span><span class="p">,</span> <span class="kt">int</span> <span class="n">paramA</span><span class="p">,</span> <span class="kt">int</span> <span class="n">paramB</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="kt">double</span> <span class="n">A</span> <span class="o">=</span> <span class="n">paramA</span> <span class="o">/</span> <span class="mf">1000.0</span><span class="p">;</span>
+</span><span class='line'>        <span class="kt">double</span> <span class="n">B</span> <span class="o">=</span> <span class="n">paramB</span> <span class="o">/</span> <span class="mf">1000.0</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="kt">double</span> <span class="n">res</span> <span class="o">=</span> <span class="n">nA</span> <span class="o">*</span> <span class="n">A</span><span class="p">;</span>
+</span><span class='line'>        <span class="k">if</span><span class="p">(</span><span class="n">res</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>            <span class="k">if</span><span class="p">(</span><span class="n">B</span> <span class="o">&lt;=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>                <span class="n">nB</span> <span class="o">-=</span> <span class="n">nB</span><span class="o">%</span><span class="mi">2</span><span class="p">;</span>
+</span><span class='line'>                <span class="n">rep</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">nB</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>                    <span class="n">res</span> <span class="o">*=</span> <span class="n">B</span><span class="p">;</span>
+</span><span class='line'>                <span class="p">}</span>
+</span><span class='line'>            <span class="p">}</span><span class="k">else</span> <span class="k">if</span><span class="p">(</span><span class="n">B</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>                <span class="n">rep</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">nB</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>                    <span class="n">res</span> <span class="o">*=</span> <span class="n">B</span><span class="p">;</span>
+</span><span class='line'>                <span class="p">}</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>        <span class="p">}</span><span class="k">else</span> <span class="p">{</span>
+</span><span class='line'>            <span class="k">if</span><span class="p">(</span><span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">B</span> <span class="o">&amp;&amp;</span> <span class="n">B</span> <span class="o">&lt;</span> <span class="mf">1.0</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>                <span class="n">rep</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">nB</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>                    <span class="n">res</span> <span class="o">*=</span> <span class="n">B</span><span class="p">;</span>
+</span><span class='line'>                <span class="p">}</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>            <span class="k">else</span> <span class="k">if</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span> <span class="o">&lt;</span> <span class="n">B</span> <span class="o">&amp;&amp;</span> <span class="n">B</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>                <span class="k">if</span><span class="p">(</span><span class="n">nB</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="n">res</span> <span class="o">*=</span> <span class="n">B</span><span class="p">;</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>            <span class="k">else</span> <span class="k">if</span><span class="p">(</span><span class="n">B</span> <span class="o">&lt;=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>                <span class="k">if</span><span class="p">(</span><span class="n">nB</span><span class="o">%</span><span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="n">nB</span><span class="o">--</span><span class="p">;</span>
+</span><span class='line'>                <span class="n">rep</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">nB</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>                    <span class="n">res</span> <span class="o">*=</span> <span class="n">B</span><span class="p">;</span>
+</span><span class='line'>                <span class="p">}</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">return</span> <span class="n">res</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>SystemTestに落ちまくり．特にscoreAが負，scoreBが負の時に，一度だけscoreBを掛ければよかったが，ここでnBが0の時の処理を加えればいいことに全く気づけなかった．</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Codeforces312-div2C Amr and Chemistry]]></title>
