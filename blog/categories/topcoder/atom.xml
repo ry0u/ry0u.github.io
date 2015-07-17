@@ -4,7 +4,7 @@
   <title><![CDATA[Category: topcoder | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/topcoder/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2015-07-17T19:54:07+09:00</updated>
+  <updated>2015-07-18T02:20:59+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,182 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[SRM502 TheLotteryBothDivs]]></title>
+    <link href="http://ry0u.github.io/blog/2015/07/17/srm502-thelotterybothdivs/"/>
+    <updated>2015-07-17T19:44:40+09:00</updated>
+    <id>http://ry0u.github.io/blog/2015/07/17/srm502-thelotterybothdivs</id>
+    <content type="html"><![CDATA[<p>000000000~999999999の10<sup>9</sup>の中で宝くじが当たる確率を求める．また下の桁が一致していれば当たりとなる．</p>
+
+<h1>考察</h1>
+
+<p>まず同じ数が与えられる可能性もあるので，setに投げて重複を消してから，下の桁が一致している数を消す．桁数が小さいほうが含まれるものが多いので，桁数が大きい方を消す．
+後は0.1<sup>桁数</sup>のsumが答えとなる．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;vector&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;cstring&gt;
+#include &lt;queue&gt;
+#include &lt;set&gt;
+#include &lt;map&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+
+using namespace std;
+typedef long long ll;
+
+class TheLotteryBothDivs {
+    public:
+    double find(vector &lt;string&gt; goodSuffixes) {
+        set&lt;string&gt; st;
+        rep(i,goodSuffixes.size()) {
+            st.insert(goodSuffixes[i]);
+        }
+
+        vector&lt;string&gt; v;
+        set&lt;string&gt;::iterator ite;
+        for(ite = st.begin();ite != st.end(); ite++) {
+            v.push_back(*ite);
+        }
+
+        vector&lt;string&gt; res;
+        rep(i,v.size()) {
+            bool flag = false;
+            rep(j,v.size()) {
+                if(v[i].size() &gt; v[j].size()) {
+                    bool ch = true;
+                    rep(k,v[j].size()) {
+                        if(v[i][v[i].size()-1-k] == v[j][v[j].size()-1-k]) continue;
+                        ch = false;
+                    }
+
+                    if(ch) flag = true;
+                }
+            }
+            if(!flag) res.push_back(v[i]);
+        }
+
+        double ans = 0;
+        rep(i,res.size()) {
+            double t = 1.0;
+
+            rep(j,res[i].size()) {
+                t *= 0.1;
+            }
+
+            ans += t;
+        }
+        return ans;
+    }
+};
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[SRM501 FoxPlayingGame]]></title>
+    <link href="http://ry0u.github.io/blog/2015/07/16/srm501-foxplayinggame/"/>
+    <updated>2015-07-16T02:56:16+09:00</updated>
+    <id>http://ry0u.github.io/blog/2015/07/16/srm501-foxplayinggame</id>
+    <content type="html"><![CDATA[<p>scoreAをnA回足す，scoreBをnB回掛ける．この操作による最大値を求める．また</p>
+
+<p><script type="math/tex; mode=display">
+scoreA = paramA / 1000.0 \
+scoreB = paramB / 1000.0
+</script></p>
+
+<p>として与えられる．</p>
+
+<h1>考察</h1>
+
+<p>掛ける場合は最初の0の状態に掛けることができるので，回数を調整できるが，足す場合はそのようなことができない．よって，まずscoreAをnA回足す．また，この値が+か-かによって場合分けをする</p>
+
+<hr />
+
+<ul>
+<li>+の場合かつscoreBが1以上の場合は，全て掛ける．</li>
+<li>+の場合かつscoreBが-1以下の場合は，(scoreB)<sup>2</sup>は正なので偶数回掛けるのが最大</li>
+<li>+の場合かつscoreBがそれ以外の場合は，減少するため，最初の0に掛けて消す</li>
+</ul>
+
+
+<hr />
+
+<ul>
+<li>-の場合かつscoreBが1以上の場合は，負の値が増加してしまうので掛けない</li>
+<li>-の場合かつscoreBが-1以下の場合は，奇数回掛けることによって値を正にすることができる</li>
+<li>-の場合かつscoreBが0より大きく1以下の場合は，負の値を小さくすることができるので全部掛ける</li>
+<li>-の場合かつscoreBが-1以上0より小さい場合は，一度だけ掛けて値を正することが最大</li>
+</ul>
+
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;sstream&gt;
+#include &lt;algorithm&gt;
+#include &lt;set&gt;
+#include &lt;map&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+
+using namespace std;
+typedef long long ll;
+
+class FoxPlayingGame {
+    public:
+    double theMax(int nA, int nB, int paramA, int paramB) {
+        double A = paramA / 1000.0;
+        double B = paramB / 1000.0;
+
+        double res = nA * A;
+        if(res &gt; 0) {
+            if(B &lt;= -1) {
+                nB -= nB%2;
+                rep(i,nB) {
+                    res *= B;
+                }
+            }else if(B &gt;= 1) {
+                rep(i,nB) {
+                    res *= B;
+                }
+            }
+        }else {
+            if(0 &lt;= B &amp;&amp; B &lt; 1.0) {
+                rep(i,nB) {
+                    res *= B;
+                }
+            }
+            else if(-1.0 &lt; B &amp;&amp; B &lt; 0) {
+                if(nB != 0) res *= B;
+            }
+            else if(B &lt;= -1) {
+                if(nB%2 == 0) nB--;
+                rep(i,nB) {
+                    res *= B;
+                }
+            }
+        }
+
+        return res;
+
+    }
+};
+</code></pre>
+
+<p>SystemTestに落ちまくり．特にscoreAが負，scoreBが負の時に，一度だけscoreBを掛ければよかったが，ここでnBが0の時の処理を加えればいいことに全く気づけなかった．</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[SRM500 GeometricProgressions]]></title>
