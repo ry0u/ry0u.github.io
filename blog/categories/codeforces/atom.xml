@@ -4,7 +4,7 @@
   <title><![CDATA[Category: codeforces | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/codeforces/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2015-08-10T11:28:41+09:00</updated>
+  <updated>2015-08-11T04:35:26+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,122 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Codeforces315-div2C Prime or Palindromes?]]></title>
+    <link href="http://ry0u.github.io/blog/2015/08/11/codeforces315-div2c-prime-or-palindromes/"/>
+    <updated>2015-08-11T04:21:29+09:00</updated>
+    <id>http://ry0u.github.io/blog/2015/08/11/codeforces315-div2c-prime-or-palindromes</id>
+    <content type="html"><![CDATA[<p><a href="http://codeforces.com/contest/569/problem/C">http://codeforces.com/contest/569/problem/C</a><br/>
+<script type="math/tex; mode=display">
+\pi (n) := nをこえない素数の数 \
+rub (n) := nをこえない回分の数
+</script></p>
+
+<p>と定義する．比<script type="math/tex">A = \frac{p}{q}</script>が与えられるので，<script type="math/tex">\pi (n) \leq A \cdot rub(n)</script>を満たす最大のnを求めたい．</p>
+
+<h1>考察</h1>
+
+<p>まず，<script type="math/tex">\pi (n)</script>と，<script type="math/tex">rub (n)</script>を求める．これをどこまで必要かを自分で判断しなければならない．<script type="math/tex"> A \leq 42</script>とあるので，多くでも<script type="math/tex">\pi (n)</script>が<script type="math/tex">rub (n)</script>の42倍になっているnまででよいと分かる．実際に値を試した所，n = 1500000で十分だとわかった．後は，後ろから見ていき，条件を満たす最大のnを答えた．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+#include &lt;cmath&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+bool prime[10000000];
+void Eratosthenes(int n) {
+    rep(i,n) prime[i] = true;
+    prime[0] = false;
+    prime[1] = false;
+
+    REP(i,2,(int)sqrt(n)) {
+        if(prime[i]) {
+            for(int j=0;i*(j+2)&lt;n;j++) {
+                prime[i*(j+2)] = 0;
+            }
+        }
+    }
+}
+
+bool check(string s) {
+    rep(i,s.size()/2) {
+        if(s[i] != s[s.size()-1-i]) return false;
+    }
+
+    return true;
+}
+
+int main() {
+    double p,q;
+    cin &gt;&gt; p &gt;&gt; q;
+
+    int N = 1500000;
+
+    Eratosthenes(N);
+    vector&lt;int&gt; pi(N);
+    int cnt = 0;
+
+    rep(i,N+5) {
+        if(prime[i]) {
+            cnt++;
+        }
+
+        pi[i] = cnt;
+    }
+
+
+    vector&lt;int&gt; rub(N);
+    cnt = 0;
+    REP(i,1,N+5) {
+        stringstream ss;
+        ss &lt;&lt; i;
+
+        if(check(ss.str())) {
+            cnt++;
+        }
+
+        rub[i] = cnt;
+    }
+
+    double A = p/q;
+    int ans = 0;
+
+    for(int i=N;i&gt;=1;i--) {
+        ll a = pi[i];
+        ll b = rub[i];
+
+        if(a &lt;=  A * b) {
+            cout &lt;&lt; i &lt;&lt; endl;
+            break;
+        }
+        else {
+            continue;
+        }
+    }
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Codeforces314-div2D One-Dimensional Battle Ships]]></title>
@@ -336,113 +452,6 @@ int main() {
 </code></pre>
 
 <p>コンテスト中，最後のほうでこの解法を思いついた．t，t2やその範囲でバグらせてしまい，時間内に提出できなかった．非常に悔しい(実力が足りない)．</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Codeforces311-div2C Arthur and Table]]></title>
-    <link href="http://ry0u.github.io/blog/2015/07/12/codeforces311-div2c-arthur-and-table/"/>
-    <updated>2015-07-12T23:17:25+09:00</updated>
-    <id>http://ry0u.github.io/blog/2015/07/12/codeforces311-div2c-arthur-and-table</id>
-    <content type="html"><![CDATA[<p><a href="http://codeforces.com/contest/557/problem/C">http://codeforces.com/contest/557/problem/C</a><br/>
-<script type="math/tex">N本の足を持つテーブルがあり，各足には長さl<em>{i}と取り除くコストd</em>{i}が与えられる．</script>
-足の長さがバラバラなのでこれを安定状態にしたい．安定状態になるには足の最大の長さの本数が全体の本数の半分より多ければよい．その時の最小のコストを求める．</p>
-
-<p>Sampleを考える．長さ1を1マスとし，文字がコストを表す．取り除いた足を赤色で表現する．</p>
-
-<p>Sample1<br/>
-<img src="/images/Codeforces311-div2/image1.png"><br/>
-長さ5を取り除くほうがコストが安い</p>
-
-<p>Sample2<br/>
-<img src="/images/Codeforces311-div2/image2.png"><br/>
-既に安定状態である</p>
-
-<p>Sample3<br/>
-<img src="/images/Codeforces311-div2/image3.png"><br/>
-長さ2に揃える．長さ3は全て取り除き，個数が半分より多くなるように長さ1を1つ取り除く．</p>
-
-<h1>考察</h1>
-
-<p>どの長さで揃えるかを探索する．仮に揃える長さをLと決めた場合，全体のコストの和からLを引き，後は長さLの足の個数-1個分残すようにすればよいとわかる．長さでsortし小さい順から見ていけば，その処理ができる．</p>
-
-<p>揃える長さを緑とした時に，赤の部分は全て取り除くことになる．
-<img src="/images/Codeforces311-div2/image4.png"><br/>
-後は緑より小さい足を緑の個数より少なくすればよい．出来るだけコストを抑えたいのでコストが大きい棒を残すようにする．よって全体のコストの和-揃える長さ-(それより長さが短い足をコストの大きい順に個数が少なくなるまで)で求める．</p>
-
-<h1>Code</h1>
-
-<p>コストが大きい順に見たいためpriority_queueを用いて大きい順に取った．最初は小さい順からとってしまい．WAを生やした．mapを使っているからidなどを作らずにmap巡回をしたほうがより分かりやすい(?)．</p>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-#include &lt;queue&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-int main() {
-    int n;
-    cin &gt;&gt; n;
-
-    vector&lt;int&gt; L(n),D(n);
-    rep(i,n) cin &gt;&gt; L[i];
-    rep(i,n) cin &gt;&gt; D[i];
-
-    vector&lt;int&gt; id(L.begin(),L.end());
-    sort(id.begin(),id.end());
-    id.erase(unique(id.begin(),id.end()),id.end());
-
-    int sum = 0;
-    map&lt;int,vector&lt;int&gt; &gt; m;
-    rep(i,n) {
-        m[L[i]].push_back(D[i]);
-        sum += D[i];
-    }
-
-    int ans = sum;
-    priority_queue&lt;int&gt; que;
-    rep(i,id.size()) {
-        vector&lt;int&gt; v(m[id[i]].begin(),m[id[i]].end());
-        int res = sum;
-        int cnt = v.size()-1;
-
-        rep(j,v.size()) res -= v[j];
-
-        vector&lt;int&gt; t;
-        while(que.size() &amp;&amp; cnt) {
-            int q = que.top();
-            que.pop();
-
-            res -= q;
-            t.push_back(q);
-            cnt--;
-        }
-
-        ans = min(ans,res);
-
-        rep(j,t.size()) que.push(t[j]);
-        rep(j,v.size()) que.push(v[j]);
-    }
-
-    cout &lt;&lt; ans &lt;&lt; endl;
-
-    return 0;
-}
-</code></pre>
 ]]></content>
   </entry>
   
