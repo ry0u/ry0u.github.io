@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: aoj | ry0u_ydのblog]]></title>
+  <link href="http://ry0u.github.io/blog/categories/aoj/atom.xml" rel="self"/>
+  <link href="http://ry0u.github.io/"/>
+  <updated>2015-08-28T02:37:12+09:00</updated>
+  <id>http://ry0u.github.io/</id>
+  <author>
+    <name><![CDATA[ry0u_yd]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Hide-and-Seek Supporting System]]></title>
+    <link href="http://ry0u.github.io/blog/2015/08/28/hide-and-seek-supporting-system/"/>
+    <updated>2015-08-28T02:23:10+09:00</updated>
+    <id>http://ry0u.github.io/blog/2015/08/28/hide-and-seek-supporting-system</id>
+    <content type="html"><![CDATA[<p><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0129">http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0129</a></p>
+
+<p>サンプル1<br/>
+<img src="/images/AOJ/0129.png"></p>
+
+<p>円に接してる場合は，Safe判定となる．</p>
+
+<h1>考察</h1>
+
+<p>円の中心と，線分の関係を見る．Dangerの場合は線分の端点両方が円内包されていない，かつ円の中心と線分の距離が円の半径よりも小さい時である．前回，この問題を取り組んだ時はWAを連発したが，今回はACすることが出来た．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+#include &lt;cmath&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+#define EPS 1e-8
+#define equals(a,b) fabs((a) - (b)) &lt; EPS
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+struct Point {
+    double x, y;
+
+    Point(double x=0, double y=0) : x(x), y(y) {}
+
+    Point operator+(const Point &amp;o) const { return Point(x+o.x, y+o.y); }
+
+    Point operator-(const Point &amp;o) const { return Point(x-o.x, y-o.y); }
+
+    Point operator*(const double m) const { return Point(x*m, y*m); }
+
+    Point operator/(const double d) const { return Point(x/d, y/d); }
+
+    bool operator&lt;(const Point &amp;o) const { return x != o.x ? x &lt; o.x : y &lt; o.y; }
+
+    bool operator==(const Point &amp;o) const { return fabs(x-o.x) &lt; EPS &amp;&amp; fabs(y-o.y) &lt; EPS; }
+
+    double cross(const Point &amp;o) const { return x * o.y - y * o.x; }
+
+    double dot(const Point &amp;o) const { return x * o.x + y * o.y; }
+
+    double atan() const { return atan2(y, x); }
+
+    double norm() const { return sqrt(dot(*this)); }
+
+    double distance(const Point &amp;o) const { return (o - (*this)).norm(); }
+
+    double area(const Point &amp;a,const Point &amp;b) {
+        Point p = a - (*this), p2 = b - (*this); 
+        return p.cross(p2);
+    }
+
+    double area_abs(const Point &amp;a,const Point &amp;b) const {
+        Point p = a - (*this), p2 = b - (*this);
+        return fabs(p.cross(p2)) / 2.0;
+    }   
+
+    //線分abが自身に含まれているのかどうか判断する
+    int between(const Point &amp;a,const Point &amp;b) {
+        if(area(a,b) != 0) return 0;
+
+        if(a.x != b.x)  return ((a.x &lt;= x) &amp;&amp; (x &lt;= b.x) || (a.x &gt;= x) &amp;&amp; (x &gt;= b.x));
+        else return ((a.y &lt;= y) &amp;&amp; (y &lt;= b.y) || (a.y &gt;= y) &amp;&amp; (y &gt;= b.y));
+    }      
+
+    double distance_seg(const Point&amp; a,const Point&amp; b) {
+        if((b-a).dot(*this-a) &lt; EPS) {
+            return (*this-a).norm();
+        }
+        if((a-b).dot(*this-b) &lt; EPS) {
+            return (*this-b).norm();
+        }
+        return abs((b-a).cross(*this-a)) / (b-a).norm();
+    }
+
+    bool hitPolygon(const Point&amp; a,const Point&amp; b,const Point&amp; c) {
+        double t = (b-a).cross(*this-b);
+        double t2 = (c-b).cross(*this-c);
+        double t3 = (a-c).cross(*this-a);   
+
+        if((t &gt; 0 &amp;&amp; t2 &gt; 0 &amp;&amp; t3 &gt; 0) || ( t &lt; 0 &amp;&amp; t2 &lt; 0 &amp;&amp; t3 &lt; 0)) {
+            return true;
+        }
+
+        return false;
+    }
+};
+
+struct Circle {
+    Point p;
+    double r;
+
+    Circle() : p(Point(0,0)), r(0) {}
+
+    Circle(Point o, double r) : p(o), r(r) {}
+
+    Circle(double x,double y, double r) : p(Point(x,y)), r(r) {}
+
+    bool isCircleIn(const Point&amp; o) {
+        Point res = o-p;
+        return res.dot(res) &lt; r*r + EPS;
+    }
+
+    // 1:外で接する，0:交差なし，-1:内で接する，2:交差，-2:内包
+    int isIntersect(const Circle&amp; c) {
+        double d = (c.p - p).dot(c.p - p);
+        double len = (c.r + r) * (c.r + r);
+
+        if(equals(d,len)) return 1;
+        if(d &gt; len) return 0;
+
+        double R = fabs(c.r - r) * fabs(c.r - r);
+        if(equals(d,R)) return -1;
+        if(d &gt; R) return 2;
+        return -2;
+    }
+
+    vector&lt;Point&gt; getCrossPoint(const Circle&amp; c) {
+        vector&lt;Point&gt; ret;
+        int ch = isIntersect(c);
+
+        if(ch == 0 || ch == -2) return ret;
+
+        Point base = c.p - p;
+        double len = base.dot(base);
+        double t = (r*r - c.r*c.r + len) / (2.0 * len);
+
+        if(ch == 2) {
+            Point n(-base.y,base.x);
+            n = n / (n.norm());
+            double h = sqrt(r * r - t*t*len);
+
+            ret.push_back(p + (base*t) + (n*h));
+            ret.push_back(p + (base*t) - (n*h));
+        } else {
+            ret.push_back(p + (base*t));
+        }
+
+        return ret;
+    }
+};
+
+int main() {
+    int n,m;
+
+    while(cin &gt;&gt; n &amp;&amp; n) {
+        vector&lt;Circle&gt; v;
+        rep(i,n) {
+            double x,y,r;
+            cin &gt;&gt; x &gt;&gt; y &gt;&gt; r;
+
+            v.push_back(Circle(x,y,r));
+        }
+
+        int m;
+        cin &gt;&gt; m;
+
+        rep(q,m) {
+            Point t,o;
+            cin &gt;&gt; t.x &gt;&gt; t.y &gt;&gt; o.x &gt;&gt; o.y;
+
+            bool flag = true;
+
+            rep(i,n) {
+                if(v[i].isCircleIn(t) &amp;&amp; v[i].isCircleIn(o)) {
+                    continue;
+                } else if(!v[i].isCircleIn(t) &amp;&amp; !v[i].isCircleIn(o)) {
+                    double d = v[i].p.distance_seg(t,o);
+                    if(d &lt; v[i].r + EPS) flag = false;
+                } else {
+                    flag = false;
+                }
+            }
+
+            if(flag) cout &lt;&lt; "Danger" &lt;&lt; endl;
+            else cout &lt;&lt; "Safe" &lt;&lt; endl;
+        }
+    }
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+</feed>
