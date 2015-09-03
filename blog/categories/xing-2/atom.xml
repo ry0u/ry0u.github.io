@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: 全探索 | ry0u_ydのblog]]></title>
-  <link href="http://ry0u.github.io/blog/categories/quan-tan-suo/atom.xml" rel="self"/>
+  <title><![CDATA[Category: 星2 | ry0u_ydのblog]]></title>
+  <link href="http://ry0u.github.io/blog/categories/xing-2/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
   <updated>2015-09-03T13:51:05+09:00</updated>
   <id>http://ry0u.github.io/</id>
@@ -129,21 +129,15 @@ int main() {
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Codeforces315-div2C Prime or Palindromes?]]></title>
-    <link href="http://ry0u.github.io/blog/2015/08/11/codeforces315-div2c-prime-or-palindromes/"/>
-    <updated>2015-08-11T04:21:29+09:00</updated>
-    <id>http://ry0u.github.io/blog/2015/08/11/codeforces315-div2c-prime-or-palindromes</id>
-    <content type="html"><![CDATA[<p><a href="http://codeforces.com/contest/569/problem/C">http://codeforces.com/contest/569/problem/C</a><br/>
-<script type="math/tex; mode=display">
-\pi (n) := nをこえない素数の数 \
-rub (n) := nをこえない回分の数
-</script></p>
-
-<p>と定義する．比<script type="math/tex">A = \frac{p}{q}</script>が与えられるので，<script type="math/tex">\pi (n) \leq A \cdot rub(n)</script>を満たす最大のnを求めたい．</p>
+    <title type="html"><![CDATA[yukicoder No.17 2つの地点に泊まりたい]]></title>
+    <link href="http://ry0u.github.io/blog/2015/09/03/yukicoder-no-dot-17-2tufalsedi-dian-nibo-maritai/"/>
+    <updated>2015-09-03T13:26:09+09:00</updated>
+    <id>http://ry0u.github.io/blog/2015/09/03/yukicoder-no-dot-17-2tufalsedi-dian-nibo-maritai</id>
+    <content type="html"><![CDATA[<p><a href="http://yukicoder.me/problems/61">http://yukicoder.me/problems/61</a></p>
 
 <h1>考察</h1>
 
-<p>まず，<script type="math/tex">\pi (n)</script>と，<script type="math/tex">rub (n)</script>を求める．これをどこまで必要かを自分で判断しなければならない．<script type="math/tex"> A \leq 42</script>とあるので，多くでも<script type="math/tex">\pi (n)</script>が<script type="math/tex">rub (n)</script>の42倍になっているnまででよいと分かる．実際に値を試した所，n = 1500000で十分だとわかった．後は，後ろから見ていき，条件を満たす最大のnを答えた．</p>
+<p>nが50と小さいので，0とn-1以外の2つの地点(i,j)を列挙する．0~i，i~j，j~n-1の最短距離，i，jの滞在コストの和の最小値を求める．それぞれの地点からのdijkstraをやったが最初にwarshall_floydをしたほうがスマートに書けそう．</p>
 
 <h1>Code</h1>
 
@@ -155,7 +149,7 @@ rub (n) := nをこえない回分の数
 #include &lt;sstream&gt;
 #include &lt;map&gt;
 #include &lt;set&gt;
-#include &lt;cmath&gt;
+#include &lt;queue&gt;
 
 #define REP(i,k,n) for(int i=k;i&lt;n;i++)
 #define rep(i,n) for(int i=0;i&lt;n;i++)
@@ -167,76 +161,88 @@ using namespace std;
 typedef long long ll;
 typedef pair&lt;int,int&gt; P;
 
-bool prime[10000000];
-void Eratosthenes(int n) {
-    rep(i,n) prime[i] = true;
-    prime[0] = false;
-    prime[1] = false;
+struct edge {
+    int from,to;
+    int cost;
 
-    REP(i,2,(int)sqrt(n)) {
-        if(prime[i]) {
-            for(int j=0;i*(j+2)&lt;n;j++) {
-                prime[i*(j+2)] = 0;
+    edge(int t,int c) : to(t),cost(c) {}
+    edge(int f,int t,int c) : from(f),to(t),cost(c) {}
+
+    bool operator&lt;(const edge &amp;e) const {
+        return cost &lt; e.cost;
+    }
+};
+
+vector&lt;edge&gt; G[55];
+int d[55];
+
+void dijkstra(int s,int n) {
+    priority_queue&lt;P,vector&lt;P&gt;,greater&lt;P&gt; &gt; que;
+    fill(d,d+n,INF);
+
+    d[s] = 0;
+    que.push(P(0,s));
+
+    while(que.size()) {
+        P p = que.top();
+        que.pop();
+
+        int v = p.second;
+        if(d[v] &lt; p.first) continue;
+
+        rep(i,G[v].size()) {
+            edge e = G[v][i];
+            if(d[e.to] &gt; d[v] + e.cost) {
+                d[e.to] = d[v] + e.cost;
+                que.push(P(d[e.to],e.to));
             }
         }
     }
 }
 
-bool check(string s) {
-    rep(i,s.size()/2) {
-        if(s[i] != s[s.size()-1-i]) return false;
-    }
-
-    return true;
-}
-
 int main() {
-    double p,q;
-    cin &gt;&gt; p &gt;&gt; q;
+    int n;
+    cin &gt;&gt; n;
 
-    int N = 1500000;
+    vector&lt;int&gt; w(n);
+    rep(i,n) cin &gt;&gt; w[i];
 
-    Eratosthenes(N);
-    vector&lt;int&gt; pi(N);
-    int cnt = 0;
+    int m;
+    cin &gt;&gt; m;
 
-    rep(i,N+5) {
-        if(prime[i]) {
-            cnt++;
-        }
+    rep(i,m) {
+        int a,b,c;
+        cin &gt;&gt; a &gt;&gt; b &gt;&gt; c;
 
-        pi[i] = cnt;
+        G[a].push_back(edge(b,c));
+        G[b].push_back(edge(a,c));
     }
 
+    int ans = INF;
+    REP(i,1,n-1) {
+        REP(j,1,n-1) {
+            if(i == j) continue;
+            int cost = 0;
 
-    vector&lt;int&gt; rub(N);
-    cnt = 0;
-    REP(i,1,N+5) {
-        stringstream ss;
-        ss &lt;&lt; i;
+            dijkstra(0,n);
+            if(d[i] == INF) continue;
+            cost += d[i];
 
-        if(check(ss.str())) {
-            cnt++;
-        }
+            dijkstra(i,n);
+            if(d[j] == INF) continue;
+            cost += d[j];
 
-        rub[i] = cnt;
-    }
+            dijkstra(j,n);
+            if(d[n-1] == INF) continue;
+            cost += d[n-1];
 
-    double A = p/q;
-    int ans = 0;
+            cost += w[i] + w[j];
 
-    for(int i=N;i&gt;=1;i--) {
-        ll a = pi[i];
-        ll b = rub[i];
-
-        if(a &lt;=  A * b) {
-            cout &lt;&lt; i &lt;&lt; endl;
-            break;
-        }
-        else {
-            continue;
+            ans = min(ans,cost);
         }
     }
+
+    cout &lt;&lt; ans &lt;&lt; endl;
 
     return 0;
 }
