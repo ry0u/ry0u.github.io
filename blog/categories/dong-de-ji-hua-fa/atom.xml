@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: 動的計画法 | ry0u_ydのblog]]></title>
+  <link href="http://ry0u.github.io/blog/categories/dong-de-ji-hua-fa/atom.xml" rel="self"/>
+  <link href="http://ry0u.github.io/"/>
+  <updated>2015-09-03T14:22:20+09:00</updated>
+  <id>http://ry0u.github.io/</id>
+  <author>
+    <name><![CDATA[ry0u_yd]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[yukicoder No.45 回転寿司]]></title>
+    <link href="http://ry0u.github.io/blog/2015/09/03/yukicoder-no-dot-45-hui-zhuan-shou-si/"/>
+    <updated>2015-09-03T14:00:37+09:00</updated>
+    <id>http://ry0u.github.io/blog/2015/09/03/yukicoder-no-dot-45-hui-zhuan-shou-si</id>
+    <content type="html"><![CDATA[<p><a href="http://yukicoder.me/problems/78">http://yukicoder.me/problems/78</a></p>
+
+<h1>考察</h1>
+
+<p>動的計画法で解く．[i][0]をi番目を取らない，[i][1]をi番目を取るとして，dp[i][j]をi番目までの最大値とする．dp[i][0] = max(i-1番目を取った，i-2番目を取った)，dp[i][1] = max(i-1番目を取らない+i番目の価値，i-2番目を取った+i番目の価値)で求める．</p>
+
+<p><script type="math/tex; mode=display">
+\begin{eqnarray}
+\begin{cases}
+dp[0][1] = v[0] \
+dp[1][0] = v[0] \
+dp[1][1] = v[1] \
+dp[i][0] = max(dp[i-1][1],dp[i-2][1]) (i \geq 2) \
+dp[i][1] = max(dp[i-1][0]+v[i],dp[i-2][1]+v[i]) (i \geq 2)
+\end{cases}
+\end{eqnarray}
+</script></p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int main() {
+    int n;
+    cin &gt;&gt; n;
+
+    vector&lt;int&gt; v(n);
+    rep(i,n) cin &gt;&gt; v[i];
+
+    int dp[1005][2];
+    memset(dp,0,sizeof(dp));
+
+    dp[0][1] = v[0];
+    dp[1][0] = v[0];
+    dp[1][1] = v[1];
+
+    REP(i,2,n) {
+        dp[i][0] = max(dp[i-1][1],dp[i-2][1]);
+        dp[i][1] = max(dp[i-1][0] + v[i],dp[i-2][1] + v[i]);
+    }
+
+    cout &lt;&lt; max(dp[n-1][0],dp[n-1][1]) &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[yukicoder No.44 DPなすごろく]]></title>
+    <link href="http://ry0u.github.io/blog/2015/09/03/yukicoder-no-dot-44-dpnasugoroku/"/>
+    <updated>2015-09-03T13:53:47+09:00</updated>
+    <id>http://ry0u.github.io/blog/2015/09/03/yukicoder-no-dot-44-dpnasugoroku</id>
+    <content type="html"><![CDATA[<p><a href="http://yukicoder.me/problems/76">http://yukicoder.me/problems/76</a></p>
+
+<h1>考察</h1>
+
+<p>1または2前に進むことが出来るので，i+2番目にマスに訪れるにはi番目のマス，またはi+1番目のマスから来るしかない．よって</p>
+
+<p><script type="math/tex; mode=display">
+\begin{eqnarray}
+\begin{cases}
+dp[0] = 1 \
+dp[1] = 1 \
+dp[i+2] = dp[i+1] + dp[i] (i \geq 2)
+\end{cases}
+\end{eqnarray}
+</script></p>
+
+<p>が成り立つ．フィボナッチ階段を同じ考えである．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int main() {
+    int n;
+    cin &gt;&gt; n;
+
+    vector&lt;ll&gt; dp(55);
+    dp[0] = 1;
+    dp[1] = 1;
+
+    rep(i,n-1) {
+        dp[i+2] = dp[i] + dp[i+1];
+    }
+
+    cout &lt;&lt; dp[n] &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+</feed>

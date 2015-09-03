@@ -9,7 +9,9 @@
   <meta name="author" content="ry0u_yd">
 
   
-  <meta name="description" content="http://yukicoder.me/problems/507 考察 端点のペアを列挙し，その直線とN個の線分が交差しているかを見る．直線ではなく，線分で交差判定をしていたためにWA． 以下の場合を考える． 今見ている．端点のペアは緑の点(a,b)だとする． &hellip;">
+  <meta name="description" content="ある文字列Iに，2つの操作が出来る．
+- 文字列の最後に"A"を足す
+- 文字列を反転して，最後に"B"を足す 文字列Iが文字列Tになるかを判定せよ 考察 愚直にIに操作していくと，2T.size()-I.size()で無理．しかしTから減らしていくには，一意しかない．末尾が"A"ならば， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -79,6 +81,190 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/07/24/srm663-abba/">SRM663 ABBA</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-07-24T18:55:13+09:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>ある文字列Iに，2つの操作が出来る．<br/>
+- 文字列の最後に"A"を足す<br/>
+- 文字列を反転して，最後に"B"を足す</p>
+
+<p>文字列Iが文字列Tになるかを判定せよ</p>
+
+<h1>考察</h1>
+
+<p>愚直にIに操作していくと，2<sup>T.size()-I.size()</sup>で無理．しかしTから減らしていくには，一意しかない．末尾が"A"ならば，一つ前の状態をpreTとすると，T = preT+&ldquo;A"となる．まと同様に，末尾が"B"ならば，T = reverse(preT) + "B"である．これを繰り返し，Iと同じsizeになった時に，同じかどうかで判定できる．</p>
+
+<h1>Code</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#line 5 &quot;ABBA.cpp&quot;</span>
+</span><span class='line'><span class="cp">#include &lt;iostream&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;string&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;vector&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;algorithm&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;sstream&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;cstring&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;queue&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;set&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;map&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="cp">#define REP(i,k,n) for(int i=k;i&lt;n;i++)</span>
+</span><span class='line'><span class="cp">#define rep(i,n) for(int i=0;i&lt;n;i++)</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="p">;</span>
+</span><span class='line'><span class="k">typedef</span> <span class="kt">long</span> <span class="kt">long</span> <span class="n">ll</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">ABBA</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">public</span><span class="o">:</span>
+</span><span class='line'>  <span class="n">string</span> <span class="n">canObtain</span><span class="p">(</span><span class="n">string</span> <span class="n">I</span><span class="p">,</span> <span class="n">string</span> <span class="n">T</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">while</span><span class="p">(</span><span class="n">T</span> <span class="o">!=</span> <span class="n">I</span> <span class="o">&amp;&amp;</span> <span class="n">T</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">I</span><span class="p">.</span><span class="n">size</span><span class="p">())</span> <span class="p">{</span>
+</span><span class='line'>            <span class="k">if</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="n">T</span><span class="p">.</span><span class="n">size</span><span class="p">()</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="sc">&#39;A&#39;</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>                <span class="n">T</span> <span class="o">=</span> <span class="n">T</span><span class="p">.</span><span class="n">substr</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">T</span><span class="p">.</span><span class="n">size</span><span class="p">()</span><span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+</span><span class='line'>            <span class="p">}</span><span class="k">else</span> <span class="p">{</span>
+</span><span class='line'>                <span class="n">T</span> <span class="o">=</span> <span class="n">T</span><span class="p">.</span><span class="n">substr</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">T</span><span class="p">.</span><span class="n">size</span><span class="p">()</span><span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+</span><span class='line'>                <span class="n">reverse</span><span class="p">(</span><span class="n">T</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span><span class="n">T</span><span class="p">.</span><span class="n">end</span><span class="p">());</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">if</span><span class="p">(</span><span class="n">T</span> <span class="o">==</span> <span class="n">I</span><span class="p">)</span> <span class="k">return</span> <span class="s">&quot;Possible&quot;</span><span class="p">;</span>
+</span><span class='line'>        <span class="k">return</span> <span class="s">&quot;Impossible&quot;</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>コードを短く，シンプルにかける．本番中は誤読をしていて死んでいた．このある状態を目的の状態にする問題で，逆からやると上手くいく系はすぐ解けるようになりたい．</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2015/07/19/tco2015-in-tokyo/">TCO2015 in Tokyo</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2015-07-19T23:19:36+09:00" pubdate data-updated="true"></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p><a href="http://tco15.topcoder.com/regional-events/#/tco15-tokyo-japan-event/">TCO2015 Round 2C</a>が東京で開催された．Tシャツが貰えて非常に嬉しい．</p>
+
+<blockquote class="twitter-tweet"><p lang="ja" dir="ltr">わーい！！ <a href="https://twitter.com/hashtag/tco15?src=hash">#tco15</a> <a href="http://t.co/3YoNlLgpa7">pic.twitter.com/3YoNlLgpa7</a></p>&mdash; Ry0u_ (@ry0u_yd) <a href="https://twitter.com/ry0u_yd/status/622273385737748484">July 18, 2015</a></blockquote>
+
+
+<script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+
+<h1>TCO</h1>
+
+<p>0完．本当に難しかった．ずっと紙に数字書いてたら終了した．</p>
+
+<h1>Hackathon</h1>
+
+<p>競技プログラミングの楽しさを伝える，というテーマが多かった(?)．</p>
+
+<p><a href="http://kenkoooo.com/">http://kenkoooo.com/</a><br/>
+がめっちゃすごかった．個人的にこのページやAOJのSolved数などは非常にモチベが上がる．どんどん精進していきたい．</p>
+
+<h1>交流会</h1>
+
+<p>いろんな競技プログラマーをお話したい！，と思っていたら，<a href="https://twitter.com/ezoeryou">Ezoeさん</a>とお話出来てしまった．C++の処理系のお話が聞けて非常に嬉しかった．ご飯美味しかった．</p>
+
+<h3>Todo</h3>
+
+<ul>
+<li>easyが解けたらここにコード貼る</li>
+<li>twitter関連のモノを載せると何でもかんでもFollowボタンが付いてしまって，鬱陶しい(消したい)</li>
+</ul>
+
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -2062,48 +2248,9 @@ SystemTest落ちまくり．以下の事を全く頭に入れていなかった�
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/07/11/testpage/">Testpage</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-
-
-
-
-  
-
-
-<time datetime="2015-07-11T19:44:05+09:00" pubdate data-updated="true"></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h1>Octopressを用いた</h1>
-
-<ul>
-<li>テスト中</li>
-</ul>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
+    
+      <a class="prev" href="3">&larr; Older</a>
     
     <a href="/blog/archives">Blog Archives</a>
     
@@ -2156,6 +2303,14 @@ SystemTest落ちまくり．以下の事を全く頭に入れていなかった�
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2015/09/03/yukicoder-no-dot-45-hui-zhuan-shou-si/">yukicoder No.45 回転寿司</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2015/09/03/yukicoder-no-dot-44-dpnasugoroku/">yukicoder No.44 DPなすごろく</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2015/09/03/yukicoder-no-dot-43-ye-qiu-falseshi-he/">yukicoder No.43 野球の試合</a>
       </li>
     
@@ -2165,14 +2320,6 @@ SystemTest落ちまくり．以下の事を全く頭に入れていなかった�
     
       <li class="post">
         <a href="/blog/2015/08/28/hide-and-seek-supporting-system/">Hide-and-Seek Supporting System</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/08/13/kekiwozuo-tuta/">ケーキを作った</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2015/08/11/codeforces315-div2c-prime-or-palindromes/">Codeforces315-div2C Prime or Palindromes?</a>
       </li>
     
   </ul>
