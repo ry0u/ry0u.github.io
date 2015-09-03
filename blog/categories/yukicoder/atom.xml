@@ -4,7 +4,7 @@
   <title><![CDATA[Category: yukicoder | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/yukicoder/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2015-09-03T16:20:53+09:00</updated>
+  <updated>2015-09-03T21:58:09+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,436 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[yukicoder No.115 遠足のおやつ]]></title>
+    <link href="http://ry0u.github.io/blog/2015/09/03/yukicoder-no-dot-115-yuan-zu-falseoyatu/"/>
+    <updated>2015-09-03T21:51:08+09:00</updated>
+    <id>http://ry0u.github.io/blog/2015/09/03/yukicoder-no-dot-115-yuan-zu-falseoyatu</id>
+    <content type="html"><![CDATA[<p><a href="http://yukicoder.me/problems/205">http://yukicoder.me/problems/205</a></p>
+
+<h1>考察</h1>
+
+<p>買うK個の最小値と最大値を出す．
+<script type="math/tex; mode=display">
+down[] = {1,2,&hellip;,k}  \
+up[] = {n-k+1,&hellip;,n-1,n}
+</script>
+としてこの中に収まるようにする．辞書順最小にしたいので，左側からdownに近づけていき，その分を右側に持っていく．この操作を可能な限り行い，変化がなくなったら終了．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;cassert&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int main() {
+    int n,d,k;
+    cin &gt;&gt; n &gt;&gt; d &gt;&gt; k;
+
+    int sum = 0, t = n;
+    rep(i,k) {
+        sum += t;
+        t--;
+    }
+
+    if(d &lt; (k*(k+1))/2 || d &gt; sum) cout &lt;&lt; -1 &lt;&lt; endl;
+    else {
+        vector&lt;int&gt; v;
+        rep(i,k) v.push_back(d/k);
+
+        int cnt = d % k;
+        rep(i,cnt) {
+            v[i]++;
+        }
+
+        sort(v.begin(),v.end());
+
+        vector&lt;int&gt; down(n), up(n);
+        rep(i,n) {
+            down[i] = i+1;
+            up[i] = n-k+1+i;
+        }
+
+        while(true) {
+            vector&lt;int&gt; temp(v.begin(),v.end());
+            int s = 0, t = v.size()-1;
+
+            while(true) {
+                if(s == t) break;
+
+                if(v[s] == down[s] || v[s] == up[s]) {
+                    s++;
+                    continue;
+                }
+
+                if(v[t] == up[t]) {
+                    t--;
+                    continue;
+                }
+
+
+                int diff;
+                if(v[s] &gt;= up[s]) {
+                    diff = v[s] - up[s];
+                } else {
+                    diff = v[s] - down[s];
+                }
+
+                while(diff) {
+                    if(v[t] + diff &lt;= up[t]) {
+                        v[s] -= diff;
+                        v[t] += diff;
+                        diff = 0;
+                    }
+                    else {
+                        v[s] -= up[t] - v[t];
+                        diff -= up[t] - v[t];
+                        v[t] = up[t];
+                        t--;
+                    }
+
+                    if(s == t) break;
+                }
+
+            }
+
+            sort(v.begin(),v.end());
+
+            bool flag = true;
+            rep(i,k) {
+                if(v[i] != temp[i]) flag = false;
+            }
+
+            if(flag) break;
+        }
+
+        rep(i,v.size()) {
+            cout &lt;&lt; v[i];
+
+            if(i == v.size()-1) cout &lt;&lt; endl;
+            else cout &lt;&lt; " ";
+        }
+    }
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[yukicoder No.92 逃走経路]]></title>
+    <link href="http://ry0u.github.io/blog/2015/09/03/yukicoder-no-dot-92-tao-zou-jing-lu/"/>
+    <updated>2015-09-03T21:40:54+09:00</updated>
+    <id>http://ry0u.github.io/blog/2015/09/03/yukicoder-no-dot-92-tao-zou-jing-lu</id>
+    <content type="html"><![CDATA[<p><a href="http://yukicoder.me/problems/149">http://yukicoder.me/problems/149</a></p>
+
+<h1>考察</h1>
+
+<p>dfsで行けるとこ全部行ったらTLEした．戻ることも考えられるので，状態数がすごいことになることがわかっていなかった．よくよく考えると，i回目の移動でいる場所としてはmaxでNなので，行ける場所をもって最後まで残った場所を答える．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+struct edge {
+    int from,to;
+    int cost;
+
+    edge(int t,int c) : to(t),cost(c) {}
+    edge(int f,int t,int c) : from(f),to(t),cost(c) {}
+
+    bool operator&lt;(const edge &amp;e) const {
+        return cost &lt; e.cost;
+    }
+};
+
+vector&lt;int&gt; v;
+int n,m,k;
+
+int main() {
+    cin &gt;&gt; n &gt;&gt; m &gt;&gt; k;
+
+    map&lt;int,vector&lt;edge&gt; &gt; edges;
+    rep(i,m) {
+        int a,b,c;
+        cin &gt;&gt; a &gt;&gt; b &gt;&gt; c;
+
+        a--;
+        b--;
+
+        edges[c].push_back(edge(a,b,c));
+        edges[c].push_back(edge(b,a,c));
+    }
+
+    v.resize(k);
+    rep(i,k) cin &gt;&gt; v[i];
+
+    vector&lt;int&gt; ans(n);
+    rep(i,n) ans[i] = i;
+    rep(i,k) {
+        bool used[105];
+        memset(used,0,sizeof(used));
+
+        rep(j,ans.size()) {
+            used[ans[j]] = true;
+        }
+
+        vector&lt;edge&gt; es = edges[v[i]];
+        vector&lt;int&gt; temp;
+        rep(j,es.size()) {
+            int f = es[j].from;
+            int t = es[j].to;
+
+            if(used[f]) {
+                temp.push_back(t);
+            }
+        }
+
+        sort(temp.begin(),temp.end());
+        temp.erase(unique(temp.begin(),temp.end()),temp.end());
+
+        ans.resize(temp.size());
+        rep(j,temp.size()) ans[j] = temp[j];
+    }
+
+    sort(ans.begin(),ans.end());
+    cout &lt;&lt; ans.size() &lt;&lt; endl;
+    rep(i,ans.size()) {
+        cout &lt;&lt; ans[i] + 1;
+        if(i == ans.size()-1) cout &lt;&lt; endl;
+        else cout &lt;&lt; " ";
+    }
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[yukicoder No.78 クジ付アイスバー]]></title>
+    <link href="http://ry0u.github.io/blog/2015/09/03/yukicoder-no-dot-7kuzifu-aisuba/"/>
+    <updated>2015-09-03T21:15:58+09:00</updated>
+    <id>http://ry0u.github.io/blog/2015/09/03/yukicoder-no-dot-7kuzifu-aisuba</id>
+    <content type="html"><![CDATA[<p><a href="http://yukicoder.me/problems/152">http://yukicoder.me/problems/152</a></p>
+
+<h1>考察</h1>
+
+<p>以下の通りに場合分けして考えた．<br/>
+- n > kの時，食べる予定のアイスバーの分回せばいい(最大50)．<br/>
+- そうではない時，まず1箱分回した時に，いくつ当たりが残るかを調べる．<br/>
+- ここで残った当たりが1箱勝った数と同じ場合はそれが答え(目標のkまで最初の1箱分だけでいける)<br/>
+- 同じでなかった時は，全部開ける箱と，買い終わってアイスが残る箱に分けて考える</p>
+
+<p>まずは愚直にやってTLEをして，&ndash;と++を間違えてWAを生やした</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int main() {
+    int n,k;
+    cin &gt;&gt; n &gt;&gt; k;
+    string s;
+    cin &gt;&gt; s;
+
+    vector&lt;int&gt; v(n);
+    rep(i,n) v[i] = s[i] - '0';
+
+    if(n &gt; k) {
+        int ans = 0, cnt = 0;
+        rep(i,k) {
+            if(cnt &gt; 0) cnt--;
+            else ans++;
+
+            cnt += v[i];
+        }
+
+        cout &lt;&lt; ans &lt;&lt; endl;
+    } else {
+        int res = 0, cnt = 0;
+        rep(i,n) {
+            if(cnt &gt; 0) cnt--;
+            else res++;
+
+            cnt += v[i];
+        }
+
+        if(cnt &gt;= res) {
+            cout &lt;&lt; res &lt;&lt; endl;
+        } else {
+            int m = 0;
+            int ans = 0, q = 0;
+            while(m + n &lt;= k) {
+                m += n;
+                if(q &gt;= res) {
+                    q -= res;
+                    q += cnt;
+                } else {
+                    ans += res - q;
+                    q = cnt;
+                }
+            }
+
+            rep(i,k%n) {
+                if(q &gt; 0) q--;
+                else ans++;
+
+                q += v[i];
+            }
+
+            cout &lt;&lt; ans &lt;&lt; endl;
+        }
+
+    }
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[yukicoder No.77 レンガのピラミッド]]></title>
+    <link href="http://ry0u.github.io/blog/2015/09/03/yukicoder-no-dot-77-rengafalsepiramitudo/"/>
+    <updated>2015-09-03T21:06:33+09:00</updated>
+    <id>http://ry0u.github.io/blog/2015/09/03/yukicoder-no-dot-77-rengafalsepiramitudo</id>
+    <content type="html"><![CDATA[<p><a href="http://yukicoder.me/problems/186">http://yukicoder.me/problems/186</a></p>
+
+<h1>考察</h1>
+
+<p>移動とは</p>
+
+<blockquote><p>任意の列の一番上にある1つのレンガを持ち，別の列に移動するか，もしくは捨て置き場に移動すること．</p></blockquote>
+
+<p>なので，ピラミッドの長さを決めたら，それに対応する長さとのdiffを取る．もし超えている部分のほうが大きくても捨て置き場に置けばよいので，長さを決め打ちすれば，その長さにするための移動数が求まる．ピラミッドの長さはNよりも大きくてもよいので(特に考えず出してWAを生やした)，十分な回数まで調べた．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+vector&lt;int&gt; init(int n) {
+    vector&lt;int&gt; ret;
+    rep(i,n/2) {
+        ret.push_back(i+1);
+    }
+    ret.push_back(n/2+1);
+    for(int i=n/2; i&gt;0; i--) {
+        ret.push_back(i);
+    }
+    return ret;
+}
+
+int main() {
+    int n;
+    cin &gt;&gt; n;
+
+    vector&lt;int&gt; v(1005);
+    rep(i,n) cin &gt;&gt; v[i];
+
+    int ans = INF;
+
+    REP(size,1,1005) {
+        if(size % 2 == 0) continue;
+        vector&lt;int&gt; t = init(size);
+
+        rep(i,n) {
+            int a = 0, b = 0;
+
+            rep(j,i) a += v[j];
+
+            REP(j,i,size) {
+                if(v[j] &gt; t[j-i]) {
+                    a += v[j] - t[j-i];
+                }
+                if(v[j] &lt; t[j-i]) {
+                    b += t[j-i] - v[j];
+                }
+            }
+
+            REP(j,size,n) a += v[j];
+
+            if(a &gt;= b) {
+                ans = min(ans,a);
+            }
+        }
+    }
+
+    cout &lt;&lt; ans &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[yukicoder No.55 正方形を描くだけの簡単なお仕事です]]></title>
@@ -216,378 +646,6 @@ int main() {
     } else {
         cout &lt;&lt; -1 &lt;&lt; endl;
     }
-
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[yukicoder No.45 回転寿司]]></title>
-    <link href="http://ry0u.github.io/blog/2015/09/03/yukicoder-no-dot-45-hui-zhuan-shou-si/"/>
-    <updated>2015-09-03T14:00:37+09:00</updated>
-    <id>http://ry0u.github.io/blog/2015/09/03/yukicoder-no-dot-45-hui-zhuan-shou-si</id>
-    <content type="html"><![CDATA[<p><a href="http://yukicoder.me/problems/78">http://yukicoder.me/problems/78</a></p>
-
-<h1>考察</h1>
-
-<p>動的計画法で解く．[i][0]をi番目を取らない，[i][1]をi番目を取るとして，dp[i][j]をi番目までの最大値とする．dp[i][0] = max(i-1番目を取った，i-2番目を取った)，dp[i][1] = max(i-1番目を取らない+i番目の価値，i-2番目を取った+i番目の価値)で求める．</p>
-
-<p><script type="math/tex; mode=display">
-\begin{eqnarray}
-\begin{cases}
-dp[0][1] = v[0] \
-dp[1][0] = v[0] \
-dp[1][1] = v[1] \
-dp[i][0] = max(dp[i-1][1],dp[i-2][1]) (i \geq 2) \
-dp[i][1] = max(dp[i-1][0]+v[i],dp[i-2][1]+v[i]) (i \geq 2)
-\end{cases}
-\end{eqnarray}
-</script></p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-int main() {
-    int n;
-    cin &gt;&gt; n;
-
-    vector&lt;int&gt; v(n);
-    rep(i,n) cin &gt;&gt; v[i];
-
-    int dp[1005][2];
-    memset(dp,0,sizeof(dp));
-
-    dp[0][1] = v[0];
-    dp[1][0] = v[0];
-    dp[1][1] = v[1];
-
-    REP(i,2,n) {
-        dp[i][0] = max(dp[i-1][1],dp[i-2][1]);
-        dp[i][1] = max(dp[i-1][0] + v[i],dp[i-2][1] + v[i]);
-    }
-
-    cout &lt;&lt; max(dp[n-1][0],dp[n-1][1]) &lt;&lt; endl;
-
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[yukicoder No.44 DPなすごろく]]></title>
-    <link href="http://ry0u.github.io/blog/2015/09/03/yukicoder-no-dot-44-dpnasugoroku/"/>
-    <updated>2015-09-03T13:53:47+09:00</updated>
-    <id>http://ry0u.github.io/blog/2015/09/03/yukicoder-no-dot-44-dpnasugoroku</id>
-    <content type="html"><![CDATA[<p><a href="http://yukicoder.me/problems/76">http://yukicoder.me/problems/76</a></p>
-
-<h1>考察</h1>
-
-<p>1または2前に進むことが出来るので，i+2番目にマスに訪れるにはi番目のマス，またはi+1番目のマスから来るしかない．よって</p>
-
-<p><script type="math/tex; mode=display">
-\begin{eqnarray}
-\begin{cases}
-dp[0] = 1 \
-dp[1] = 1 \
-dp[i+2] = dp[i+1] + dp[i] (i \geq 2)
-\end{cases}
-\end{eqnarray}
-</script></p>
-
-<p>が成り立つ．フィボナッチ階段を同じ考えである．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-int main() {
-    int n;
-    cin &gt;&gt; n;
-
-    vector&lt;ll&gt; dp(55);
-    dp[0] = 1;
-    dp[1] = 1;
-
-    rep(i,n-1) {
-        dp[i+2] = dp[i] + dp[i+1];
-    }
-
-    cout &lt;&lt; dp[n] &lt;&lt; endl;
-
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[yukicoder No.43 野球の試合]]></title>
-    <link href="http://ry0u.github.io/blog/2015/09/03/yukicoder-no-dot-43-ye-qiu-falseshi-he/"/>
-    <updated>2015-09-03T13:39:56+09:00</updated>
-    <id>http://ry0u.github.io/blog/2015/09/03/yukicoder-no-dot-43-ye-qiu-falseshi-he</id>
-    <content type="html"><![CDATA[<p><a href="http://yukicoder.me/problems/8">http://yukicoder.me/problems/8</a></p>
-
-<h1>考察</h1>
-
-<p>0番目のチームに"-&ldquo;がある場合は必ず，勝ちにする．それ以外の場合はより勝っているチームが負け，負けているチームが勝つようにする，という貪欲は上手くいきそうにない．Nが最大6なので，全てが&rdquo;-&ldquo;だとしても状態数は2<sup>18</sup>．よって全ての状態を列挙して，最大で何位になれるかを見る．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-int main() {
-    int n;
-    cin &gt;&gt; n;
-
-    vector&lt;string&gt; v(n);
-    rep(i,n) cin &gt;&gt; v[i];
-
-    vector&lt;int&gt; cnt(n);
-
-    rep(i,n) {
-        rep(j,n) {
-            if(v[i][j] == '#') continue;
-            if(v[i][j] == 'o') cnt[i]++;
-        }
-    }
-
-    set&lt;P&gt; st;
-    rep(i,n) {
-        rep(j,n) {
-            if(v[i][j] == '-') {
-                int s = i, t = j;
-                if(s &gt; t) swap(s,t);
-
-                st.insert(P(s,t));
-            }
-        }
-    }
-
-    int ans = n;
-    int m = st.size();
-    if(m == 0) {
-        int val = cnt[0];
-
-        sort(cnt.begin(),cnt.end());
-        cnt.erase(unique(cnt.begin(),cnt.end()),cnt.end());
-        reverse(cnt.begin(),cnt.end());
-
-        rep(i,cnt.size()) {
-            if(val == cnt[i]) {
-                ans = i;
-                break;
-            }
-        }
-    } else {
-
-        vector&lt;P&gt; v2(st.begin(), st.end());
-
-        rep(i,1&lt;&lt;m) {
-            vector&lt;int&gt; res(cnt.begin(), cnt.end());
-            rep(j,m) {
-                P p = v2[j];
-                if(i &amp; (1&lt;&lt;j)) {
-                    res[p.first]++;
-                } else {
-                    res[p.second]++;
-                }
-            }
-
-            int val = res[0];
-            sort(res.begin(),res.end());
-            res.erase(unique(res.begin(),res.end()),res.end());
-            reverse(res.begin(),res.end());
-
-            int id = 0;
-            rep(j,res.size()) {
-                if(res[j] == val) {
-                    id = j;
-                    break;
-                }
-            }
-
-            ans = min(ans,id);
-        }
-    }
-
-    cout &lt;&lt; ans + 1 &lt;&lt; endl;
-
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[yukicoder No.17 2つの地点に泊まりたい]]></title>
-    <link href="http://ry0u.github.io/blog/2015/09/03/yukicoder-no-dot-17-2tufalsedi-dian-nibo-maritai/"/>
-    <updated>2015-09-03T13:26:09+09:00</updated>
-    <id>http://ry0u.github.io/blog/2015/09/03/yukicoder-no-dot-17-2tufalsedi-dian-nibo-maritai</id>
-    <content type="html"><![CDATA[<p><a href="http://yukicoder.me/problems/61">http://yukicoder.me/problems/61</a></p>
-
-<h1>考察</h1>
-
-<p>nが50と小さいので，0とn-1以外の2つの地点(i,j)を列挙する．0~i，i~j，j~n-1の最短距離，i，jの滞在コストの和の最小値を求める．それぞれの地点からのdijkstraをやったが最初にwarshall_floydをしたほうがスマートに書けそう．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-#include &lt;queue&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-struct edge {
-    int from,to;
-    int cost;
-
-    edge(int t,int c) : to(t),cost(c) {}
-    edge(int f,int t,int c) : from(f),to(t),cost(c) {}
-
-    bool operator&lt;(const edge &amp;e) const {
-        return cost &lt; e.cost;
-    }
-};
-
-vector&lt;edge&gt; G[55];
-int d[55];
-
-void dijkstra(int s,int n) {
-    priority_queue&lt;P,vector&lt;P&gt;,greater&lt;P&gt; &gt; que;
-    fill(d,d+n,INF);
-
-    d[s] = 0;
-    que.push(P(0,s));
-
-    while(que.size()) {
-        P p = que.top();
-        que.pop();
-
-        int v = p.second;
-        if(d[v] &lt; p.first) continue;
-
-        rep(i,G[v].size()) {
-            edge e = G[v][i];
-            if(d[e.to] &gt; d[v] + e.cost) {
-                d[e.to] = d[v] + e.cost;
-                que.push(P(d[e.to],e.to));
-            }
-        }
-    }
-}
-
-int main() {
-    int n;
-    cin &gt;&gt; n;
-
-    vector&lt;int&gt; w(n);
-    rep(i,n) cin &gt;&gt; w[i];
-
-    int m;
-    cin &gt;&gt; m;
-
-    rep(i,m) {
-        int a,b,c;
-        cin &gt;&gt; a &gt;&gt; b &gt;&gt; c;
-
-        G[a].push_back(edge(b,c));
-        G[b].push_back(edge(a,c));
-    }
-
-    int ans = INF;
-    REP(i,1,n-1) {
-        REP(j,1,n-1) {
-            if(i == j) continue;
-            int cost = 0;
-
-            dijkstra(0,n);
-            if(d[i] == INF) continue;
-            cost += d[i];
-
-            dijkstra(i,n);
-            if(d[j] == INF) continue;
-            cost += d[j];
-
-            dijkstra(j,n);
-            if(d[n-1] == INF) continue;
-            cost += d[n-1];
-
-            cost += w[i] + w[j];
-
-            ans = min(ans,cost);
-        }
-    }
-
-    cout &lt;&lt; ans &lt;&lt; endl;
 
     return 0;
 }

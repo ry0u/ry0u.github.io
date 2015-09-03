@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: グラフ | ry0u_ydのblog]]></title>
+  <link href="http://ry0u.github.io/blog/categories/gurahu/atom.xml" rel="self"/>
+  <link href="http://ry0u.github.io/"/>
+  <updated>2015-09-03T21:58:09+09:00</updated>
+  <id>http://ry0u.github.io/</id>
+  <author>
+    <name><![CDATA[ry0u_yd]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[yukicoder No.92 逃走経路]]></title>
+    <link href="http://ry0u.github.io/blog/2015/09/03/yukicoder-no-dot-92-tao-zou-jing-lu/"/>
+    <updated>2015-09-03T21:40:54+09:00</updated>
+    <id>http://ry0u.github.io/blog/2015/09/03/yukicoder-no-dot-92-tao-zou-jing-lu</id>
+    <content type="html"><![CDATA[<p><a href="http://yukicoder.me/problems/149">http://yukicoder.me/problems/149</a></p>
+
+<h1>考察</h1>
+
+<p>dfsで行けるとこ全部行ったらTLEした．戻ることも考えられるので，状態数がすごいことになることがわかっていなかった．よくよく考えると，i回目の移動でいる場所としてはmaxでNなので，行ける場所をもって最後まで残った場所を答える．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+struct edge {
+    int from,to;
+    int cost;
+
+    edge(int t,int c) : to(t),cost(c) {}
+    edge(int f,int t,int c) : from(f),to(t),cost(c) {}
+
+    bool operator&lt;(const edge &amp;e) const {
+        return cost &lt; e.cost;
+    }
+};
+
+vector&lt;int&gt; v;
+int n,m,k;
+
+int main() {
+    cin &gt;&gt; n &gt;&gt; m &gt;&gt; k;
+
+    map&lt;int,vector&lt;edge&gt; &gt; edges;
+    rep(i,m) {
+        int a,b,c;
+        cin &gt;&gt; a &gt;&gt; b &gt;&gt; c;
+
+        a--;
+        b--;
+
+        edges[c].push_back(edge(a,b,c));
+        edges[c].push_back(edge(b,a,c));
+    }
+
+    v.resize(k);
+    rep(i,k) cin &gt;&gt; v[i];
+
+    vector&lt;int&gt; ans(n);
+    rep(i,n) ans[i] = i;
+    rep(i,k) {
+        bool used[105];
+        memset(used,0,sizeof(used));
+
+        rep(j,ans.size()) {
+            used[ans[j]] = true;
+        }
+
+        vector&lt;edge&gt; es = edges[v[i]];
+        vector&lt;int&gt; temp;
+        rep(j,es.size()) {
+            int f = es[j].from;
+            int t = es[j].to;
+
+            if(used[f]) {
+                temp.push_back(t);
+            }
+        }
+
+        sort(temp.begin(),temp.end());
+        temp.erase(unique(temp.begin(),temp.end()),temp.end());
+
+        ans.resize(temp.size());
+        rep(j,temp.size()) ans[j] = temp[j];
+    }
+
+    sort(ans.begin(),ans.end());
+    cout &lt;&lt; ans.size() &lt;&lt; endl;
+    rep(i,ans.size()) {
+        cout &lt;&lt; ans[i] + 1;
+        if(i == ans.size()-1) cout &lt;&lt; endl;
+        else cout &lt;&lt; " ";
+    }
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+</feed>
