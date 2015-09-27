@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 星2 | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/xing-2/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2015-09-03T21:58:09+09:00</updated>
+  <updated>2015-09-27T23:56:56+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,152 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[yukicoder No.120 傾向と対策:門松列(その1)]]></title>
+    <link href="http://ry0u.github.io/blog/2015/09/03/yukicoder-no-dot-120-qing-xiang-todui-ce-men-song-lie-sofalse1/"/>
+    <updated>2015-09-03T22:07:12+09:00</updated>
+    <id>http://ry0u.github.io/blog/2015/09/03/yukicoder-no-dot-120-qing-xiang-todui-ce-men-song-lie-sofalse1</id>
+    <content type="html"><![CDATA[<p><a href="http://yukicoder.me/problems/291">http://yukicoder.me/problems/291</a></p>
+
+<h1>考察</h1>
+
+<p>自由に並び替えて良いため，関係あるのは長さの竹が何個あるか．sortして小さい順にとるような貪欲では例えば
+<script type="math/tex; mode=display">
+{1,1,2,3,3,3,3,3,4,4,4}
+</script>
+の時に，{1,2,3}とペアを作ってしまうとペアが2つしか作れない．長さが違えばよいで，個数が多い順にとっていく貪欲で上手くいった．多い順に取るのはpriority_queueを使った．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+#include &lt;queue&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int main() {
+    int t;
+    cin &gt;&gt; t;
+
+    rep(q,t) {
+        int n;
+        cin &gt;&gt; n;
+
+        vector&lt;int&gt; v(n);
+        map&lt;int,int&gt; m;
+        rep(i,n) {
+            cin &gt;&gt; v[i];
+            m[v[i]]++;
+        }
+
+        priority_queue&lt;int&gt; que;
+        map&lt;int,int&gt;::iterator ite;
+        for(ite = m.begin(); ite != m.end(); ite++) {
+            que.push(ite-&gt;second);
+        }
+
+        int cnt = 0;
+        while(que.size() &gt; 2) {
+            cnt++;
+            vector&lt;int&gt; t(3);
+
+            rep(i,3) {
+                t[i] = que.top();
+                que.pop();
+            }
+
+            rep(i,3) {
+                if(t[i] == 1) continue;
+                que.push(t[i]-1);
+            }
+        }
+
+        cout &lt;&lt; cnt &lt;&lt; endl;
+
+    }
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[yukicoder No.118 門松列(2)]]></title>
+    <link href="http://ry0u.github.io/blog/2015/09/03/yukicoder-no-dot-118-men-song-lie-2/"/>
+    <updated>2015-09-03T22:00:55+09:00</updated>
+    <id>http://ry0u.github.io/blog/2015/09/03/yukicoder-no-dot-118-men-song-lie-2</id>
+    <content type="html"><![CDATA[<p><a href="http://yukicoder.me/problems/221">http://yukicoder.me/problems/221</a></p>
+
+<h1>考察</h1>
+
+<p>今回は与えられるA_{i}が100と小さいので，門松の要素の列挙が出来る．何組の選び方があるあを求めたいので，それぞれの長さが何本あるかを持っておき，一番小さいもの，真ん中，一番大きいものの個数をかける．探す範囲はN本与えられた長さの最小値から最大値までで行った．mod 10<sup>9</sup> + 7を忘れない．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;vector&gt;
+#include &lt;algorithm&gt;
+#include &lt;cstring&gt;
+#include &lt;map&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define MOD 1000000007
+
+using namespace std;
+typedef long long ll;
+
+int main()
+{
+    int n;
+    cin &gt;&gt; n;
+
+    vector&lt;int&gt; v(n);
+    map&lt;int,ll&gt; m;
+    int vmin = INF, vmax = 0;
+    rep(i,n) {
+        cin &gt;&gt; v[i];
+        m[v[i]]++;
+
+        vmin = min(vmin,v[i]);
+        vmax = max(vmax,v[i]);
+    }
+
+    ll ans = 0;
+    REP(i,vmin,vmax+1) {
+        REP(j,i+1,vmax+1) {
+            REP(k,j+1,vmax+1) {
+                ans += m[i] * m[j] * m[k];
+                ans %= MOD;
+            }
+        }
+    }
+
+    cout &lt;&lt; ans &lt;&lt; endl;
+
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[yukicoder No.115 遠足のおやつ]]></title>
@@ -346,307 +492,6 @@ int main() {
         }
 
     }
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[yukicoder No.77 レンガのピラミッド]]></title>
-    <link href="http://ry0u.github.io/blog/2015/09/03/yukicoder-no-dot-77-rengafalsepiramitudo/"/>
-    <updated>2015-09-03T21:06:33+09:00</updated>
-    <id>http://ry0u.github.io/blog/2015/09/03/yukicoder-no-dot-77-rengafalsepiramitudo</id>
-    <content type="html"><![CDATA[<p><a href="http://yukicoder.me/problems/186">http://yukicoder.me/problems/186</a></p>
-
-<h1>考察</h1>
-
-<p>移動とは</p>
-
-<blockquote><p>任意の列の一番上にある1つのレンガを持ち，別の列に移動するか，もしくは捨て置き場に移動すること．</p></blockquote>
-
-<p>なので，ピラミッドの長さを決めたら，それに対応する長さとのdiffを取る．もし超えている部分のほうが大きくても捨て置き場に置けばよいので，長さを決め打ちすれば，その長さにするための移動数が求まる．ピラミッドの長さはNよりも大きくてもよいので(特に考えず出してWAを生やした)，十分な回数まで調べた．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-vector&lt;int&gt; init(int n) {
-    vector&lt;int&gt; ret;
-    rep(i,n/2) {
-        ret.push_back(i+1);
-    }
-    ret.push_back(n/2+1);
-    for(int i=n/2; i&gt;0; i--) {
-        ret.push_back(i);
-    }
-    return ret;
-}
-
-int main() {
-    int n;
-    cin &gt;&gt; n;
-
-    vector&lt;int&gt; v(1005);
-    rep(i,n) cin &gt;&gt; v[i];
-
-    int ans = INF;
-
-    REP(size,1,1005) {
-        if(size % 2 == 0) continue;
-        vector&lt;int&gt; t = init(size);
-
-        rep(i,n) {
-            int a = 0, b = 0;
-
-            rep(j,i) a += v[j];
-
-            REP(j,i,size) {
-                if(v[j] &gt; t[j-i]) {
-                    a += v[j] - t[j-i];
-                }
-                if(v[j] &lt; t[j-i]) {
-                    b += t[j-i] - v[j];
-                }
-            }
-
-            REP(j,size,n) a += v[j];
-
-            if(a &gt;= b) {
-                ans = min(ans,a);
-            }
-        }
-    }
-
-    cout &lt;&lt; ans &lt;&lt; endl;
-
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[yukicoder No.55 正方形を描くだけの簡単なお仕事です]]></title>
-    <link href="http://ry0u.github.io/blog/2015/09/03/yukicoder-no-dot-55-zheng-fang-xing-womiao-kudakefalsejian-dan-naoshi-shi-desu/"/>
-    <updated>2015-09-03T14:28:18+09:00</updated>
-    <id>http://ry0u.github.io/blog/2015/09/03/yukicoder-no-dot-55-zheng-fang-xing-womiao-kudakefalsejian-dan-naoshi-shi-desu</id>
-    <content type="html"><![CDATA[<p><a href="http://yukicoder.me/problems/83">http://yukicoder.me/problems/83</a></p>
-
-<p>Sample1
-<img src="/images/yukicoder/055/1.png">
-Sample2 この3点では正方形が出来ない
-<img src="/images/yukicoder/055/2.png">
-Sample3
-<img src="/images/yukicoder/055/3.png">
-Sample4
-<img src="/images/yukicoder/055/4.png"></p>
-
-<h1>考察</h1>
-
-<p>3点が与えられ，正方形となるもう1点を答えるのだが，正方形がx軸，y軸に平行でなくてもいい．3点の中で最も2点間の距離が長いものを線分として，もう1点をその線分に対して対象な点を求めた．</p>
-
-<p>サンプル3を考える．
-<img src="/images/yukicoder/055/5.png">
-一番長い線分を見つける．
-<img src="/images/yukicoder/055/6.png">
-この線分に対し，対象な点を取る．
-<img src="/images/yukicoder/055/7.png">
-正方形の完成．
-<img src="/images/yukicoder/055/8.png"></p>
-
-<p>このままではひし型も作れてしまうので，与えられた3点によって出来る三角形が二等辺三角形かつ，短い辺の<script type="math/tex"> \sqrt{2} </script>が，長い辺となる時のみ行う．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-#include &lt;cmath&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-#define EPS 1e-8
-#define equals(a,b) fabs((a) - (b)) &lt; EPS
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-struct Point {
-    double x, y;
-
-    Point(double x=0, double y=0) : x(x), y(y) {}
-
-    Point operator+(const Point &amp;o) const { return Point(x+o.x, y+o.y); }
-
-    Point operator-(const Point &amp;o) const { return Point(x-o.x, y-o.y); }
-
-    Point operator*(const double m) const { return Point(x*m, y*m); }
-
-    Point operator/(const double d) const { return Point(x/d, y/d); }
-
-    bool operator&lt;(const Point &amp;o) const { return x != o.x ? x &lt; o.x : y &lt; o.y; }
-
-    bool operator==(const Point &amp;o) const { return fabs(x-o.x) &lt; EPS &amp;&amp; fabs(y-o.y) &lt; EPS; }
-
-    double cross(const Point &amp;o) const { return x * o.y - y * o.x; }
-
-    double dot(const Point &amp;o) const { return x * o.x + y * o.y; }
-
-    double atan() const { return atan2(y, x); }
-
-    double norm() const { return sqrt(dot(*this)); }
-
-    double distance(const Point &amp;o) const { return (o - (*this)).norm(); }
-
-    double area(const Point &amp;a,const Point &amp;b) {
-        Point p = a - (*this), p2 = b - (*this); 
-        return p.cross(p2);
-    }
-
-    double area_abs(const Point &amp;a,const Point &amp;b) const {
-        Point p = a - (*this), p2 = b - (*this);
-        return fabs(p.cross(p2)) / 2.0;
-    }   
-
-    //線分abが自身に含まれているのかどうか判断する
-    int between(const Point &amp;a,const Point &amp;b) {
-        if(area(a,b) != 0) return 0;
-
-        if(a.x != b.x)  return ((a.x &lt;= x) &amp;&amp; (x &lt;= b.x) || (a.x &gt;= x) &amp;&amp; (x &gt;= b.x));
-        else return ((a.y &lt;= y) &amp;&amp; (y &lt;= b.y) || (a.y &gt;= y) &amp;&amp; (y &gt;= b.y));
-    }      
-
-    double distance_seg(const Point&amp; a,const Point&amp; b) {
-        if((b-a).dot(*this-a) &lt; EPS) {
-            return (*this-a).norm();
-        }
-        if((a-b).dot(*this-b) &lt; EPS) {
-            return (*this-b).norm();
-        }
-        return abs((b-a).cross(*this-a)) / (b-a).norm();
-    }
-
-    bool hitPolygon(const Point&amp; a,const Point&amp; b,const Point&amp; c) {
-        double t = (b-a).cross(*this-b);
-        double t2 = (c-b).cross(*this-c);
-        double t3 = (a-c).cross(*this-a);   
-
-        if((t &gt; 0 &amp;&amp; t2 &gt; 0 &amp;&amp; t3 &gt; 0) || ( t &lt; 0 &amp;&amp; t2 &lt; 0 &amp;&amp; t3 &lt; 0)) {
-            return true;
-        }
-
-        return false;
-    }
-};
-
-struct Seg {
-    Point a,b;
-
-    Seg (Point a, Point b) : a(a),b(b) {}
-
-    bool isOrthogonal(Seg &amp;s) { return equals((b - a).dot(s.b - s.a),0.0); }
-
-    bool isParallel(Seg &amp;s) { return equals((b-a).cross(s.b - s.a),0.0); }
-
-    bool isIntersect(Seg &amp;s) {
-        if(s.a.between(a,b) || s.b.between(a,b) || a.between(s.a,s.b) || b.between(s.a,s.b)) {
-            return true;
-        }
-        return ((a-b).cross(s.a-a) * (a-b).cross(s.b-a) &lt; EPS) &amp;&amp; ((s.b-s.a).cross(a-s.a)*(s.b-s.a).cross(b-s.a) &lt; EPS);
-    }
-
-    bool distance(Seg &amp;s) {
-        if((*this).isIntersect(s)) return 0.0;
-
-        return min(min(a.distance_seg(s.a,s.b),b.distance_seg(s.a,s.b)),min(s.a.distance_seg(a,b),s.b.distance_seg(a,b)));
-    }
-
-    Point getCrossPoint(Seg &amp;s) {
-        Point p = s.b - s.a;
-        double d = abs(p.cross(a-s.a));
-        double d2 = abs(p.cross(b-s.a));
-
-        double t = d / (d+d2);
-        return a + (b-a)*t;
-    }
-
-    Point project(Point &amp;p) {
-        Point base = b - a;
-        double t = base.dot(p-a) / base.dot(base);
-        return a + base * t;
-    }
-
-    Point reflect(Point &amp;p) {
-        return p + (project(p) - p) * 2.0;
-    }
-};
-
-int main() {
-    vector&lt;Point&gt; v(3);
-    set&lt;int&gt; id;
-    rep(i,3) {
-        cin &gt;&gt; v[i].x &gt;&gt; v[i].y;
-        id.insert(i);
-    }
-
-    set&lt;double&gt; st;
-    double len = 0, d = INF;
-    rep(i,3) {
-        int j = (i+1) % 3;
-        double dist = v[i].distance(v[j]);
-        len = max(len, dist);
-        d = min(d, dist);
-        st.insert(dist);
-    }
-
-    if(st.size() == 2 &amp;&amp; equals(2*d*d,len*len)) {
-        int s = 0, t = 0;
-        rep(i,3) {
-            int j = (i+1) % 3;
-            if(len == v[i].distance(v[j])) {
-                id.erase(i);
-                id.erase(j);
-                s = i;
-                t = j;
-                break;
-            }
-        }
-
-        Seg seg(v[s],v[t]);
-        Point p = seg.reflect(v[*(id.begin())]);
-        cout &lt;&lt; (int)p.x &lt;&lt; " " &lt;&lt; (int)p.y &lt;&lt; endl;
-
-    } else {
-        cout &lt;&lt; -1 &lt;&lt; endl;
-    }
-
     return 0;
 }
 </code></pre>
