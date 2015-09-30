@@ -4,7 +4,7 @@
   <title><![CDATA[Category: codeforces | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/codeforces/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2015-09-27T23:56:56+09:00</updated>
+  <updated>2015-09-30T15:38:31+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,166 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Codeforces322-div2B Luxurious Houses]]></title>
+    <link href="http://ry0u.github.io/blog/2015/09/30/codeforces322-div2b-luxurious-houses/"/>
+    <updated>2015-09-30T15:26:14+09:00</updated>
+    <id>http://ry0u.github.io/blog/2015/09/30/codeforces322-div2b-luxurious-houses</id>
+    <content type="html"><![CDATA[<p><a href="http://codeforces.com/contest/581/problem/B">http://codeforces.com/contest/581/problem/B</a></p>
+
+<p>建物の高さが与えられる．自分から見て，右側の建物より高くなるために必要な高さを答えよ．</p>
+
+<h1>考察</h1>
+
+<p>CodeFestival予選練習会で<br/>
+<a href="http://code-festival-2014-qualb.contest.atcoder.jp/tasks/code_festival_qualB_d">http://code-festival-2014-qualb.contest.atcoder.jp/tasks/code_festival_qualB_d</a><br/>
+を解いたばかりである．これはRMQだ，と思って実装した．<br/>
+しかし，そんなことをする必要は無く，右から見ていき，現在見た所までの最大の高さを持っているだけで出来た．この方法は思いつかなかった．</p>
+
+<h1>Code</h1>
+
+<p>RMQ</p>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+struct RMQ {
+    int n;
+    vector&lt;int&gt; dat;
+
+    RMQ(int n_) {
+        n = 1;
+        while(n &lt; n_) n *= 2;
+
+        dat.resize(n*4);
+        rep(i,n*4) dat[i] = -INF;
+    }
+
+    void update(int k,int a) {
+        int i = k+n-1;
+        dat[i] = a;
+
+        while(i &gt; 0) {
+            i = (i-1) / 2;
+            dat[i] = max(dat[i*2+1],dat[i*2+2]);
+        }
+    }
+
+    //[a,b)
+    //query(a,b,0,0,n)
+    int _query(int a,int b,int k,int l,int r)
+    {
+        if(r &lt;= a || b &lt;= l) return -INF;
+
+        if(a &lt;= l &amp;&amp; r &lt;= b) return dat[k];
+        else { 
+            int vl = _query(a,b,k*2+1,l,(l+r)/2);
+            int vr = _query(a,b,k*2+2,(l+r)/2,r);
+            return max(vl,vr);
+        }
+    }
+
+    //[a,b)
+    int query(int a,int b) {
+        return _query(a,b,0,0,n);
+    }
+
+};
+
+int main() {
+    int n;
+    cin &gt;&gt; n;
+
+    vector&lt;int&gt; v(n);
+    RMQ rmq(n);
+    rep(i,n) {
+        cin &gt;&gt; v[i];
+        rmq.update(i,v[i]);
+    }
+
+    rep(i,n) {
+        int d = rmq.query(i,n+1);
+        int d2 = rmq.query(i+1,n+1);
+
+        if(d == v[i] &amp;&amp; v[i] != d2) cout &lt;&lt; 0;
+        else cout &lt;&lt; d+1 - v[i];
+
+        if(i == n-1) cout &lt;&lt; endl;
+        else cout &lt;&lt; " ";
+    }
+
+    return 0;
+}
+</code></pre>
+
+<p>右から見て行く．</p>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int main() {
+    int n;
+    cin &gt;&gt; n;
+
+    vector&lt;int&gt; v(n);
+    rep(i,n) cin &gt;&gt; v[i];
+
+    int vmax = 0;
+    vector&lt;int&gt; ans(n);
+    for(int i=n-1; i&gt;=0; i--) {
+        if(vmax &lt; v[i]) ans[i] = 0;
+        else ans[i] = vmax+1 - v[i];
+
+        vmax = max(vmax,v[i]);
+    }
+
+    rep(i,n) {
+        cout &lt;&lt; ans[i];
+
+        if(i ==n -1) cout &lt;&lt; endl;
+        else cout &lt;&lt; " ";
+    }
+
+    return 0;
+}
+</code></pre>
+
+<p>実装量がかなり違うので，出来るだけ実装が軽い方法を思いつけるようになりたい．</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Codeforces315-div2C Prime or Palindromes?]]></title>
@@ -351,107 +511,6 @@ int main() {
     return 0;
 }
 </code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Codeforces312-div2C Amr and Chemistry]]></title>
-    <link href="http://ry0u.github.io/blog/2015/07/15/codeforces312-div2c-amr-and-chemistry/"/>
-    <updated>2015-07-15T03:38:42+09:00</updated>
-    <id>http://ry0u.github.io/blog/2015/07/15/codeforces312-div2c-amr-and-chemistry</id>
-    <content type="html"><![CDATA[<p><a href="http://codeforces.com/contest/558/problem/C">http://codeforces.com/contest/558/problem/C</a><br/>
-N個のデータが与えられる．それぞれの値には*2，/2することが出来る．全ての要素を揃えるための最小手数を求めよ</p>
-
-<h1>考察</h1>
-
-<p>この操作による状態数はそんなに多くない(log(n)の何倍か(?))．各値を動かした時にカウントして最後にカウントがn個となっている最小値を答える．動かすのは幅で見て，コストを足していった．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-#include &lt;queue&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-int d[100005];
-bool used[100005];
-int cnt[100005];
-
-int main() {
-    int n;
-    cin &gt;&gt; n;
-
-    vector&lt;int&gt; v(n);
-    rep(i,n) cin &gt;&gt; v[i];
-
-    rep(i,100005) d[i] = INF;
-    memset(cnt,0,sizeof(cnt));
-
-    rep(i,n) {
-        memset(used,0,sizeof(used));
-        used[v[i]] = true;
-        if(d[v[i]] == INF) d[v[i]] = 0;
-        cnt[v[i]]++;
-
-        queue&lt;pair&lt;int,int&gt; &gt; que;
-        que.push(mp(v[i],0));
-
-        while(que.size()) {
-            pair&lt;int,int&gt; p = que.front();
-            que.pop();
-
-            int f = p.first;
-            int cost = p.second;
-
-            int t = f/2;
-            int t2 = f*2;
-
-            if(0 &lt; t &amp;&amp; t &lt; 100005 &amp;&amp; !used[t]) {
-                used[t] = true;
-                cnt[t]++;
-                if(d[t] == INF) d[t] = cost+1;
-                else d[t] += cost+1;
-                que.push(make_pair(t,cost+1));
-            }
-
-            if(0 &lt; t2 &amp;&amp; t2 &lt; 100005 &amp;&amp; !used[t2]) {
-                used[t2] = true;
-                cnt[t2]++;
-                if(d[t2] == INF) d[t2] = cost+1;
-                else d[t2] += cost+1;
-                que.push(make_pair(t2,cost+1));
-            }
-        }
-
-    }
-
-    int ans = INF;
-    rep(i,100005) {
-        if(cnt[i] == n) ans = min(ans,d[i]);
-    }
-
-    cout &lt;&lt; ans &lt;&lt; endl;
-
-    return 0;
-}
-</code></pre>
-
-<p>コンテスト中，最後のほうでこの解法を思いついた．t，t2やその範囲でバグらせてしまい，時間内に提出できなかった．非常に悔しい(実力が足りない)．</p>
 ]]></content>
   </entry>
   
