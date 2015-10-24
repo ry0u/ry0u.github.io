@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: atcoder | ry0u_ydのblog]]></title>
+  <link href="http://ry0u.github.io/blog/categories/atcoder/atom.xml" rel="self"/>
+  <link href="http://ry0u.github.io/"/>
+  <updated>2015-10-25T04:35:37+09:00</updated>
+  <id>http://ry0u.github.io/</id>
+  <author>
+    <name><![CDATA[ry0u_yd]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[ARC043-B 難易度]]></title>
+    <link href="http://ry0u.github.io/blog/2015/10/25/arc043-b-nan-yi-du/"/>
+    <updated>2015-10-25T01:41:41+09:00</updated>
+    <id>http://ry0u.github.io/blog/2015/10/25/arc043-b-nan-yi-du</id>
+    <content type="html"><![CDATA[<p>難易度の2倍以上の問題に対して選ぶことが出来る．<br/>
+まずは，難易度でソート．<br/>
+今見ている問題数をiとすると，i+1問目でその問題を選ぶことが出来る場所に足していく．</p>
+
+<p><img src="/images/Atcoder/001/g.png"><br/>
+縦を問題，横を問題数と見て，遷移出来る場所を見つけたい．これを愚直に探すと，探索に<script type="math/tex"> n </script>かかってしまう．しかし，難易度でソートされているので，lower_boundで<script type="math/tex"> log(n) </script>で見つけることが出来る．最初に見つけた場所に足していって，累積和を取った．全体で<script type="math/tex"> O(nlog(n)) </script>で間に合う．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+#define MOD 1000000007
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int main() {
+    int n;
+    cin &gt;&gt; n;
+
+    ll vmax = 0;
+    vector&lt;ll&gt; v(n);
+    rep(i,n) {
+        cin &gt;&gt; v[i];
+        vmax = max(vmax, v[i]);
+    }
+
+    sort(v.begin(), v.end());
+
+    ll cnt[100005][4];
+    memset(cnt, 0, sizeof(cnt)) ;
+
+    rep(i,n) {
+        cnt[i][0]++;
+    }
+
+    rep(i,3) {
+        rep(j,n) {
+            if(v[j]*2 &gt; vmax) continue;
+            int id = lower_bound(v.begin(), v.end(), v[j]*2) - v.begin();
+
+            cnt[id][i+1] += cnt[j][i];
+            cnt[id][i+1] %= MOD;
+        }
+
+        REP(j,1,n) {
+            cnt[j][i+1] += cnt[j-1][i+1];
+            cnt[j][i+1] %= MOD;
+        }
+    }
+
+    ll ans = 0;
+    rep(i,n) {
+        ans += cnt[i][3];
+        ans %= MOD;
+    }
+    cout &lt;&lt; ans &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
+
+<p>2倍するので，オーバーフローしてWA．llに直した時に，cntの初期化を消してしまったらしく，それに気づかずWAを連発してしまった．．．</p>
+]]></content>
+  </entry>
+  
+</feed>
