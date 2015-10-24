@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: graphviz | ry0u_ydのblog]]></title>
+  <link href="http://ry0u.github.io/blog/categories/graphviz/atom.xml" rel="self"/>
+  <link href="http://ry0u.github.io/"/>
+  <updated>2015-10-25T07:18:36+09:00</updated>
+  <id>http://ry0u.github.io/</id>
+  <author>
+    <name><![CDATA[ry0u_yd]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[GraphvizとかVimとか]]></title>
+    <link href="http://ry0u.github.io/blog/2015/10/25/graphviztokavimtoka/"/>
+    <updated>2015-10-25T04:45:42+09:00</updated>
+    <id>http://ry0u.github.io/blog/2015/10/25/graphviztokavimtoka</id>
+    <content type="html"><![CDATA[<p>基本的に物事をすぐに忘れるので簡単なことでもメモ．</p>
+
+<h1>Graphvizとか</h1>
+
+<p><a href="http://www.graphviz.org/">Graphviz</a><br/>
+基本的に，<br/>
+<a href="http://qiita.com/tmsanrinsha/items/d54bee11193b2c6ea71b">Graghvizでグラフ構造からグラフを描画する</a><br/>
+にめちゃ詳しく書いてある．<br/>
+ただコマンドによっては使えない属性があるので<br/>
+<a href="http://www.graphviz.org/doc/info/attrs.html">http://www.graphviz.org/doc/info/attrs.html</a><br/>
+で確認．</p>
+
+<h3>ノードの形</h3>
+
+<p>ノードの形はデフォルトにしていたけど，pointがいい感じに思える．
+<script type="math/tex"> K_{3,4} </script>
+<img src="/images/etc/img.png">
+<img src="/images/etc/img2.png"></p>
+
+<pre><code class="sh">node [ shape = point];
+</code></pre>
+
+<p>ノードにlabelが欲しい場合は，defaultに戻す．</p>
+
+<h3>閉路を書きたい</h3>
+
+<p><code>dot</code>ではなく，<code>cicro</code>がいいかも</p>
+
+<p><img src="/images/etc/img3.png"></p>
+
+<h3>細かい調整</h3>
+
+<p>rankでsame，max，min，source，sinkを指定出来る．</p>
+
+<pre><code class="sh">{rank = same; hoge; hogehoge;}
+</code></pre>
+
+<p>見えない辺で調整とか．グラフは同型なんだけど，そうじゃない，という時．<br/>
+例えば，下のグラフの左下のノードを上に持って行きたい．<br/>
+<img src="/images/etc/img4.png"></p>
+
+<p>辺を作って，rankを合わせる．作った辺を消す．<br/>
+<img src="/images/etc/img5.png">
+<img src="/images/etc/img6.png"></p>
+
+<pre><code class="sh">graph g {
+    node [
+        shape = point;
+    ];
+
+    a [fixedsize = true, width = 0.01, height = 0.01, shape = point,color="#00000000"];
+    b [fixedsize = true, width = 0.01, height = 0.01, shape = point,color="#00000000"];
+    c [fixedsize = true, width = 0.01, height = 0.01, shape = point,color="#00000000"];
+    d [fixedsize = true, width = 0.01, height = 0.01, shape = point,color="#00000000"];
+
+    a -- b -- c -- d [style = invis];
+
+    1 -- 3;
+    1 -- 4;
+    2 -- 3 -- 5;
+    2 -- 4 -- 5;
+    3 -- 4;
+
+    {rank = same; a; 1;}
+    {rank = same; b; 2;}
+    {rank = same; c; 3; 4;}
+    {rank = same; d; 5;}
+}
+</code></pre>
+
+<h3>表</h3>
+
+<p>動的計画法とかの状態遷移をgraphvizで書きたい（DPの練習問題が本当にたまたま解けたので，メモを残すの必死）．<code>patchwork</code>とかいいと思ったけど，辺が書けないみたいなので，<code>osage</code>でshapeをsquareに<br/>
+<img src="/images/etc/g.png"></p>
+
+<h3>グラフ理論の講義ノートを綺麗に</h3>
+
+<p><img src="/images/etc/img10.png"><br/>
+<img src="/images/etc/img11.png"><br/>
+<img src="/images/etc/img12.png"></p>
+
+<h1>Vimとか</h1>
+
+<p>毎回，毎回 <code>dot -Tpng hoge.dot -o hoge.png</code> するのは面倒．quirkrunの設定に書く．</p>
+
+<pre><code class="vim">let g:quickrun_config['dot'] = {
+\   'command': 'dot',
+\   'exec': ['%c -T png %s -o %s:r.png', 'display %s:r.png']
+\}
+</code></pre>
+
+<p>この設定で満足と思っていたが，こんな記事を見つけた．<br/>
+<a href="http://d.hatena.ne.jp/n9d/20080419/1208614482">emacsのgraphviz用モードをインストールする</a><br/>
+emacsでは，pngのviewが出来る．これをしたい．</p>
+
+<p><a href="http://d.hatena.ne.jp/osyo-manga/20130203/1359896048">そうだ Vim で画像を表示させよう</a>を読む．この記事通りに設定して，
+<img src="/images/etc/img7.png"><br/>
+無事描画できた．この記事には</p>
+
+<blockquote><p>本来であれば XPM を用いて画像ファイルの描画を行うと Vim がかなり重くなるんですが、今回は別に起動している Vim で描画を行なっているのでレスポンスの重さはあまり気になりません。</p></blockquote>
+
+<p>とある．Vimが重くなることを考慮しなければファイル描画が可能？ココロオドル<br/>
+helpを読むと，gvimの起動オプションを指定出来るみたいなので，
+<code>vim
+let g:sugarpot_gvim_cmd_option = '--serverlist GVIM --remote-tab-silent .'
+</code>
+的なことをして無理やり，dotをいじっているgvimに突っ込んでみる．フリーズする．ごめんなさい．sourceを読んでも全くわからないので諦める．</p>
+
+<p>次に<a href="https://github.com/tpope/vim-afterimage">afterimage.vim</a>を見つける．画像を開いてみる．
+<img src="/images/etc/img8.png"><br/>
+いつものフォントサイズで描画されてしまうので，小さく指定する．
+<img src="/images/etc/img9.png"><br/>
+そうすると，dotを書いているほうまで小さくなる（そりゃそうだ）．頭を悩ます．バッファごとにフォントサイズを変更出来たりしないか調べるがよく分からず．</p>
+
+<p><a href="https://github.com/basyura/TweetVim">TweetVim</a>とか<a href="http://d.hatena.ne.jp/osyo-manga/20120720/1342770437">vimfiler でファイルのアイコンを表示させてみた</a>見て，iconの表示をやってる所を見たら参考になるかも，と思いコードを読むも何一つ分からず．</p>
+
+<h1>まとめ</h1>
+
+<ul>
+<li>Graphvizいい感じだ</li>
+<li>Vimでquickrunの設定した</li>
+<li>画像表示をいい感じに出来ず</li>
+</ul>
+
+
+<p><strong><em>モウダメダ（完）</em></strong></p>
+]]></content>
+  </entry>
+  
+</feed>
