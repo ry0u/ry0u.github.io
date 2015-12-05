@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: projecteuler | ry0u_ydのblog]]></title>
+  <link href="http://ry0u.github.io/blog/categories/projecteuler/atom.xml" rel="self"/>
+  <link href="http://ry0u.github.io/"/>
+  <updated>2015-12-05T20:56:43+09:00</updated>
+  <id>http://ry0u.github.io/</id>
+  <author>
+    <name><![CDATA[ry0u_yd]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[ProjectEuler 349 Langton's ant]]></title>
+    <link href="http://ry0u.github.io/blog/2015/12/05/projecteuler-349-langtons-ant/"/>
+    <updated>2015-12-05T19:57:23+09:00</updated>
+    <id>http://ry0u.github.io/blog/2015/12/05/projecteuler-349-langtons-ant</id>
+    <content type="html"><![CDATA[<p><a href="https://projecteuler.net/problem=349">https://projecteuler.net/problem=349</a></p>
+
+<p>行動回数を<script type="math/tex">N</script>としてとりあえずシュミレーションしてみる．</p>
+
+<p><script type="math/tex">N = 10</script><br/>
+<img src="/images/ProjectEuler/349/10.png"></p>
+
+<p><script type="math/tex">N = 20</script><br/>
+<img src="/images/ProjectEuler/349/20.png"></p>
+
+<p><script type="math/tex">N = 50</script><br/>
+<img src="/images/ProjectEuler/349/50.png"></p>
+
+<p><script type="math/tex">N = 100</script><br/>
+<img src="/images/ProjectEuler/349/100.png"></p>
+
+<p>結果だけ見ても良くわからないので，動きを見てみた．</p>
+
+<p><script type="math/tex">N = 200</script><br/>
+<img src="/images/ProjectEuler/349/200.gif"></p>
+
+<p>もっと大きな数をやった
+<script type="math/tex">N = 1000</script><br/>
+<img src="/images/ProjectEuler/349/1000.png"></p>
+
+<p><script type="math/tex">N = 10000</script><br/>
+<img src="/images/ProjectEuler/349/10000.png"></p>
+
+<p><script type="math/tex">N = 20000</script><br/>
+<img src="/images/ProjectEuler/349/20000.png"></p>
+
+<p>!!!!!!!<br/>
+めっちゃびっくりした．直線になるらしい<br/>
+周期的になるだろうと思い10000から100ずつぐらいずらして数えた差を取ってみた<br/>
+<img src="/images/ProjectEuler/349/img.png"></p>
+
+<p>どうやら10000から始めると26で一周期になっているようだ．実際に2600ずつずらしてみた．<br/>
+<img src="/images/ProjectEuler/349/img2.png"></p>
+
+<p>後はpythonで計算した．</p>
+
+<pre><code class="python">720 + (10 ** 18 - 10000) / 2600 * 300
+=&gt; 115384615384614720
+(10 ** 18 - 10000) % 2600
+=&gt; 2000
+</code></pre>
+
+<p>後は100ずつずらした時の20番目まで足したもとを出して</p>
+
+<p><script type="math/tex; mode=display">
+115384615384614720 + 232 = 115384615384614952
+</script></p>
+
+<p>submitしたら合ってた．良かった．</p>
+
+<p>シュミレーションするコード</p>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int dy[4] = {-1, 0, 1, 0};
+int dx[4] = { 0, 1, 0, -1};
+
+vector&lt; int &gt; v[5005][5005];
+const int GETA = 1000;
+int N = 0;
+
+void dfs(int y, int x, int dir, int c) {
+    if(c == N) return;
+
+    int n = v[y][x].size();
+    v[y][x].push_back(c);
+
+    int ndir = 0;
+    if(n % 2 == 0) {
+        ndir = (dir + 1) % 4;
+    } else {
+        ndir = (dir + 3) % 4;
+    }
+
+    int ny = y + dy[ndir];
+    int nx = x + dx[ndir];
+
+    dfs(ny, nx, ndir, c+1);
+    return;
+}
+
+void print(int x) {
+    REP(i, GETA-x, GETA+x+1) {
+        REP(j, GETA-x, GETA+x+1) {
+            cout &lt;&lt; v[i][j].size() &lt;&lt; " ";
+        }
+        cout &lt;&lt; endl;
+    }
+}
+
+void print2(int x) {
+    REP(i, GETA-x, GETA+x+1) {
+        REP(j, GETA-x, GETA+x+1) {
+            if(v[i][j].size() % 2 == 0) {
+                cout &lt;&lt; " ";
+            } else {
+                cout &lt;&lt; "O";
+            }
+        }
+        cout &lt;&lt; endl;
+    }
+}
+
+int main() {
+    vector&lt;int&gt; t;
+    rep(k, 10) {
+        N = k * 100 + 10000;
+        rep(i, 2005) rep(j, 2005) v[i][j].clear();
+        dfs(GETA, GETA, 0, 0);
+
+        ll cnt = 0;
+        rep(i, 5005) {
+            rep(j, 5005) {
+                if(v[i][j].size() % 2 == 1) {
+                    cnt++;
+                }
+            }
+        }
+
+        t.push_back(cnt);
+        cout &lt;&lt; cnt &lt;&lt; endl;
+    }
+
+    rep(i, t.size()-1) {
+        cout &lt;&lt; t[i+1] - t[i] &lt;&lt; " ";
+    }
+    cout &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+</feed>
