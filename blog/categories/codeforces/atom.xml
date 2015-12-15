@@ -4,7 +4,7 @@
   <title><![CDATA[Category: codeforces | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/codeforces/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2015-12-15T10:21:07+09:00</updated>
+  <updated>2015-12-15T11:50:30+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,122 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Codeforces335-div2D Lazy Student]]></title>
+    <link href="http://ry0u.github.io/blog/2015/12/15/codeforces335-div2d-lazy-student/"/>
+    <updated>2015-12-15T11:04:47+09:00</updated>
+    <id>http://ry0u.github.io/blog/2015/12/15/codeforces335-div2d-lazy-student</id>
+    <content type="html"><![CDATA[<p>グラフの頂点数<script type="math/tex">N</script>，辺の数<script type="math/tex">M</script>，
+最小全域木を構築する辺とそれ以外の辺が与えられる．そのようなグラフが存在すればその一例を，そうでない場合は-1を出力する．</p>
+
+<h1>考察</h1>
+
+<p>最小全域木を構築する辺をコストの小さい順に一本につなげる．Sample 1では次のようにする．
+<img src="/images/Codeforces/335/g.png"></p>
+
+<p>後は最小全域木を壊さないように辺を追加する．2つの辺を選び，その端を結ぶことを考えるとその選び方は2乗通りある．
+<img src="/images/Codeforces/335/g2.png"></p>
+
+<p>しかし，最小全域木を壊さないということは，選んだ2つの辺のコストよりも大きい辺を追加すれば良いので，小さい順に見ていけばよい．一本の線にする時に小さい順にしているので，前から見ていくことで，追加する辺の個数回で済む．<br/>
+<img src="/images/Codeforces/335/g3.png"></p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int main() {
+    int n, m;
+    cin &gt;&gt; n &gt;&gt; m;
+
+    vector&lt;pair&lt;pair&lt;int,int&gt;, int&gt; &gt; v;
+    rep(i, m) {
+        int a, b;
+        cin &gt;&gt; a &gt;&gt; b;
+        v.push_back(mp(mp(a, b), i));
+    }
+
+    sort(v.begin(), v.end());
+
+    vector&lt;int&gt; e;
+    vector&lt;P&gt; q;
+    vector&lt;pair&lt;int,pair&lt;int,int&gt; &gt; &gt; ans;
+    int t = 0;
+    rep(i, m) {
+        int cost = v[i].first.first;
+        int f = v[i].first.second;
+        int j = v[i].second;
+
+        if(f == 1) {
+            e.push_back(cost);
+            ans.push_back(mp(j, mp(t, t+1)));
+            t++;
+        }
+        else if(f == 0) {
+            q.push_back(mp(cost, j));
+        }
+    }
+
+    bool flag = true;
+    int from = 0, to = 1;
+    for(int i = 0; i &lt; q.size(); i++) {
+        if(to == e.size()) {
+            flag = false;
+            break;
+        }
+
+        if(e[from] &lt;= q[i].first &amp;&amp; e[to] &lt;= q[i].first) {
+            ans.push_back(mp(q[i].second, mp(from, to+1) ));
+        } else {
+            P p = q.back();
+            if(e[from] &lt;= p.first &amp;&amp; e[to] &lt;= p.first) {
+                ans.push_back(mp(p.second, mp(from, to+1)));
+                q.pop_back();
+            }
+            i--;
+        }
+
+        if(from == to - 1) {
+            from = 0;
+            to++;
+        } else {
+            from++;
+        }
+    }
+
+    if(flag) {
+        sort(ans.begin(), ans.end());
+        rep(i, ans.size()) {
+            cout &lt;&lt; ans[i].second.first+1 &lt;&lt; " " &lt;&lt; ans[i].second.second+1 &lt;&lt; endl;
+        }
+    } else {
+        cout &lt;&lt; -1 &lt;&lt; endl;
+    }
+
+    return 0;
+}
+</code></pre>
+
+<p>選んだ辺のコストを超えないようにするということは，まず１つの辺を選んだ時に，それより小さい辺を見なければいけなかったが，大きい方の辺をずらしていくという意味の分からないことをしていてWAを連発した．</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Codeforces332-div2C Day at the Beach]]></title>
@@ -471,122 +587,6 @@ int main() {
 </code></pre>
 
 <p>実装量がかなり違うので，出来るだけ実装が軽い方法を思いつけるようになりたい．</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Codeforces315-div2C Prime or Palindromes?]]></title>
-    <link href="http://ry0u.github.io/blog/2015/08/11/codeforces315-div2c-prime-or-palindromes/"/>
-    <updated>2015-08-11T04:21:29+09:00</updated>
-    <id>http://ry0u.github.io/blog/2015/08/11/codeforces315-div2c-prime-or-palindromes</id>
-    <content type="html"><![CDATA[<p><a href="http://codeforces.com/contest/569/problem/C">http://codeforces.com/contest/569/problem/C</a><br/>
-<script type="math/tex; mode=display">
-\pi (n) := nをこえない素数の数 \
-rub (n) := nをこえない回分の数
-</script></p>
-
-<p>と定義する．比<script type="math/tex">A = \frac{p}{q}</script>が与えられるので，<script type="math/tex">\pi (n) \leq A \cdot rub(n)</script>を満たす最大のnを求めたい．</p>
-
-<h1>考察</h1>
-
-<p>まず，<script type="math/tex">\pi (n)</script>と，<script type="math/tex">rub (n)</script>を求める．これをどこまで必要かを自分で判断しなければならない．<script type="math/tex"> A \leq 42</script>とあるので，多くでも<script type="math/tex">\pi (n)</script>が<script type="math/tex">rub (n)</script>の42倍になっているnまででよいと分かる．実際に値を試した所，n = 1500000で十分だとわかった．後は，後ろから見ていき，条件を満たす最大のnを答えた．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-#include &lt;cmath&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-bool prime[10000000];
-void Eratosthenes(int n) {
-    rep(i,n) prime[i] = true;
-    prime[0] = false;
-    prime[1] = false;
-
-    REP(i,2,(int)sqrt(n)) {
-        if(prime[i]) {
-            for(int j=0;i*(j+2)&lt;n;j++) {
-                prime[i*(j+2)] = 0;
-            }
-        }
-    }
-}
-
-bool check(string s) {
-    rep(i,s.size()/2) {
-        if(s[i] != s[s.size()-1-i]) return false;
-    }
-
-    return true;
-}
-
-int main() {
-    double p,q;
-    cin &gt;&gt; p &gt;&gt; q;
-
-    int N = 1500000;
-
-    Eratosthenes(N);
-    vector&lt;int&gt; pi(N);
-    int cnt = 0;
-
-    rep(i,N+5) {
-        if(prime[i]) {
-            cnt++;
-        }
-
-        pi[i] = cnt;
-    }
-
-
-    vector&lt;int&gt; rub(N);
-    cnt = 0;
-    REP(i,1,N+5) {
-        stringstream ss;
-        ss &lt;&lt; i;
-
-        if(check(ss.str())) {
-            cnt++;
-        }
-
-        rub[i] = cnt;
-    }
-
-    double A = p/q;
-    int ans = 0;
-
-    for(int i=N;i&gt;=1;i--) {
-        ll a = pi[i];
-        ll b = rub[i];
-
-        if(a &lt;=  A * b) {
-            cout &lt;&lt; i &lt;&lt; endl;
-            break;
-        }
-        else {
-            continue;
-        }
-    }
-
-    return 0;
-}
-</code></pre>
 ]]></content>
   </entry>
   
