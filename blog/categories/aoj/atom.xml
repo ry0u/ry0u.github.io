@@ -4,7 +4,7 @@
   <title><![CDATA[Category: aoj | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/aoj/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-02-09T14:52:30+09:00</updated>
+  <updated>2016-02-09T15:36:08+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,127 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ0534 Chain]]></title>
+    <link href="http://ry0u.github.io/blog/2016/02/09/aoj0534-chain/"/>
+    <updated>2016-02-09T15:14:15+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/02/09/aoj0534-chain</id>
+    <content type="html"><![CDATA[<p>問題文<br/>
+<a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0534">http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0534</a></p>
+
+<!-- more -->
+
+
+<p>まず，色を変えるのを選ぶ．変える色は前後のどちらかの色にする．次に色を変えた状態で何個残るかをシュミレーションする．<br/>
+シュミレーションは上から見て行く．同じ色の塊で(色，個数)をstackに積んでいく．もし4つ以上連続している場合はstackには積まない(消える)．stackのtopと現在見てる個数が4を超えればpopして，超えない場合はpushすることで連鎖を表現出来る．<script type="math/tex"> O(N^2) </script></p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+#include &lt;stack&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int func(vector&lt;int&gt;&amp; v) {
+    stack&lt;P&gt; st;
+    int n = v.size(), ret = 0;
+
+    rep(i, n) {
+        int len = 1, c = v[i];
+        REP(j, i+1, n) {
+            if(c == v[j]) {
+                i++;
+                len++;
+                continue;
+            } else break;
+        }
+
+        if(len &gt;= 4) continue;
+        else {
+            if(st.size() == 0) {
+                st.push(mp(c, len));
+                ret += len;
+            } else {
+                P p = st.top();
+                if(p.first == c) {
+                    if(p.second + len &lt; 4) {
+                        st.top().second += len;
+                        ret += len;
+                    } else {
+                        st.pop();
+                        ret -= p.second;
+                    }
+                } else {
+                    st.push(mp(c, len));
+                    ret += len;
+                }
+            }
+        }
+    }
+
+    return ret;
+}
+
+int main() {
+    int n;
+    while(cin &gt;&gt; n &amp;&amp; n) {
+
+        vector&lt;int&gt; v(n);
+        rep(i, n) cin &gt;&gt; v[i];
+
+        int ans = n + 1;
+        rep(i, n) {
+            int t = v[i];
+
+            v[i] = 1;
+            if(i == 0) {
+                v[i] = v[i+1];
+                ans = min(ans, func(v));
+            } else if(i == n-1) {
+                v[i] = v[i-1];
+                ans = min(ans, func(v));
+            } else {
+                if(v[i+1] == v[i-1]) {
+                    v[i] = v[i+1];
+                    ans = min(ans, func(v));
+                } else {
+                    v[i] = v[i-1];
+                    ans = min(ans, func(v));
+
+                    v[i] = v[i+1];
+                    ans = min(ans, func(v));
+                }
+            }
+
+            v[i] = t;
+        }
+
+        cout &lt;&lt; ans &lt;&lt; endl;
+    }
+
+    return 0;
+}
+</code></pre>
+
+<p>制限時間が結構厳しかった．TLEを連発して0.96secまで落とした．</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[AOJ0535 Crossing Black Ice]]></title>
