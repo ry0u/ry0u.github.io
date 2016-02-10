@@ -4,7 +4,7 @@
   <title><![CDATA[Category: aoj | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/aoj/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-02-10T20:35:54+09:00</updated>
+  <updated>2016-02-10T21:40:32+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,132 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ0541 Walk]]></title>
+    <link href="http://ry0u.github.io/blog/2016/02/10/aoj0541-walk/"/>
+    <updated>2016-02-10T20:37:51+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/02/10/aoj0541-walk</id>
+    <content type="html"><![CDATA[<p>問題文<br/>
+<a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0541">http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0541</a></p>
+
+<!-- more -->
+
+
+<p>その交差点を何回通ったかが分かれば，その偶奇でどちらに進むかが分かる．<br/>
+例えば現在いる場所を赤として，次に向かう場所を青，さらにをそこに通る回数を5とする．</p>
+
+<p><strong>東</strong>
+<img src="/images/AOJ/0541-1.png">
+<strong>南</strong>
+<img src="/images/AOJ/0541-2.png"></p>
+
+<p>東の場合は，東に3回行き，南に2回行く．<br/>
+南の場合は，東に2回行き，南に3回行く．<br/>
+通る回数が偶数の場合はどちらに行く回数も同じである．<br/>
+よって初期地点<script type="math/tex"> (1, 1)にN として，</script>
+<script type="math/tex">(i, j)が東なら</script>
+<script type="math/tex; mode=display">
+\begin{eqnarray}
+    dp[i+1][j] &amp;=&amp; dp[i][j]/2 \
+    dp[i][j+1] &amp;=&amp; dp[i][j] - dp[i][j]/2
+\end{eqnarray}
+</script></p>
+
+<p><script type="math/tex"> (i, j)が南なら </script>
+<script type="math/tex; mode=display">
+\begin{eqnarray}
+    dp[i+1][j] &amp;=&amp; dp[i][j] - dp[i][j]/2 \
+    dp[i][j+1] &amp;=&amp; dp[i][j]/2
+\end{eqnarray}
+</script></p>
+
+<p>これで通った回数が分かったので，<script type="math/tex">(1, 1)から始めてW+1またはH+1</script>に出るまで進む．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int h, w, n;
+int dp[1005][1005];
+
+int main() {
+    while(cin &gt;&gt; h &gt;&gt; w &gt;&gt; n) {
+        if(h == 0 &amp;&amp; w == 0 &amp;&amp; n == 0) break;
+
+        vector&lt; vector&lt;int&gt; &gt; v(h, vector&lt;int&gt;(w));
+        rep(i, h) {
+            rep(j, w) {
+                cin &gt;&gt; v[i][j];
+            }
+        }
+
+        memset(dp, 0, sizeof(dp));
+        dp[0][0] = n;
+
+        rep(i, h) {
+            rep(j, w) {
+                int s = dp[i][j] / 2;
+                int t = dp[i][j] - s;
+
+                if(v[i][j] % 2 == 1) {
+                    dp[i][j+1] += t;
+                    dp[i+1][j] += s;
+                } else {
+                    dp[i+1][j] += t;
+                    dp[i][j+1] += s;
+                }
+            }
+        }
+
+        int y = 0, x = 0;
+        while(y != h &amp;&amp; x != w) {
+            if(v[y][x] == 1) {
+                if(dp[y][x] % 2 == 1) {
+                    x++;
+                } else {
+                    y++;
+                }
+            } else {
+                if(dp[y][x] % 2 == 1) {
+                    y++;
+                } else {
+                    x++;
+                }
+            }
+        }
+
+        cout &lt;&lt; y + 1 &lt;&lt; " " &lt;&lt; x + 1 &lt;&lt; endl;
+        // rep(i, h) {
+        //  rep(j, w) {
+        //      cout &lt;&lt; dp[i][j] &lt;&lt; " ";
+        //  }
+        //  cout &lt;&lt; endl;
+        // }
+    }
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[AOJ0540 Amidakuji]]></title>
