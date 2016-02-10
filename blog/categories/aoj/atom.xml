@@ -4,7 +4,7 @@
   <title><![CDATA[Category: aoj | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/aoj/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-02-10T21:40:32+09:00</updated>
+  <updated>2016-02-10T21:58:47+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,169 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ0546 Lining up the cards]]></title>
+    <link href="http://ry0u.github.io/blog/2016/02/10/aoj0546-lining-up-the-cards/"/>
+    <updated>2016-02-10T21:50:42+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/02/10/aoj0546-lining-up-the-cards</id>
+    <content type="html"><![CDATA[<p>問題文<br/>
+<a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0546">http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0546</a></p>
+
+<!-- more-->
+
+
+<p>最大<script type="math/tex"> Nが10</script>なので全探索してsetにぶっ込んで終了だと思ったけどTLEした．k番目より後ろが変更してもできる整数は一緒なので，k番目までの状態もsetにぶっ込んだらACした．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;sstream&gt;
+#include &lt;string&gt;
+#include &lt;vector&gt;
+#include &lt;algorithm&gt;
+#include &lt;set&gt;
+#include &lt;map&gt;
+
+#define REP(i,k,n) for(int i=0;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+
+using namespace std;
+
+typedef long long ll;
+typedef pair&lt;int, int&gt; P;
+
+int func(vector&lt;int&gt; v, int k) {
+    stringstream ss;
+    rep(i, k) {
+        ss &lt;&lt; v[i];
+    }
+
+    int ret;
+    ss &gt;&gt; ret;
+
+    return ret;
+}
+
+int main() {
+    int n;
+    while(cin &gt;&gt; n) {
+        if(n == 0) break;
+
+        int k;
+        cin &gt;&gt; k;
+
+        vector&lt;int&gt; v(n);
+        rep(i, n) cin &gt;&gt; v[i];
+
+        sort(v.begin(), v.end());
+
+        set&lt;int&gt; ans;
+        set&lt;vector&lt;int&gt; &gt; st;
+
+
+        do {
+            vector&lt;int&gt; ret(k);
+            rep(i, k)  ret[i] = v[i];
+
+            if(st.find(ret) == st.end()) {
+                st.insert(ret);
+                ans.insert(func(v, k));
+            } else continue;
+        }while(next_permutation(v.begin(), v.end()));
+
+        cout &lt;&lt; ans.size() &lt;&lt; endl;
+    }
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ0545 Party]]></title>
+    <link href="http://ry0u.github.io/blog/2016/02/10/aoj0545-party/"/>
+    <updated>2016-02-10T21:45:34+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/02/10/aoj0545-party</id>
+    <content type="html"><![CDATA[<p>問題文<br/>
+<a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0545">http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0545</a></p>
+
+<!-- more -->
+
+
+<p>この手の問題を結構前にAtCoderで探索して解き，その時のwarshall_floyd解が非常にスマートだったという覚えがあったのでそれで書いてみた．<script type="math/tex"> N \leq 500 なのでO(N ^3)でも十分間に合う</script></p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int d[1005][1005];
+
+void warshall_floyd(int n, int m) {
+    rep(i,n) rep(j,n) d[i][j] = INF;
+    rep(i,n) d[i][i] = 0;
+
+    rep(i, m) {
+        int s, t;
+        cin &gt;&gt; s &gt;&gt; t;
+
+        s--;
+        t--;
+
+        d[s][t] = 1;
+        d[t][s] = 1;
+    }
+
+    rep(k, n) {
+        rep(i, n) {
+            rep(j, n) {
+                if(d[i][k] == INF || d[k][j] == INF) continue;
+                d[i][j] = min(d[i][j],d[i][k] + d[k][j]);
+            }
+        }
+    }
+}
+
+int main() {
+    int n, m;
+    while(cin &gt;&gt; n &gt;&gt; m) {
+        if(n == 0 &amp;&amp; m == 0) break;
+
+        warshall_floyd(n, m);
+
+        int ans = 0;
+        rep(i, n) {
+            if(i == 0) continue;
+            if(d[0][i] &lt;= 2) {
+                ans++;
+            }
+        }
+
+        cout &lt;&lt; ans &lt;&lt; endl;
+    }
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[AOJ0541 Walk]]></title>
@@ -345,303 +508,6 @@ int main() {
 </code></pre>
 
 <p>制限時間が結構厳しかった．TLEを連発して0.96secまで落とした．</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[AOJ0535 Crossing Black Ice]]></title>
-    <link href="http://ry0u.github.io/blog/2016/02/09/aoj0535-crossing-black-ice/"/>
-    <updated>2016-02-09T14:46:39+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/02/09/aoj0535-crossing-black-ice</id>
-    <content type="html"><![CDATA[<p>問題文<br/>
-<a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0535">http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0535</a></p>
-
-<!-- more -->
-
-
-<p>移動方法は20万通りを超えないと問題分に明記されているので，普通にDFSした．移動できる区画数の最大値を求めたいので移動出来る場所がなくなった時点でのMaxを返すようにした．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-int w,h;
-int dx[4] = {1,0,-1,0};
-int dy[4] = {0,1,0,-1};
-int f[100][100];
-int ans = 0;
-
-bool can(int y,int x) {
-    if(0 &lt;= y &amp;&amp; y &lt; h &amp;&amp; 0 &lt;= x &amp;&amp; x &lt; w) return true;
-    return false;
-}
-
-void dfs(set&lt;int&gt; S, int y, int x) {
-    bool flag = true;
-    rep(i, 4) {
-        int ny = y + dy[i];
-        int nx = x + dx[i];
-        int id = ny * h + nx;
-
-        if(can(ny, nx) &amp;&amp; f[ny][nx] == 1 &amp;&amp; S.find(id) == S.end() ) {
-            flag = false;
-            S.insert(id);
-            dfs(S, ny, nx);
-            S.erase(id);
-        }
-    }
-
-    if(flag) {
-        ans = max(ans, (int)S.size());
-    }
-}
-
-int main() {
-    while(cin &gt;&gt; w &gt;&gt; h) {
-        if(w == 0 &amp;&amp; h == 0) break;
-
-        rep(i, h) {
-            rep(j, w) cin &gt;&gt; f[i][j];
-        }
-
-        ans = 0;
-        rep(i, h) {
-            rep(j, w) {
-                if(f[i][j]){
-                    set&lt;int&gt; S;
-                    S.insert(i * h + j);
-                    dfs(S, i, j);
-                }
-            }
-        }
-
-        cout &lt;&lt; ans &lt;&lt; endl;
-    }
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Hide-and-Seek Supporting System]]></title>
-    <link href="http://ry0u.github.io/blog/2015/08/28/hide-and-seek-supporting-system/"/>
-    <updated>2015-08-28T02:23:10+09:00</updated>
-    <id>http://ry0u.github.io/blog/2015/08/28/hide-and-seek-supporting-system</id>
-    <content type="html"><![CDATA[<p><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0129">http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0129</a></p>
-
-<p>サンプル1<br/>
-<img src="/images/AOJ/0129.png"></p>
-
-<p>円に接してる場合は，Safe判定となる．</p>
-
-<h1>考察</h1>
-
-<p>円の中心と，線分の関係を見る．Dangerの場合は線分の端点両方が円内包されていない，かつ円の中心と線分の距離が円の半径よりも小さい時である．前回，この問題を取り組んだ時はWAを連発したが，今回はACすることが出来た．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-#include &lt;cmath&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-#define EPS 1e-8
-#define equals(a,b) fabs((a) - (b)) &lt; EPS
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-struct Point {
-    double x, y;
-
-    Point(double x=0, double y=0) : x(x), y(y) {}
-
-    Point operator+(const Point &amp;o) const { return Point(x+o.x, y+o.y); }
-
-    Point operator-(const Point &amp;o) const { return Point(x-o.x, y-o.y); }
-
-    Point operator*(const double m) const { return Point(x*m, y*m); }
-
-    Point operator/(const double d) const { return Point(x/d, y/d); }
-
-    bool operator&lt;(const Point &amp;o) const { return x != o.x ? x &lt; o.x : y &lt; o.y; }
-
-    bool operator==(const Point &amp;o) const { return fabs(x-o.x) &lt; EPS &amp;&amp; fabs(y-o.y) &lt; EPS; }
-
-    double cross(const Point &amp;o) const { return x * o.y - y * o.x; }
-
-    double dot(const Point &amp;o) const { return x * o.x + y * o.y; }
-
-    double atan() const { return atan2(y, x); }
-
-    double norm() const { return sqrt(dot(*this)); }
-
-    double distance(const Point &amp;o) const { return (o - (*this)).norm(); }
-
-    double area(const Point &amp;a,const Point &amp;b) {
-        Point p = a - (*this), p2 = b - (*this); 
-        return p.cross(p2);
-    }
-
-    double area_abs(const Point &amp;a,const Point &amp;b) const {
-        Point p = a - (*this), p2 = b - (*this);
-        return fabs(p.cross(p2)) / 2.0;
-    }   
-
-    //線分abが自身に含まれているのかどうか判断する
-    int between(const Point &amp;a,const Point &amp;b) {
-        if(area(a,b) != 0) return 0;
-
-        if(a.x != b.x)  return ((a.x &lt;= x) &amp;&amp; (x &lt;= b.x) || (a.x &gt;= x) &amp;&amp; (x &gt;= b.x));
-        else return ((a.y &lt;= y) &amp;&amp; (y &lt;= b.y) || (a.y &gt;= y) &amp;&amp; (y &gt;= b.y));
-    }      
-
-    double distance_seg(const Point&amp; a,const Point&amp; b) {
-        if((b-a).dot(*this-a) &lt; EPS) {
-            return (*this-a).norm();
-        }
-        if((a-b).dot(*this-b) &lt; EPS) {
-            return (*this-b).norm();
-        }
-        return abs((b-a).cross(*this-a)) / (b-a).norm();
-    }
-
-    bool hitPolygon(const Point&amp; a,const Point&amp; b,const Point&amp; c) {
-        double t = (b-a).cross(*this-b);
-        double t2 = (c-b).cross(*this-c);
-        double t3 = (a-c).cross(*this-a);   
-
-        if((t &gt; 0 &amp;&amp; t2 &gt; 0 &amp;&amp; t3 &gt; 0) || ( t &lt; 0 &amp;&amp; t2 &lt; 0 &amp;&amp; t3 &lt; 0)) {
-            return true;
-        }
-
-        return false;
-    }
-};
-
-struct Circle {
-    Point p;
-    double r;
-
-    Circle() : p(Point(0,0)), r(0) {}
-
-    Circle(Point o, double r) : p(o), r(r) {}
-
-    Circle(double x,double y, double r) : p(Point(x,y)), r(r) {}
-
-    bool isCircleIn(const Point&amp; o) {
-        Point res = o-p;
-        return res.dot(res) &lt; r*r + EPS;
-    }
-
-    // 1:外で接する，0:交差なし，-1:内で接する，2:交差，-2:内包
-    int isIntersect(const Circle&amp; c) {
-        double d = (c.p - p).dot(c.p - p);
-        double len = (c.r + r) * (c.r + r);
-
-        if(equals(d,len)) return 1;
-        if(d &gt; len) return 0;
-
-        double R = fabs(c.r - r) * fabs(c.r - r);
-        if(equals(d,R)) return -1;
-        if(d &gt; R) return 2;
-        return -2;
-    }
-
-    vector&lt;Point&gt; getCrossPoint(const Circle&amp; c) {
-        vector&lt;Point&gt; ret;
-        int ch = isIntersect(c);
-
-        if(ch == 0 || ch == -2) return ret;
-
-        Point base = c.p - p;
-        double len = base.dot(base);
-        double t = (r*r - c.r*c.r + len) / (2.0 * len);
-
-        if(ch == 2) {
-            Point n(-base.y,base.x);
-            n = n / (n.norm());
-            double h = sqrt(r * r - t*t*len);
-
-            ret.push_back(p + (base*t) + (n*h));
-            ret.push_back(p + (base*t) - (n*h));
-        } else {
-            ret.push_back(p + (base*t));
-        }
-
-        return ret;
-    }
-};
-
-int main() {
-    int n,m;
-
-    while(cin &gt;&gt; n &amp;&amp; n) {
-        vector&lt;Circle&gt; v;
-        rep(i,n) {
-            double x,y,r;
-            cin &gt;&gt; x &gt;&gt; y &gt;&gt; r;
-
-            v.push_back(Circle(x,y,r));
-        }
-
-        int m;
-        cin &gt;&gt; m;
-
-        rep(q,m) {
-            Point t,o;
-            cin &gt;&gt; t.x &gt;&gt; t.y &gt;&gt; o.x &gt;&gt; o.y;
-
-            bool flag = true;
-
-            rep(i,n) {
-                if(v[i].isCircleIn(t) &amp;&amp; v[i].isCircleIn(o)) {
-                    continue;
-                } else if(!v[i].isCircleIn(t) &amp;&amp; !v[i].isCircleIn(o)) {
-                    double d = v[i].p.distance_seg(t,o);
-                    if(d &lt; v[i].r + EPS) flag = false;
-                } else {
-                    flag = false;
-                }
-            }
-
-            if(flag) cout &lt;&lt; "Danger" &lt;&lt; endl;
-            else cout &lt;&lt; "Safe" &lt;&lt; endl;
-        }
-    }
-
-    return 0;
-}
-</code></pre>
 ]]></content>
   </entry>
   
