@@ -4,7 +4,7 @@
   <title><![CDATA[Category: aoj | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/aoj/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-02-10T21:58:47+09:00</updated>
+  <updated>2016-02-10T22:48:52+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,263 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ0551 Icicles]]></title>
+    <link href="http://ry0u.github.io/blog/2016/02/10/aoj0551-icicles/"/>
+    <updated>2016-02-10T22:42:10+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/02/10/aoj0551-icicles</id>
+    <content type="html"><![CDATA[<p>問題文<br/>
+<a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0551">http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0551</a></p>
+
+<!-- more -->
+
+
+<p>i番目のつららが落ちる時間は両隣のi-1，i+1番目のつららが落ちる時間に依存し，初期の値が大きいほうからつららを落として行けば矛盾は起きないと思ったので，priority_queueでやったらACした．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+#include &lt;queue&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int main() {
+    int n, l;
+    while(cin &gt;&gt; n &gt;&gt; l) {
+        if(n == 0 &amp;&amp; l == 0) break;
+
+        vector&lt;int&gt; v(n), cnt(n);
+        priority_queue&lt;P, vector&lt;P&gt;, greater&lt;P&gt; &gt; que;
+        rep(i, n) {
+            cin &gt;&gt; v[i];
+            cnt[i] = 0;
+            que.push(P(v[i], i));
+        }
+
+        while(que.size()) {
+            P p = que.top();
+            que.pop();
+
+            int d = l - p.first;
+            int id = p.second;
+
+            if(id == 0) cnt[id] += cnt[id+1] + d;
+            else if(id == n-1) cnt[id] += cnt[id-1] + d;
+            else cnt[id] += max(cnt[id-1], cnt[id+1]) + d;
+        }
+
+        int ans = 0;
+        rep(i, n) {
+            ans = max(ans, cnt[i]);
+        }
+        cout &lt;&lt; ans &lt;&lt; endl;
+    }
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ0549 A Traveler]]></title>
+    <link href="http://ry0u.github.io/blog/2016/02/10/aoj0549-a-traveler/"/>
+    <updated>2016-02-10T22:34:52+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/02/10/aoj0549-a-traveler</id>
+    <content type="html"><![CDATA[<p>問題文<br/>
+<a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0549">http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0549</a></p>
+
+<!-- more -->
+
+
+<p>宿場町<script type="math/tex">kから宿場町k + a_i</script>までのコストの和が求まれば良いのでBITを用いた．ブログを書いてる時に，これimosだけのほうがシンプルでlogが消えることに気付いたけど，この問題だったらどっちでもいいよね(log<sup>2</sup>とかにならないのでほぼ定数)となった．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+struct BIT {
+    vector&lt;int&gt; bit;
+
+    BIT(int n) : bit(n+1) {}
+
+    int sum(int i) {
+        int s = 0;
+        while(i &gt; 0) {
+            s += bit[i];
+            i -= i &amp; -i;
+        }
+        return s;
+    }
+
+    void add(int i,int x) {
+        while(i &lt;= bit.size()) {
+            bit[i] += x;
+            i += i &amp; -i;
+        }
+    }
+};
+
+int main() {
+    int n, m;
+    while(cin &gt;&gt; n &gt;&gt; m) {
+        if(n == 0 &amp;&amp; m == 0) break;
+
+        BIT bit(100005);
+        rep(i, n-1) {
+            int a;
+            cin &gt;&gt; a;
+
+            bit.add(i+1, a);
+        }
+
+        int cur = 1;
+        ll ans = 0;
+
+        rep(i, m) {
+            int a;
+            cin &gt;&gt; a;
+
+            ans += abs(bit.sum(cur+a-1) - bit.sum(cur-1));
+            ans %= 100000;
+            cur += a;
+        }
+
+        cout &lt;&lt; ans &lt;&lt; endl;
+    }
+
+    return 0;
+}
+</code></pre>
+
+<p>いくらlogだからといって変につけたりするとTLEすることがあるが何回かあったので，注意したい．</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ0547 Commute routes]]></title>
+    <link href="http://ry0u.github.io/blog/2016/02/10/aoj0547-commute-routes/"/>
+    <updated>2016-02-10T22:08:01+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/02/10/aoj0547-commute-routes</id>
+    <content type="html"><![CDATA[<p>問題文<br/>
+<a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0547">http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0547</a></p>
+
+<!-- more -->
+
+
+<p>dp[i][j] := その地点から横にいける経路の個数<br/>
+dp2[i][j] := その地点から縦にいける経路の個数 とした．<br/>
+交差点で曲がった直後が曲がれない場合は，同じ方向であればその経路は存在する．つまりdp[i][j]の場合はdp[i][j-1]，dp2[i][j]の場合はdp[i-1][j]の経路がそのまま存在する．<br/>
+また別の方向でも一個交差点を飛ばした場所の経路は存在する．つまりdp[i][j]の場合はdp2[i-2][j]，dp2[i][j]の場合はdp[i][j-2]の経路が存在する．</p>
+
+<p>よって
+<script type="math/tex; mode=display">
+\begin{eqnarray}
+    dp[i][j] &amp;+=&amp; dp[i][j-1] + dp2[i-2][j] \
+    dp2[i][j] &amp;+=&amp; dp[i][j-2] + dp2[i-1][j]
+\end{eqnarray}
+</script></p>
+
+<p>MODを取るのと忘れないようにする．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+#define MOD 100000
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int dp[105][105], dp2[105][105];
+
+int main() {
+    int w, h;
+    while(cin &gt;&gt; w &gt;&gt; h) {
+        if(w == 0 &amp;&amp; h == 0) break;
+
+        memset(dp, 0, sizeof(dp));
+        memset(dp2, 0, sizeof(dp2));
+
+        dp[0][0] = 1;
+        dp2[0][0] = 1;
+
+        rep(i, w) {
+            dp[0][i] = 1;
+            dp2[0][i] = 1;
+        }
+
+        rep(i, h) {
+            dp[i][0] = 1;
+            dp2[i][0] = 1;
+        }
+
+        REP(i, 1, h) {
+            REP(j, 1, w) {
+                dp[i][j] += dp[i][j-1];
+                if(i - 2 &gt;= 0) dp[i][j] += dp2[i-2][j];
+                dp[i][j] %= MOD;
+
+                dp2[i][j] += dp2[i-1][j];
+                if(j - 2 &gt;= 0) dp2[i][j] += dp[i][j-2];
+                dp2[i][j] %= MOD;
+            }
+        }
+
+        if(h == 2 || w == 2) cout &lt;&lt; 2 &lt;&lt; endl;
+        else cout &lt;&lt; (dp[h-1][w-1] + dp[h-2][w-3]) % MOD &lt;&lt; endl;
+    }
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[AOJ0546 Lining up the cards]]></title>
@@ -173,341 +430,6 @@ int main() {
     return 0;
 }
 </code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[AOJ0541 Walk]]></title>
-    <link href="http://ry0u.github.io/blog/2016/02/10/aoj0541-walk/"/>
-    <updated>2016-02-10T20:37:51+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/02/10/aoj0541-walk</id>
-    <content type="html"><![CDATA[<p>問題文<br/>
-<a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0541">http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0541</a></p>
-
-<!-- more -->
-
-
-<p>その交差点を何回通ったかが分かれば，その偶奇でどちらに進むかが分かる．<br/>
-例えば現在いる場所を赤として，次に向かう場所を青，さらにをそこに通る回数を5とする．</p>
-
-<p><strong>東</strong>
-<img src="/images/AOJ/0541-1.png">
-<strong>南</strong>
-<img src="/images/AOJ/0541-2.png"></p>
-
-<p>東の場合は，東に3回行き，南に2回行く．<br/>
-南の場合は，東に2回行き，南に3回行く．<br/>
-通る回数が偶数の場合はどちらに行く回数も同じである．<br/>
-よって初期地点<script type="math/tex"> (1, 1)にN として，</script>
-<script type="math/tex">(i, j)が東なら</script>
-<script type="math/tex; mode=display">
-\begin{eqnarray}
-    dp[i+1][j] &amp;=&amp; dp[i][j]/2 \
-    dp[i][j+1] &amp;=&amp; dp[i][j] - dp[i][j]/2
-\end{eqnarray}
-</script></p>
-
-<p><script type="math/tex"> (i, j)が南なら </script>
-<script type="math/tex; mode=display">
-\begin{eqnarray}
-    dp[i+1][j] &amp;=&amp; dp[i][j] - dp[i][j]/2 \
-    dp[i][j+1] &amp;=&amp; dp[i][j]/2
-\end{eqnarray}
-</script></p>
-
-<p>これで通った回数が分かったので，<script type="math/tex">(1, 1)から始めてW+1またはH+1</script>に出るまで進む．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-int h, w, n;
-int dp[1005][1005];
-
-int main() {
-    while(cin &gt;&gt; h &gt;&gt; w &gt;&gt; n) {
-        if(h == 0 &amp;&amp; w == 0 &amp;&amp; n == 0) break;
-
-        vector&lt; vector&lt;int&gt; &gt; v(h, vector&lt;int&gt;(w));
-        rep(i, h) {
-            rep(j, w) {
-                cin &gt;&gt; v[i][j];
-            }
-        }
-
-        memset(dp, 0, sizeof(dp));
-        dp[0][0] = n;
-
-        rep(i, h) {
-            rep(j, w) {
-                int s = dp[i][j] / 2;
-                int t = dp[i][j] - s;
-
-                if(v[i][j] % 2 == 1) {
-                    dp[i][j+1] += t;
-                    dp[i+1][j] += s;
-                } else {
-                    dp[i+1][j] += t;
-                    dp[i][j+1] += s;
-                }
-            }
-        }
-
-        int y = 0, x = 0;
-        while(y != h &amp;&amp; x != w) {
-            if(v[y][x] == 1) {
-                if(dp[y][x] % 2 == 1) {
-                    x++;
-                } else {
-                    y++;
-                }
-            } else {
-                if(dp[y][x] % 2 == 1) {
-                    y++;
-                } else {
-                    x++;
-                }
-            }
-        }
-
-        cout &lt;&lt; y + 1 &lt;&lt; " " &lt;&lt; x + 1 &lt;&lt; endl;
-        // rep(i, h) {
-        //  rep(j, w) {
-        //      cout &lt;&lt; dp[i][j] &lt;&lt; " ";
-        //  }
-        //  cout &lt;&lt; endl;
-        // }
-    }
-
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[AOJ0540 Amidakuji]]></title>
-    <link href="http://ry0u.github.io/blog/2016/02/10/aoj0540-amidakuji/"/>
-    <updated>2016-02-10T20:28:02+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/02/10/aoj0540-amidakuji</id>
-    <content type="html"><![CDATA[<p>問題文<br/>
-<a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0540">http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0540</a></p>
-
-<!-- more-->
-
-
-<p>減らす棒は1本で良いので，アミダをシュミレーションして，下から順に戻した．戻していく時に，k番目以内に双方が入っている場合はその棒を無くしてもk番目までのコストの和は変わらないので，どちらか一方がk番目に入っている場合に更新があるかないかの判断をした．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-int main() {
-    int n, m, h, k;
-
-    while(cin &gt;&gt; n &gt;&gt; m &gt;&gt; h &gt;&gt; k) {
-        if(n == 0 &amp;&amp; m == 0 &amp;&amp; h == 0 &amp;&amp; k == 0) break;
-
-        vector&lt;int&gt; cost(n);
-        rep(i, n) cin &gt;&gt; cost[i];
-
-        vector&lt;P&gt; p(m);
-        rep(i, m) cin &gt;&gt; p[i].second &gt;&gt; p[i].first;
-        sort(p.begin(), p.end());
-
-        vector&lt;int&gt; id(n);
-        rep(i, n) id[i] = i;
-
-        rep(i, m) {
-            swap(id[ p[i].second-1 ], id[ p[i].second]);
-        }
-
-        int ans = 0;
-        vector&lt;int&gt; v(n);
-        rep(i, n) {
-            v[id[i]] = cost[i];
-            if(id[i] &lt; k) ans += cost[i];
-        }
-
-        int res = 0;
-        for(int i = m-1; i &gt;= 0; i--) {
-            int a = id[ p[i].second-1];
-            int b = id[ p[i].second];
-
-            if(a &lt; k &amp;&amp; k &lt;= b) {
-                if(v[a] &gt; v[b]) {
-                    res = max(res, v[a] - v[b]);
-                }
-            } else if(b &lt; k &amp;&amp; k &lt;= a) {
-                if(v[b] &gt; v[a]) {
-                    res = max(res, v[b] - v[a]);
-                }
-            }
-
-            swap(id[ p[i].second-1], id[p[i].second]);
-        }
-
-        cout &lt;&lt; ans - res &lt;&lt; endl;
-    }
-
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[AOJ0534 Chain]]></title>
-    <link href="http://ry0u.github.io/blog/2016/02/09/aoj0534-chain/"/>
-    <updated>2016-02-09T15:14:15+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/02/09/aoj0534-chain</id>
-    <content type="html"><![CDATA[<p>問題文<br/>
-<a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0534">http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0534</a></p>
-
-<!-- more -->
-
-
-<p>まず，色を変えるのを選ぶ．変える色は前後のどちらかの色にする．次に色を変えた状態で何個残るかをシュミレーションする．<br/>
-シュミレーションは上から見て行く．同じ色の塊で(色，個数)をstackに積んでいく．もし4つ以上連続している場合はstackには積まない(消える)．stackのtopと現在見てる個数が4を超えればpopして，超えない場合はpushすることで連鎖を表現出来る．<script type="math/tex"> O(N^2) </script></p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-#include &lt;stack&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-int func(vector&lt;int&gt;&amp; v) {
-    stack&lt;P&gt; st;
-    int n = v.size(), ret = 0;
-
-    rep(i, n) {
-        int len = 1, c = v[i];
-        REP(j, i+1, n) {
-            if(c == v[j]) {
-                i++;
-                len++;
-                continue;
-            } else break;
-        }
-
-        if(len &gt;= 4) continue;
-        else {
-            if(st.size() == 0) {
-                st.push(mp(c, len));
-                ret += len;
-            } else {
-                P p = st.top();
-                if(p.first == c) {
-                    if(p.second + len &lt; 4) {
-                        st.top().second += len;
-                        ret += len;
-                    } else {
-                        st.pop();
-                        ret -= p.second;
-                    }
-                } else {
-                    st.push(mp(c, len));
-                    ret += len;
-                }
-            }
-        }
-    }
-
-    return ret;
-}
-
-int main() {
-    int n;
-    while(cin &gt;&gt; n &amp;&amp; n) {
-
-        vector&lt;int&gt; v(n);
-        rep(i, n) cin &gt;&gt; v[i];
-
-        int ans = n + 1;
-        rep(i, n) {
-            int t = v[i];
-
-            v[i] = 1;
-            if(i == 0) {
-                v[i] = v[i+1];
-                ans = min(ans, func(v));
-            } else if(i == n-1) {
-                v[i] = v[i-1];
-                ans = min(ans, func(v));
-            } else {
-                if(v[i+1] == v[i-1]) {
-                    v[i] = v[i+1];
-                    ans = min(ans, func(v));
-                } else {
-                    v[i] = v[i-1];
-                    ans = min(ans, func(v));
-
-                    v[i] = v[i+1];
-                    ans = min(ans, func(v));
-                }
-            }
-
-            v[i] = t;
-        }
-
-        cout &lt;&lt; ans &lt;&lt; endl;
-    }
-
-    return 0;
-}
-</code></pre>
-
-<p>制限時間が結構厳しかった．TLEを連発して0.96secまで落とした．</p>
 ]]></content>
   </entry>
   

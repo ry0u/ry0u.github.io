@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: bit | ry0u_ydのblog]]></title>
+  <link href="http://ry0u.github.io/blog/categories/bit/atom.xml" rel="self"/>
+  <link href="http://ry0u.github.io/"/>
+  <updated>2016-02-10T22:48:52+09:00</updated>
+  <id>http://ry0u.github.io/</id>
+  <author>
+    <name><![CDATA[ry0u_yd]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ0549 A Traveler]]></title>
+    <link href="http://ry0u.github.io/blog/2016/02/10/aoj0549-a-traveler/"/>
+    <updated>2016-02-10T22:34:52+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/02/10/aoj0549-a-traveler</id>
+    <content type="html"><![CDATA[<p>問題文<br/>
+<a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0549">http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0549</a></p>
+
+<!-- more -->
+
+
+<p>宿場町<script type="math/tex">kから宿場町k + a_i</script>までのコストの和が求まれば良いのでBITを用いた．ブログを書いてる時に，これimosだけのほうがシンプルでlogが消えることに気付いたけど，この問題だったらどっちでもいいよね(log<sup>2</sup>とかにならないのでほぼ定数)となった．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+struct BIT {
+    vector&lt;int&gt; bit;
+
+    BIT(int n) : bit(n+1) {}
+
+    int sum(int i) {
+        int s = 0;
+        while(i &gt; 0) {
+            s += bit[i];
+            i -= i &amp; -i;
+        }
+        return s;
+    }
+
+    void add(int i,int x) {
+        while(i &lt;= bit.size()) {
+            bit[i] += x;
+            i += i &amp; -i;
+        }
+    }
+};
+
+int main() {
+    int n, m;
+    while(cin &gt;&gt; n &gt;&gt; m) {
+        if(n == 0 &amp;&amp; m == 0) break;
+
+        BIT bit(100005);
+        rep(i, n-1) {
+            int a;
+            cin &gt;&gt; a;
+
+            bit.add(i+1, a);
+        }
+
+        int cur = 1;
+        ll ans = 0;
+
+        rep(i, m) {
+            int a;
+            cin &gt;&gt; a;
+
+            ans += abs(bit.sum(cur+a-1) - bit.sum(cur-1));
+            ans %= 100000;
+            cur += a;
+        }
+
+        cout &lt;&lt; ans &lt;&lt; endl;
+    }
+
+    return 0;
+}
+</code></pre>
+
+<p>いくらlogだからといって変につけたりするとTLEすることがあるが何回かあったので，注意したい．</p>
+]]></content>
+  </entry>
+  
+</feed>

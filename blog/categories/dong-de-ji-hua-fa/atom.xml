@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 動的計画法 | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/dong-de-ji-hua-fa/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-02-10T21:58:47+09:00</updated>
+  <updated>2016-02-10T22:48:52+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,98 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ0547 Commute routes]]></title>
+    <link href="http://ry0u.github.io/blog/2016/02/10/aoj0547-commute-routes/"/>
+    <updated>2016-02-10T22:08:01+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/02/10/aoj0547-commute-routes</id>
+    <content type="html"><![CDATA[<p>問題文<br/>
+<a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0547">http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0547</a></p>
+
+<!-- more -->
+
+
+<p>dp[i][j] := その地点から横にいける経路の個数<br/>
+dp2[i][j] := その地点から縦にいける経路の個数 とした．<br/>
+交差点で曲がった直後が曲がれない場合は，同じ方向であればその経路は存在する．つまりdp[i][j]の場合はdp[i][j-1]，dp2[i][j]の場合はdp[i-1][j]の経路がそのまま存在する．<br/>
+また別の方向でも一個交差点を飛ばした場所の経路は存在する．つまりdp[i][j]の場合はdp2[i-2][j]，dp2[i][j]の場合はdp[i][j-2]の経路が存在する．</p>
+
+<p>よって
+<script type="math/tex; mode=display">
+\begin{eqnarray}
+    dp[i][j] &amp;+=&amp; dp[i][j-1] + dp2[i-2][j] \
+    dp2[i][j] &amp;+=&amp; dp[i][j-2] + dp2[i-1][j]
+\end{eqnarray}
+</script></p>
+
+<p>MODを取るのと忘れないようにする．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+#define MOD 100000
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int dp[105][105], dp2[105][105];
+
+int main() {
+    int w, h;
+    while(cin &gt;&gt; w &gt;&gt; h) {
+        if(w == 0 &amp;&amp; h == 0) break;
+
+        memset(dp, 0, sizeof(dp));
+        memset(dp2, 0, sizeof(dp2));
+
+        dp[0][0] = 1;
+        dp2[0][0] = 1;
+
+        rep(i, w) {
+            dp[0][i] = 1;
+            dp2[0][i] = 1;
+        }
+
+        rep(i, h) {
+            dp[i][0] = 1;
+            dp2[i][0] = 1;
+        }
+
+        REP(i, 1, h) {
+            REP(j, 1, w) {
+                dp[i][j] += dp[i][j-1];
+                if(i - 2 &gt;= 0) dp[i][j] += dp2[i-2][j];
+                dp[i][j] %= MOD;
+
+                dp2[i][j] += dp2[i-1][j];
+                if(j - 2 &gt;= 0) dp2[i][j] += dp[i][j-2];
+                dp2[i][j] %= MOD;
+            }
+        }
+
+        if(h == 2 || w == 2) cout &lt;&lt; 2 &lt;&lt; endl;
+        else cout &lt;&lt; (dp[h-1][w-1] + dp[h-2][w-3]) % MOD &lt;&lt; endl;
+    }
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[AOJ0541 Walk]]></title>
@@ -1387,70 +1479,6 @@ int main() {
     }
 
     cout &lt;&lt; max(dp[n-1][0],dp[n-1][1]) &lt;&lt; endl;
-
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[yukicoder No.44 DPなすごろく]]></title>
-    <link href="http://ry0u.github.io/blog/2015/09/03/yukicoder-no-dot-44-dpnasugoroku/"/>
-    <updated>2015-09-03T13:53:47+09:00</updated>
-    <id>http://ry0u.github.io/blog/2015/09/03/yukicoder-no-dot-44-dpnasugoroku</id>
-    <content type="html"><![CDATA[<p><a href="http://yukicoder.me/problems/76">http://yukicoder.me/problems/76</a></p>
-
-<h1>考察</h1>
-
-<p>1または2前に進むことが出来るので，i+2番目にマスに訪れるにはi番目のマス，またはi+1番目のマスから来るしかない．よって</p>
-
-<p><script type="math/tex; mode=display">
-\begin{eqnarray}
-\begin{cases}
-dp[0] = 1 \
-dp[1] = 1 \
-dp[i+2] = dp[i+1] + dp[i] (i \geq 2)
-\end{cases}
-\end{eqnarray}
-</script></p>
-
-<p>が成り立つ．フィボナッチ階段を同じ考えである．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-int main() {
-    int n;
-    cin &gt;&gt; n;
-
-    vector&lt;ll&gt; dp(55);
-    dp[0] = 1;
-    dp[1] = 1;
-
-    rep(i,n-1) {
-        dp[i+2] = dp[i] + dp[i+1];
-    }
-
-    cout &lt;&lt; dp[n] &lt;&lt; endl;
 
     return 0;
 }
