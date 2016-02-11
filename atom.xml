@@ -4,7 +4,7 @@
   <title><![CDATA[ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-02-12T02:59:49+09:00</updated>
+  <updated>2016-02-12T04:13:41+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,207 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ0561 Books]]></title>
+    <link href="http://ry0u.github.io/blog/2016/02/12/aoj0561-books/"/>
+    <updated>2016-02-12T03:04:14+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/02/12/aoj0561-books</id>
+    <content type="html"><![CDATA[<p>問題文<br/>
+<a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0561">http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0561</a></p>
+
+<!-- more -->
+
+
+<p>割とすぐにDPだろうと思ったけど，どう遷移していいか分からない分からないとずっと悩んでいた．試しに値段，(ジャンルの個数，値段)の貪欲をして<strong>WA</strong>を連発した</p>
+
+<hr />
+
+<script type="math/tex; mode=display">
+\begin{eqnarray}
+    d[i][j] &:=& i番目のジャンルの本をj冊選んだ時のコスト \\
+    dp[i][j] &:=& i番目以降のジャンルからj冊以下の時の最大コスト
+\end{eqnarray}
+</script>
+
+
+<p>とした．5冊まで同じジャンルを売った時にプラスされる値段を見ると</p>
+
+<script type="math/tex; mode=display">
+\begin{eqnarray}
+    1冊 &\to& 0 \\
+    2冊 &\to& 1 + 1  = 2\\
+    3冊 &\to& 2 + 2 + 2 = 6 \\
+    4冊 &\to& 3 + 3 + 3 + 3 = 12\\
+    5冊 &\to& 4 + 4 + 4 + 4 + 4 = 20
+\end{eqnarray}
+</script>
+
+
+<p>となるので同じジャンルを売った時にプラスされる値段は，冊数を<script type="math/tex">i</script>とすると，<script type="math/tex">i-1</script>増えるのがされるのが<script type="math/tex">1</script>個，<script type="math/tex">1</script>増えるのが<script type="math/tex">i-1</script>個あるので<script type="math/tex">(i-1)*2</script>となる．<br/>
+また<script type="math/tex"> j </script>冊選んだ時のコストは大きい順に取ればそれが最大となるので事前にソートしておくことで<script type="math/tex"> d </script>が求まる．<br/>
+これが求まると，冊数を重さと見ると，<script type="math/tex">K</script>冊を超えないナップサックになる．</p>
+
+<p>青を遷移先とする．普通のナップサック?(蟻本p.52)はその品物を使わない遷移と使う遷移の2種類がある<br/>
+<img src="http://ry0u.github.io/images/AOJ/0561-1.png"></p>
+
+<p>今回の場合は，そのジャンルの本数文，遷移があるので下図のような状況になる．<br/>
+<img src="http://ry0u.github.io/images/AOJ/0561-2.png"></p>
+
+<p>この遷移のmaxを取れば<script type="math/tex"> dp[i][j]が求まるので最終的に dp[ジャンル数][K冊]</script>が答えとなった．</p>
+
+<h1>Code</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &lt;iostream&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;vector&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;string&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;cstring&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;algorithm&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;sstream&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;map&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;set&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="cp">#define REP(i,k,n) for(int i=k;i&lt;n;i++)</span>
+</span><span class='line'><span class="cp">#define rep(i,n) for(int i=0;i&lt;n;i++)</span>
+</span><span class='line'><span class="cp">#define INF 1&lt;&lt;30</span>
+</span><span class='line'><span class="cp">#define pb push_back</span>
+</span><span class='line'><span class="cp">#define mp make_pair</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="p">;</span>
+</span><span class='line'><span class="k">typedef</span> <span class="kt">long</span> <span class="kt">long</span> <span class="n">ll</span><span class="p">;</span>
+</span><span class='line'><span class="k">typedef</span> <span class="n">pair</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">P</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">ll</span> <span class="n">d</span><span class="p">[</span><span class="mi">15</span><span class="p">][</span><span class="mi">2005</span><span class="p">],</span> <span class="n">dp</span><span class="p">[</span><span class="mi">15</span><span class="p">][</span><span class="mi">2005</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="kt">int</span> <span class="n">n</span><span class="p">,</span> <span class="n">K</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">cin</span> <span class="o">&gt;&gt;</span> <span class="n">n</span> <span class="o">&gt;&gt;</span> <span class="n">K</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">id</span><span class="p">,</span> <span class="n">v</span><span class="p">[</span><span class="mi">2005</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">rep</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="kt">int</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">;</span>
+</span><span class='line'>      <span class="n">cin</span> <span class="o">&gt;&gt;</span> <span class="n">a</span> <span class="o">&gt;&gt;</span> <span class="n">b</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="n">id</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">b</span><span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+</span><span class='line'>      <span class="n">v</span><span class="p">[</span><span class="n">b</span><span class="o">-</span><span class="mi">1</span><span class="p">].</span><span class="n">push_back</span><span class="p">(</span><span class="n">a</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">sort</span><span class="p">(</span><span class="n">id</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span> <span class="n">id</span><span class="p">.</span><span class="n">end</span><span class="p">());</span>
+</span><span class='line'>  <span class="n">id</span><span class="p">.</span><span class="n">erase</span><span class="p">(</span><span class="n">unique</span><span class="p">(</span><span class="n">id</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span><span class="n">id</span><span class="p">.</span><span class="n">end</span><span class="p">()),</span><span class="n">id</span><span class="p">.</span><span class="n">end</span><span class="p">());</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">rep</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">id</span><span class="p">.</span><span class="n">size</span><span class="p">())</span> <span class="p">{</span>
+</span><span class='line'>      <span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="n">id</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+</span><span class='line'>      <span class="n">sort</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="n">j</span><span class="p">].</span><span class="n">begin</span><span class="p">(),</span> <span class="n">v</span><span class="p">[</span><span class="n">j</span><span class="p">].</span><span class="n">end</span><span class="p">(),</span> <span class="n">greater</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">()</span> <span class="p">);</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">memset</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">d</span><span class="p">));</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">rep</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">id</span><span class="p">.</span><span class="n">size</span><span class="p">())</span> <span class="p">{</span>
+</span><span class='line'>      <span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="n">id</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="n">REP</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">v</span><span class="p">[</span><span class="n">j</span><span class="p">].</span><span class="n">size</span><span class="p">()</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>          <span class="n">d</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">+=</span> <span class="n">d</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">v</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="p">;</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">memset</span><span class="p">(</span><span class="n">dp</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">dp</span><span class="p">));</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">rep</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">id</span><span class="p">.</span><span class="n">size</span><span class="p">())</span> <span class="p">{</span>
+</span><span class='line'>      <span class="n">rep</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">K</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>          <span class="n">ll</span> <span class="n">res</span> <span class="o">=</span> <span class="n">dp</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">];</span>
+</span><span class='line'>          <span class="n">rep</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">[</span><span class="n">id</span><span class="p">[</span><span class="n">i</span><span class="p">]].</span><span class="n">size</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>              <span class="k">if</span><span class="p">(</span><span class="n">j</span> <span class="o">&gt;=</span> <span class="n">k</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>                  <span class="n">res</span>  <span class="o">=</span> <span class="n">max</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">dp</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span> <span class="o">-</span> <span class="n">k</span><span class="p">]</span> <span class="o">+</span> <span class="n">d</span><span class="p">[</span><span class="n">id</span><span class="p">[</span><span class="n">i</span><span class="p">]][</span><span class="n">k</span><span class="p">]);</span>
+</span><span class='line'>              <span class="p">}</span>
+</span><span class='line'>          <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>          <span class="n">dp</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">res</span><span class="p">;</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">dp</span><span class="p">[</span> <span class="n">id</span><span class="p">.</span><span class="n">size</span><span class="p">()][</span><span class="n">K</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[AOJ0560 Planetary Exploration]]></title>
@@ -6356,179 +6557,6 @@ k個までの最大部分和．しゃくとり法．</p>
 
 <p><strong>Codefestival2015最高でした</strong><br/>
 運営・参加者の方々お疲れ様でした，ありがとうございました．</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[GraphvizとかVimとか]]></title>
-    <link href="http://ry0u.github.io/blog/2015/10/25/graphviztokavimtoka/"/>
-    <updated>2015-10-25T04:45:42+09:00</updated>
-    <id>http://ry0u.github.io/blog/2015/10/25/graphviztokavimtoka</id>
-    <content type="html"><![CDATA[<p>基本的に物事をすぐに忘れるので簡単なことでもメモ．</p>
-
-<h1>Graphvizとか</h1>
-
-<p><a href="http://www.graphviz.org/">Graphviz</a><br/>
-基本的に，<br/>
-<a href="http://qiita.com/tmsanrinsha/items/d54bee11193b2c6ea71b">Graghvizでグラフ構造からグラフを描画する</a><br/>
-にめちゃ詳しく書いてある．<br/>
-ただコマンドによっては使えない属性があるので<br/>
-<a href="http://www.graphviz.org/doc/info/attrs.html">http://www.graphviz.org/doc/info/attrs.html</a><br/>
-で確認．</p>
-
-<h3>ノードの形</h3>
-
-<p>ノードの形はデフォルトにしていたけど，pointがいい感じに思える．</p>
-
-<script type="math/tex"> K_{3,4} </script>
-
-
-<p><img src="http://ry0u.github.io/images/etc/img.png">
-<img src="http://ry0u.github.io/images/etc/img2.png"></p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'>node <span class="o">[</span> <span class="nv">shape</span> <span class="o">=</span> point<span class="o">]</span><span class="p">;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>ノードにlabelが欲しい場合は，defaultに戻す．</p>
-
-<h3>閉路を書きたい</h3>
-
-<p><code>dot</code>ではなく，<code>cicro</code>がいいかも</p>
-
-<p><img src="http://ry0u.github.io/images/etc/img3.png"></p>
-
-<h3>細かい調整</h3>
-
-<p>rankでsame，max，min，source，sinkを指定出来る．</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'><span class="o">{</span><span class="nv">rank</span> <span class="o">=</span> same<span class="p">;</span> hoge<span class="p">;</span> hogehoge<span class="p">;</span><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>見えない辺で調整とか．グラフは同型なんだけど，そうじゃない，という時．<br/>
-例えば，下のグラフの左下のノードを上に持って行きたい．<br/>
-<img src="http://ry0u.github.io/images/etc/img4.png"></p>
-
-<p>辺を作って，rankを合わせる．作った辺を消す．<br/>
-<img src="http://ry0u.github.io/images/etc/img5.png">
-<img src="http://ry0u.github.io/images/etc/img6.png"></p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-</pre></td><td class='code'><pre><code class='sh'><span class='line'>graph g <span class="o">{</span>
-</span><span class='line'>    node <span class="o">[</span>
-</span><span class='line'>        <span class="nv">shape</span> <span class="o">=</span> point<span class="p">;</span>
-</span><span class='line'>    <span class="o">]</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'>    a <span class="o">[</span><span class="nv">fixedsize</span> <span class="o">=</span> <span class="nb">true</span>, <span class="nv">width</span> <span class="o">=</span> 0.01, <span class="nv">height</span> <span class="o">=</span> 0.01, <span class="nv">shape</span> <span class="o">=</span> point,color<span class="o">=</span><span class="s2">&quot;#00000000&quot;</span><span class="o">]</span><span class="p">;</span>
-</span><span class='line'>    b <span class="o">[</span><span class="nv">fixedsize</span> <span class="o">=</span> <span class="nb">true</span>, <span class="nv">width</span> <span class="o">=</span> 0.01, <span class="nv">height</span> <span class="o">=</span> 0.01, <span class="nv">shape</span> <span class="o">=</span> point,color<span class="o">=</span><span class="s2">&quot;#00000000&quot;</span><span class="o">]</span><span class="p">;</span>
-</span><span class='line'>    c <span class="o">[</span><span class="nv">fixedsize</span> <span class="o">=</span> <span class="nb">true</span>, <span class="nv">width</span> <span class="o">=</span> 0.01, <span class="nv">height</span> <span class="o">=</span> 0.01, <span class="nv">shape</span> <span class="o">=</span> point,color<span class="o">=</span><span class="s2">&quot;#00000000&quot;</span><span class="o">]</span><span class="p">;</span>
-</span><span class='line'>    d <span class="o">[</span><span class="nv">fixedsize</span> <span class="o">=</span> <span class="nb">true</span>, <span class="nv">width</span> <span class="o">=</span> 0.01, <span class="nv">height</span> <span class="o">=</span> 0.01, <span class="nv">shape</span> <span class="o">=</span> point,color<span class="o">=</span><span class="s2">&quot;#00000000&quot;</span><span class="o">]</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'>    a -- b -- c -- d <span class="o">[</span><span class="nv">style</span> <span class="o">=</span> invis<span class="o">]</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="m">1</span> -- 3<span class="p">;</span>
-</span><span class='line'>    <span class="m">1</span> -- 4<span class="p">;</span>
-</span><span class='line'>    <span class="m">2</span> -- <span class="m">3</span> -- 5<span class="p">;</span>
-</span><span class='line'>    <span class="m">2</span> -- <span class="m">4</span> -- 5<span class="p">;</span>
-</span><span class='line'>  <span class="m">3</span> -- 4<span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="o">{</span><span class="nv">rank</span> <span class="o">=</span> same<span class="p">;</span> a<span class="p">;</span> 1<span class="p">;</span><span class="o">}</span>
-</span><span class='line'>    <span class="o">{</span><span class="nv">rank</span> <span class="o">=</span> same<span class="p">;</span> b<span class="p">;</span> 2<span class="p">;</span><span class="o">}</span>
-</span><span class='line'>    <span class="o">{</span><span class="nv">rank</span> <span class="o">=</span> same<span class="p">;</span> c<span class="p">;</span> 3<span class="p">;</span> 4<span class="p">;</span><span class="o">}</span>
-</span><span class='line'>    <span class="o">{</span><span class="nv">rank</span> <span class="o">=</span> same<span class="p">;</span> d<span class="p">;</span> 5<span class="p">;</span><span class="o">}</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>表</h3>
-
-<p>動的計画法とかの状態遷移をgraphvizで書きたい（DPの練習問題が本当にたまたま解けたので，メモを残すの必死）．<code>patchwork</code>とかいいと思ったけど，辺が書けないみたいなので，<code>osage</code>でshapeをsquareに<br/>
-<img src="http://ry0u.github.io/images/etc/g.png"></p>
-
-<h3>グラフ理論の講義ノートを綺麗に</h3>
-
-<p><img src="http://ry0u.github.io/images/etc/img10.png"><br/>
-<img src="http://ry0u.github.io/images/etc/img11.png"><br/>
-<img src="http://ry0u.github.io/images/etc/img12.png"></p>
-
-<h1>Vimとか</h1>
-
-<p>毎回，毎回 <code>dot -Tpng hoge.dot -o hoge.png</code> するのは面倒．quirkrunの設定に書く．</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='vim'><span class='line'><span class="k">let</span> <span class="k">g</span>:quickrun_config[<span class="s1">&#39;dot&#39;</span>] <span class="p">=</span> {
-</span><span class='line'>\ <span class="s1">&#39;command&#39;</span>: <span class="s1">&#39;dot&#39;</span><span class="p">,</span>
-</span><span class='line'>\ <span class="s1">&#39;exec&#39;</span>: [<span class="s1">&#39;%c -T png %s -o %s:r.png&#39;</span><span class="p">,</span> <span class="s1">&#39;display %s:r.png&#39;</span>]
-</span><span class='line'>\}
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>この設定で満足と思っていたが，こんな記事を見つけた．<br/>
-<a href="http://d.hatena.ne.jp/n9d/20080419/1208614482">emacsのgraphviz用モードをインストールする</a><br/>
-emacsでは，pngのviewが出来る．これをしたい．</p>
-
-<p><a href="http://d.hatena.ne.jp/osyo-manga/20130203/1359896048">そうだ Vim で画像を表示させよう</a>を読む．この記事通りに設定して，
-<img src="http://ry0u.github.io/images/etc/img7.png"><br/>
-無事描画できた．この記事には</p>
-
-<blockquote><p>本来であれば XPM を用いて画像ファイルの描画を行うと Vim がかなり重くなるんですが、今回は別に起動している Vim で描画を行なっているのでレスポンスの重さはあまり気になりません。</p></blockquote>
-
-<p>とある．Vimが重くなることを考慮しなければファイル描画が可能？ココロオドル<br/>
-helpを読むと，gvimの起動オプションを指定出来るみたいなので，</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='vim'><span class='line'><span class="k">let</span> <span class="k">g</span>:sugarpot_gvim_cmd_option <span class="p">=</span> <span class="s1">&#39;--serverlist GVIM --remote-tab-silent .&#39;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>的なことをして無理やり，dotをいじっているgvimに突っ込んでみる．フリーズする．ごめんなさい．sourceを読んでも全くわからないので諦める．</p>
-
-<p>次に<a href="https://github.com/tpope/vim-afterimage">afterimage.vim</a>を見つける．画像を開いてみる．
-<img src="http://ry0u.github.io/images/etc/img8.png"><br/>
-いつものフォントサイズで描画されてしまうので，小さく指定する．
-<img src="http://ry0u.github.io/images/etc/img9.png"><br/>
-そうすると，dotを書いているほうまで小さくなる（そりゃそうだ）．頭を悩ます．バッファごとにフォントサイズを変更出来たりしないか調べるがよく分からず．</p>
-
-<p><a href="https://github.com/basyura/TweetVim">TweetVim</a>とか<a href="http://d.hatena.ne.jp/osyo-manga/20120720/1342770437">vimfiler でファイルのアイコンを表示させてみた</a>見て，iconの表示をやってる所を見たら参考になるかも，と思いコードを読むも何一つ分からず．</p>
-
-<h1>まとめ</h1>
-
-<ul>
-<li>Graphvizいい感じだ</li>
-<li>Vimでquickrunの設定した</li>
-<li>画像表示をいい感じに出来ず</li>
-</ul>
-
-
-<p><strong><em>モウダメダ（完）</em></strong></p>
 ]]></content>
   </entry>
   
