@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: 六角座標 | ry0u_ydのblog]]></title>
+  <link href="http://ry0u.github.io/blog/categories/liu-jiao-zuo-biao/atom.xml" rel="self"/>
+  <link href="http://ry0u.github.io/"/>
+  <updated>2016-02-16T22:59:07+09:00</updated>
+  <id>http://ry0u.github.io/</id>
+  <author>
+    <name><![CDATA[ry0u_yd]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ0569 Illumination]]></title>
+    <link href="http://ry0u.github.io/blog/2016/02/16/aoj0569-illumination/"/>
+    <updated>2016-02-16T22:49:54+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/02/16/aoj0569-illumination</id>
+    <content type="html"><![CDATA[<p>問題文<br/>
+<a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0569">http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0569</a></p>
+
+<!-- more -->
+
+
+<p>六角座標の問題．yが偶奇でdy, dxを変えれば良い．<br/>
+全てがイルミネーションの場合もあるので，まず全体を1マス余分にとる．<br/>
+外の部分は，必ず<script type="math/tex"> (0, 0) から0で繋がっているはずなので，探索中に回りにある1の数を</script>数えれたらACした．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+#include &lt;queue&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int w, h;
+int dy[6] = {-1, 0,+1,+1, 0,-1};
+int dx[6] = { 0,-1, 0,+1,+1,+1};
+
+int dy2[6] = {-1, 0,+1,+1, 0,-1};
+int dx2[6] = {-1,-1,-1, 0,+1, 0};
+
+bool can(int y,int x) {
+    if(0 &lt;= y &amp;&amp; y &lt; h + 2 &amp;&amp; 0 &lt;= x &amp;&amp; x &lt; w + 2) return true;
+    return false;
+}
+
+int main() {
+    cin &gt;&gt; w &gt;&gt; h;
+
+    vector&lt; vector&lt;int&gt; &gt; v(h + 2, vector&lt;int&gt;(w + 2));
+    rep(i, h) {
+        rep(j, w) cin &gt;&gt; v[i+1][j+1];
+    }
+
+    int sy = 0, sx = 0;
+
+    queue&lt;P&gt; que;
+    que.push(mp(sy, sx));
+
+    bool used[105][105];
+    memset(used, 0, sizeof(used));
+    used[sy][sx] = true;
+
+    int ans = 0;
+
+    while(que.size()) {
+        P p = que.front();
+        que.pop();
+
+        rep(i, 6) {
+            int y, x;
+
+            if(p.first % 2 == 0) {
+                y = p.first + dy2[i];
+                x = p.second + dx2[i];
+            } else {
+                y = p.first + dy[i];
+                x = p.second + dx[i];
+            }
+
+            if(can(y, x)) {
+                if(v[y][x] == 1) {
+                    ans++;
+                } else if(!used[y][x]) {
+                    used[y][x] = true;
+                    que.push(mp(y, x));
+                }
+            }
+        }
+    }
+
+    cout &lt;&lt; ans &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+</feed>
