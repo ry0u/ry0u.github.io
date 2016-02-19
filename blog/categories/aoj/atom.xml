@@ -4,7 +4,7 @@
   <title><![CDATA[Category: aoj | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/aoj/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-02-16T23:37:23+09:00</updated>
+  <updated>2016-02-20T00:56:15+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,102 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ0574 Nails]]></title>
+    <link href="http://ry0u.github.io/blog/2016/02/20/aoj0574-nails/"/>
+    <updated>2016-02-20T00:38:56+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/02/20/aoj0574-nails</id>
+    <content type="html"><![CDATA[<p>問題文<br/>
+<a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0574">http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0574</a></p>
+
+<!-- more -->
+
+
+<ul>
+<li><script type="math/tex"> (a,b)に+1</script></li>
+<li><script type="math/tex"> (a, b+1)に-1 </script></li>
+<li><script type="math/tex"> (a+x+1, b)に-1 </script></li>
+<li><script type="math/tex">(a+x+2, b+1)に+1</script></li>
+<li><script type="math/tex">(a+x+1, b+x+2)に+1</script></li>
+<li><script type="math/tex">(a+x+2，b+x+2)に-1 </script></li>
+</ul>
+
+
+<p>して，左から右，上から下，左上から右下方向の累積和を取り，0ではない場所の個数を数えた．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int d[5005][5005];
+
+int main() {
+    int n, m;
+    cin &gt;&gt; n &gt;&gt; m;
+
+    memset(d, 0, sizeof(d));
+
+    rep(i, m) {
+        int a, b, x;
+        cin &gt;&gt; a &gt;&gt; b &gt;&gt; x;
+
+        a--;
+        b--;
+
+        d[a][b]++;
+        d[a][b+1]--;
+
+        d[a+x+1][b]--;
+        d[a+x+2][b+1]++;
+
+        d[a+x+1][b+x+2]++;
+        d[a+x+2][b+x+2]--;
+    }
+
+    rep(i, n) {
+        rep(j, i+1) d[i][j+1] += d[i][j];
+    }
+
+    rep(i, n) {
+        rep(j, i+1) d[i+1][j] += d[i][j];
+    }
+
+    rep(i, n) {
+        rep(j, i+1) d[i+1][j+1] += d[i][j];
+    }
+
+    int ans = 0;
+    rep(i, n) {
+        rep(j, i+1) {
+            if(d[i][j]) ans++;
+        }
+    }
+
+    cout &lt;&lt; ans &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[AOJ0573 Night Market]]></title>
@@ -431,129 +527,6 @@ int main() {
     }
 
     cout &lt;&lt; sum &lt;&lt; endl;
-
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[AOJ0561 Books]]></title>
-    <link href="http://ry0u.github.io/blog/2016/02/12/aoj0561-books/"/>
-    <updated>2016-02-12T03:04:14+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/02/12/aoj0561-books</id>
-    <content type="html"><![CDATA[<p>問題文<br/>
-<a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0561">http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0561</a></p>
-
-<!-- more -->
-
-
-<p>割とすぐにDPだろうと思ったけど，どう遷移していいか分からない分からないとずっと悩んでいた．試しに値段，(ジャンルの個数，値段)の貪欲をして<strong>WA</strong>を連発した</p>
-
-<hr />
-
-<p><script type="math/tex; mode=display">
-\begin{eqnarray}
-    d[i][j] &amp;:=&amp; i番目のジャンルの本をj冊選んだ時のコスト \
-    dp[i][j] &amp;:=&amp; i番目以降のジャンルからj冊以下の時の最大コスト
-\end{eqnarray}
-</script></p>
-
-<p>とした．5冊まで同じジャンルを売った時にプラスされる値段を見ると
-<script type="math/tex; mode=display">
-\begin{eqnarray}
-    1冊 &amp;\to&amp; 0 \
-    2冊 &amp;\to&amp; 1 + 1  = 2\
-    3冊 &amp;\to&amp; 2 + 2 + 2 = 6 \
-    4冊 &amp;\to&amp; 3 + 3 + 3 + 3 = 12\
-    5冊 &amp;\to&amp; 4 + 4 + 4 + 4 + 4 = 20
-\end{eqnarray}
-</script></p>
-
-<p>となるので同じジャンルを売った時にプラスされる値段は，冊数を<script type="math/tex">i</script>とすると，<script type="math/tex">i-1</script>増えるのがされるのが<script type="math/tex">1</script>個，<script type="math/tex">1</script>増えるのが<script type="math/tex">i-1</script>個あるので<script type="math/tex">(i-1)*2</script>となる．<br/>
-また<script type="math/tex"> j </script>冊選んだ時のコストは大きい順に取ればそれが最大となるので事前にソートしておくことで<script type="math/tex"> d </script>が求まる．<br/>
-これが求まると，冊数を重さと見ると，<script type="math/tex">K</script>冊を超えないナップサックになる．</p>
-
-<p>青を遷移先とする．普通のナップサック?(蟻本p.52)はその品物を使わない遷移と使う遷移の2種類がある<br/>
-<img src="/images/AOJ/0561-1.png"></p>
-
-<p>今回の場合は，そのジャンルの本数文，遷移があるので下図のような状況になる．<br/>
-<img src="/images/AOJ/0561-2.png"></p>
-
-<p>この遷移のmaxを取れば<script type="math/tex"> dp[i][j]が求まるので最終的に dp[ジャンル数][K冊]</script>が答えとなった．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-ll d[15][2005], dp[15][2005];
-
-int main() {
-    int n, K;
-    cin &gt;&gt; n &gt;&gt; K;
-
-    vector&lt;int&gt; id, v[2005];
-
-    rep(i, n) {
-        int a, b;
-        cin &gt;&gt; a &gt;&gt; b;
-
-        id.push_back(b-1);
-        v[b-1].push_back(a);
-    }
-
-    sort(id.begin(), id.end());
-    id.erase(unique(id.begin(),id.end()),id.end());
-
-    rep(i, id.size()) {
-        int j = id[i];
-        sort(v[j].begin(), v[j].end(), greater&lt;int&gt;() );
-    }
-
-    memset(d, 0, sizeof(d));
-
-    rep(i, id.size()) {
-        int j = id[i];
-
-        REP(k, 1, v[j].size()+1) {
-            d[j][k] += d[j][k-1] + v[j][k-1] + (k-1) * 2;
-        }
-    }
-
-    memset(dp, 0, sizeof(dp));
-
-    rep(i, id.size()) {
-        rep(j, K + 1) {
-            ll res = dp[i][j];
-            rep(k, v[id[i]].size() + 1) {
-                if(j &gt;= k) {
-                    res = max(res, dp[i][j - k] + d[id[i]][k]);
-                }
-            }
-
-            dp[i+1][j] = res;
-        }
-    }
-
-    cout &lt;&lt; dp[ id.size()][K] &lt;&lt; endl;
 
     return 0;
 }
