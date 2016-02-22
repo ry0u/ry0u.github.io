@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 動的計画法 | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/dong-de-ji-hua-fa/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-02-20T00:56:15+09:00</updated>
+  <updated>2016-02-22T23:04:07+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,92 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ0579 Hot days]]></title>
+    <link href="http://ry0u.github.io/blog/2016/02/22/aoj0579-hot-days/"/>
+    <updated>2016-02-22T22:24:12+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/02/22/aoj0579-hot-days</id>
+    <content type="html"><![CDATA[<p>問題文<br/>
+<a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0579">http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0579</a></p>
+
+<!-- more -->
+
+
+<p><script type="math/tex; mode=display">
+    dp[i][j] := i日目に服jを着た時の最大値 \
+</script>
+として，最大化したい値は</p>
+
+<p><script type="math/tex; mode=display">
+    |C<em>{x_1} - C</em>{x_2}| + |C<em>{x_2} - C</em>{x_3}| + \cdots +  |C<em>{x</em>{D-1}} - C_{x_D}|
+</script></p>
+
+<p>なので，<script type="math/tex"> 1日目に切れる服には0を入れておき， i-1日目からi日目に遷移する．(2 \leq i \leq D)</script><br/>
+遷移可能(<script type="math/tex">i</script>日目の最高気温によって服が着れるか着れないか)な場合，<script type="math/tex">i-1</script>日目に何を着ていた場合が値が最大になるかを選ぶ．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int main() {
+    int d, n;
+    cin &gt;&gt; d &gt;&gt; n;
+
+    vector&lt;int&gt; t(d);
+    rep(i, d) cin &gt;&gt; t[i];
+
+    vector&lt;int&gt; a(n), b(n), c(n);
+    rep(i, n) cin &gt;&gt; a[i] &gt;&gt; b[i] &gt;&gt; c[i];
+
+    int dp[205][205];
+    rep(i, 205) rep(j, 205) dp[i][j] = -1;
+
+    rep(i, n) {
+        if(a[i] &lt;= t[0] &amp;&amp; t[0] &lt;= b[i]) dp[0][i] = 0;
+    }
+
+    REP(i, 1, d) {
+        rep(j, n) {
+            if(a[j] &lt;= t[i] &amp;&amp; t[i] &lt;= b[j]) {
+                rep(k, n) {
+                    if(dp[i-1][k] == -1) continue;
+                    dp[i][j] = max(dp[i][j], dp[i-1][k] + abs(c[k] - c[j]));
+                }
+            }
+        }
+    }
+
+    int ans = 0;
+    rep(i, n) {
+        ans = max(ans, dp[d-1][i]);
+    }
+
+    cout &lt;&lt; ans &lt;&lt; endl;
+
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[AOJ0573 Night Market]]></title>
@@ -461,132 +547,6 @@ int main() {
         if(h == 2 || w == 2) cout &lt;&lt; 2 &lt;&lt; endl;
         else cout &lt;&lt; (dp[h-1][w-1] + dp[h-2][w-3]) % MOD &lt;&lt; endl;
     }
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[AOJ0541 Walk]]></title>
-    <link href="http://ry0u.github.io/blog/2016/02/10/aoj0541-walk/"/>
-    <updated>2016-02-10T20:37:51+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/02/10/aoj0541-walk</id>
-    <content type="html"><![CDATA[<p>問題文<br/>
-<a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0541">http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0541</a></p>
-
-<!-- more -->
-
-
-<p>その交差点を何回通ったかが分かれば，その偶奇でどちらに進むかが分かる．<br/>
-例えば現在いる場所を赤として，次に向かう場所を青，さらにをそこに通る回数を5とする．</p>
-
-<p><strong>東</strong>
-<img src="/images/AOJ/0541-1.png">
-<strong>南</strong>
-<img src="/images/AOJ/0541-2.png"></p>
-
-<p>東の場合は，東に3回行き，南に2回行く．<br/>
-南の場合は，東に2回行き，南に3回行く．<br/>
-通る回数が偶数の場合はどちらに行く回数も同じである．<br/>
-よって初期地点<script type="math/tex"> (1, 1)にN として，</script>
-<script type="math/tex">(i, j)が東なら</script>
-<script type="math/tex; mode=display">
-\begin{eqnarray}
-    dp[i+1][j] &amp;=&amp; dp[i][j]/2 \
-    dp[i][j+1] &amp;=&amp; dp[i][j] - dp[i][j]/2
-\end{eqnarray}
-</script></p>
-
-<p><script type="math/tex"> (i, j)が南なら </script>
-<script type="math/tex; mode=display">
-\begin{eqnarray}
-    dp[i+1][j] &amp;=&amp; dp[i][j] - dp[i][j]/2 \
-    dp[i][j+1] &amp;=&amp; dp[i][j]/2
-\end{eqnarray}
-</script></p>
-
-<p>これで通った回数が分かったので，<script type="math/tex">(1, 1)から始めてW+1またはH+1</script>に出るまで進む．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-int h, w, n;
-int dp[1005][1005];
-
-int main() {
-    while(cin &gt;&gt; h &gt;&gt; w &gt;&gt; n) {
-        if(h == 0 &amp;&amp; w == 0 &amp;&amp; n == 0) break;
-
-        vector&lt; vector&lt;int&gt; &gt; v(h, vector&lt;int&gt;(w));
-        rep(i, h) {
-            rep(j, w) {
-                cin &gt;&gt; v[i][j];
-            }
-        }
-
-        memset(dp, 0, sizeof(dp));
-        dp[0][0] = n;
-
-        rep(i, h) {
-            rep(j, w) {
-                int s = dp[i][j] / 2;
-                int t = dp[i][j] - s;
-
-                if(v[i][j] % 2 == 1) {
-                    dp[i][j+1] += t;
-                    dp[i+1][j] += s;
-                } else {
-                    dp[i+1][j] += t;
-                    dp[i][j+1] += s;
-                }
-            }
-        }
-
-        int y = 0, x = 0;
-        while(y != h &amp;&amp; x != w) {
-            if(v[y][x] == 1) {
-                if(dp[y][x] % 2 == 1) {
-                    x++;
-                } else {
-                    y++;
-                }
-            } else {
-                if(dp[y][x] % 2 == 1) {
-                    y++;
-                } else {
-                    x++;
-                }
-            }
-        }
-
-        cout &lt;&lt; y + 1 &lt;&lt; " " &lt;&lt; x + 1 &lt;&lt; endl;
-        // rep(i, h) {
-        //  rep(j, w) {
-        //      cout &lt;&lt; dp[i][j] &lt;&lt; " ";
-        //  }
-        //  cout &lt;&lt; endl;
-        // }
-    }
-
     return 0;
 }
 </code></pre>
