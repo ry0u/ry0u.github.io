@@ -4,7 +4,7 @@
   <title><![CDATA[Category: aoj | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/aoj/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-02-22T23:04:07+09:00</updated>
+  <updated>2016-02-23T00:18:25+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,123 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ0580 Fish]]></title>
+    <link href="http://ry0u.github.io/blog/2016/02/23/aoj0580-fish/"/>
+    <updated>2016-02-23T00:00:36+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/02/23/aoj0580-fish</id>
+    <content type="html"><![CDATA[<p>問題文<br/>
+<a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0580">http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0580</a></p>
+
+<!-- more -->
+
+
+<p>魚の種類<script type="math/tex"> Nが最大で50 </script>なので，座標圧縮すると，3重ループがかける．<br/>
+座標圧縮は<br/>
+<a href="http://algoogle.hadrori.jp/algorithm/compress.html">http://algoogle.hadrori.jp/algorithm/compress.html</a><br/>
+が非常に分かりやすかった（蟻本の問題みたいに前後+1，-1した場所まで取っておく置く必要なし）．</p>
+
+<p>座圧後の<script type="math/tex"> i, j, k </script>の座圧前の体積は
+<script type="math/tex; mode=display">
+    (\mbox{xunzip}[i+1] - \mbox{xunzip}[i]) \cdot (\mbox{yunzip}[j+1] - \mbox{yunzip}[j]) \cdot (\mbox{zunzip}[k+1] - \mbox{zunzip}[k])
+</script>
+で求められる．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+#include &lt;cmath&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+#define EPS 1e-8
+#define equals(a,b) fabs((a) - (b)) &lt; EPS
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int compress(vector&lt;int&gt;&amp; v, map&lt;int, int&gt;&amp; zip, map&lt;int, int&gt;&amp; unzip) {
+    sort(v.begin(), v.end());
+    v.erase(unique(v.begin(),v.end()),v.end());
+
+    rep(i, v.size()) {
+        zip[v[i]] = i;
+        unzip[i] = v[i];
+    }
+
+    return v.size();
+}
+
+int d[55 * 3][55 * 3][55 * 5];
+
+int main() {
+    int n, K;
+    cin &gt;&gt; n &gt;&gt; K;
+
+    vector&lt;int&gt; x, y, z;
+    vector&lt;int&gt; x1(n), y1(n), z1(n), x2(n), y2(n), z2(n);
+
+    rep(i, n) {
+        cin &gt;&gt; x1[i] &gt;&gt; y1[i] &gt;&gt; z1[i] &gt;&gt; x2[i] &gt;&gt; y2[i] &gt;&gt; z2[i];
+        x.push_back(x1[i]);
+        x.push_back(x2[i]);
+
+        y.push_back(y1[i]);
+        y.push_back(y2[i]);
+
+        z.push_back(z1[i]);
+        z.push_back(z2[i]);
+    }
+
+    map&lt;int, int&gt; xzip, yzip, zzip;
+    map&lt;int, int&gt; xunzip, yunzip, zunzip;
+
+    int X = compress(x, xzip, xunzip);
+    int Y = compress(y, yzip, yunzip);
+    int Z = compress(z, zzip, zunzip);
+
+    memset(d, 0, sizeof(d));
+
+    rep(i, n) {
+        REP(j, xzip[x1[i]], xzip[x2[i]]) {
+            REP(k, yzip[y1[i]], yzip[y2[i]]) {
+                REP(l, zzip[z1[i]], zzip[z2[i]]) {
+                    d[j][k][l]++;
+                }
+            }
+        }
+    }
+
+    ll ans = 0;
+    rep(i, X) {
+        rep(j, Y) {
+            rep(k, Z) {
+                if(d[i][j][k] &gt;= K) {
+                    ans += ll(xunzip[i+1] - xunzip[i]) * ll(yunzip[j+1] - yunzip[j]) * ll(zunzip[k+1] - zunzip[k]);
+                }
+            }
+        }
+    }
+
+    cout &lt;&lt; ans &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[AOJ0579 Hot days]]></title>
@@ -353,108 +470,6 @@ int main() {
             if(s == t) t++;
         }
 
-    }
-
-    cout &lt;&lt; ans &lt;&lt; endl;
-
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[AOJ0569 Illumination]]></title>
-    <link href="http://ry0u.github.io/blog/2016/02/16/aoj0569-illumination/"/>
-    <updated>2016-02-16T22:49:54+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/02/16/aoj0569-illumination</id>
-    <content type="html"><![CDATA[<p>問題文<br/>
-<a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0569">http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0569</a></p>
-
-<!-- more -->
-
-
-<p>六角座標の問題．yが偶奇でdy, dxを変えれば良い．<br/>
-全てがイルミネーションの場合もあるので，まず全体を1マス余分にとる．<br/>
-外の部分は，必ず<script type="math/tex"> (0, 0) から0で繋がっているはずなので，探索中に回りにある1の数を</script>数えれたらACした．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-#include &lt;queue&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-int w, h;
-int dy[6] = {-1, 0,+1,+1, 0,-1};
-int dx[6] = { 0,-1, 0,+1,+1,+1};
-
-int dy2[6] = {-1, 0,+1,+1, 0,-1};
-int dx2[6] = {-1,-1,-1, 0,+1, 0};
-
-bool can(int y,int x) {
-    if(0 &lt;= y &amp;&amp; y &lt; h + 2 &amp;&amp; 0 &lt;= x &amp;&amp; x &lt; w + 2) return true;
-    return false;
-}
-
-int main() {
-    cin &gt;&gt; w &gt;&gt; h;
-
-    vector&lt; vector&lt;int&gt; &gt; v(h + 2, vector&lt;int&gt;(w + 2));
-    rep(i, h) {
-        rep(j, w) cin &gt;&gt; v[i+1][j+1];
-    }
-
-    int sy = 0, sx = 0;
-
-    queue&lt;P&gt; que;
-    que.push(mp(sy, sx));
-
-    bool used[105][105];
-    memset(used, 0, sizeof(used));
-    used[sy][sx] = true;
-
-    int ans = 0;
-
-    while(que.size()) {
-        P p = que.front();
-        que.pop();
-
-        rep(i, 6) {
-            int y, x;
-
-            if(p.first % 2 == 0) {
-                y = p.first + dy2[i];
-                x = p.second + dx2[i];
-            } else {
-                y = p.first + dy[i];
-                x = p.second + dx[i];
-            }
-
-            if(can(y, x)) {
-                if(v[y][x] == 1) {
-                    ans++;
-                } else if(!used[y][x]) {
-                    used[y][x] = true;
-                    que.push(mp(y, x));
-                }
-            }
-        }
     }
 
     cout &lt;&lt; ans &lt;&lt; endl;
