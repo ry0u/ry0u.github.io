@@ -4,7 +4,7 @@
   <title><![CDATA[Category: codeforces | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/codeforces/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-02-23T00:18:25+09:00</updated>
+  <updated>2016-02-29T01:08:53+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -126,6 +126,86 @@ int main() {
 </code></pre>
 
 <p>選んだ辺のコストを超えないようにするということは，まず１つの辺を選んだ時に，それより小さい辺を見なければいけなかったが，大きい方の辺をずらしていくという意味の分からないことをしていてWAを連発した．</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Codeforces334-div2C Alternative Thinking]]></title>
+    <link href="http://ry0u.github.io/blog/2015/12/15/codeforces334-div2c-alternative-thinking/"/>
+    <updated>2015-12-15T09:50:00+09:00</updated>
+    <id>http://ry0u.github.io/blog/2015/12/15/codeforces334-div2c-alternative-thinking</id>
+    <content type="html"><![CDATA[<p>長さ<script type="math/tex">N</script>の'0'と'1'で構成された文字列が与えられる．ある区間を1度だけ反転して'0'と'1'が交互となる列の長さを最大化する．</p>
+
+<h1>考察</h1>
+
+<p>まず，文字列の交互列の長さを<script type="math/tex"> m </script>とすると，一度の反転で最大2しか増えないことが分かる．例えば，
+<script type="math/tex; mode=display">
+    1111(m = 1) \Rightarrow 11\color{red}01(m = 3) \
+    1101(m = 3) \Rightarrow \color{red}0101(m = 4) \
+    1100(m = 2) \Rightarrow 1\color{red}0\color{red}10(m = 4) \
+</script>
+のように出来る．また，<script type="math/tex"> m = N </script>の時以外に，区間を反転して長さが増えないケースを考えると，そのようなケースは無いと分かる．反転する区間で01を内包している場合，反転後をその部分は10で交互列になるからである．
+<script type="math/tex; mode=display">
+11 0101 00(m = 4) \Rightarrow 1 \color{red}0 \color{red}1\color{red}0\color{red}1\color{red}0 \color{red}1 0(m = 6) \
+</script></p>
+
+<p>よって，<script type="math/tex">N</script>を超えないように，+1，+2したらACが貰えた</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int main() {
+    int n;
+    cin &gt;&gt; n;
+
+    string s;
+    cin &gt;&gt; s;
+
+    int cnt = 0;
+    bool flag = true;
+
+    if(s[0] == '1') cnt++;
+
+    rep(i, n) {
+        if(flag) {
+            if(s[i] == '1') continue;
+            else {
+                cnt++;
+                flag = false;
+            }
+        } else {
+            if(s[i] == '1') {
+                cnt++;
+                flag = true;
+            } else continue;
+        }
+    }
+
+    if(cnt + 2 &lt;= n) cout &lt;&lt; cnt + 2 &lt;&lt; endl;
+    else if(cnt + 1 &lt;= n) cout &lt;&lt; cnt + 1 &lt;&lt; endl;
+    else cout &lt;&lt; cnt &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
 ]]></content>
   </entry>
   
@@ -427,166 +507,6 @@ int main() {
     return 0;
 }
 </code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Codeforces322-div2B Luxurious Houses]]></title>
-    <link href="http://ry0u.github.io/blog/2015/09/30/codeforces322-div2b-luxurious-houses/"/>
-    <updated>2015-09-30T15:26:14+09:00</updated>
-    <id>http://ry0u.github.io/blog/2015/09/30/codeforces322-div2b-luxurious-houses</id>
-    <content type="html"><![CDATA[<p><a href="http://codeforces.com/contest/581/problem/B">http://codeforces.com/contest/581/problem/B</a></p>
-
-<p>建物の高さが与えられる．自分から見て，右側の建物より高くなるために必要な高さを答えよ．</p>
-
-<h1>考察</h1>
-
-<p>CodeFestival予選練習会で<br/>
-<a href="http://code-festival-2014-qualb.contest.atcoder.jp/tasks/code_festival_qualB_d">http://code-festival-2014-qualb.contest.atcoder.jp/tasks/code_festival_qualB_d</a><br/>
-を解いたばかりである．これはRMQだ，と思って実装した．<br/>
-しかし，そんなことをする必要は無く，右から見ていき，現在見た所までの最大の高さを持っているだけで出来た．この方法は思いつかなかった．</p>
-
-<h1>Code</h1>
-
-<p>RMQ</p>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-struct RMQ {
-    int n;
-    vector&lt;int&gt; dat;
-
-    RMQ(int n_) {
-        n = 1;
-        while(n &lt; n_) n *= 2;
-
-        dat.resize(n*4);
-        rep(i,n*4) dat[i] = -INF;
-    }
-
-    void update(int k,int a) {
-        int i = k+n-1;
-        dat[i] = a;
-
-        while(i &gt; 0) {
-            i = (i-1) / 2;
-            dat[i] = max(dat[i*2+1],dat[i*2+2]);
-        }
-    }
-
-    //[a,b)
-    //query(a,b,0,0,n)
-    int _query(int a,int b,int k,int l,int r)
-    {
-        if(r &lt;= a || b &lt;= l) return -INF;
-
-        if(a &lt;= l &amp;&amp; r &lt;= b) return dat[k];
-        else { 
-            int vl = _query(a,b,k*2+1,l,(l+r)/2);
-            int vr = _query(a,b,k*2+2,(l+r)/2,r);
-            return max(vl,vr);
-        }
-    }
-
-    //[a,b)
-    int query(int a,int b) {
-        return _query(a,b,0,0,n);
-    }
-
-};
-
-int main() {
-    int n;
-    cin &gt;&gt; n;
-
-    vector&lt;int&gt; v(n);
-    RMQ rmq(n);
-    rep(i,n) {
-        cin &gt;&gt; v[i];
-        rmq.update(i,v[i]);
-    }
-
-    rep(i,n) {
-        int d = rmq.query(i,n+1);
-        int d2 = rmq.query(i+1,n+1);
-
-        if(d == v[i] &amp;&amp; v[i] != d2) cout &lt;&lt; 0;
-        else cout &lt;&lt; d+1 - v[i];
-
-        if(i == n-1) cout &lt;&lt; endl;
-        else cout &lt;&lt; " ";
-    }
-
-    return 0;
-}
-</code></pre>
-
-<p>右から見て行く．</p>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-int main() {
-    int n;
-    cin &gt;&gt; n;
-
-    vector&lt;int&gt; v(n);
-    rep(i,n) cin &gt;&gt; v[i];
-
-    int vmax = 0;
-    vector&lt;int&gt; ans(n);
-    for(int i=n-1; i&gt;=0; i--) {
-        if(vmax &lt; v[i]) ans[i] = 0;
-        else ans[i] = vmax+1 - v[i];
-
-        vmax = max(vmax,v[i]);
-    }
-
-    rep(i,n) {
-        cout &lt;&lt; ans[i];
-
-        if(i ==n -1) cout &lt;&lt; endl;
-        else cout &lt;&lt; " ";
-    }
-
-    return 0;
-}
-</code></pre>
-
-<p>実装量がかなり違うので，出来るだけ実装が軽い方法を思いつけるようになりたい．</p>
 ]]></content>
   </entry>
   
