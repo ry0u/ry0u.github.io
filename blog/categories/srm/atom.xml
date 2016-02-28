@@ -4,7 +4,7 @@
   <title><![CDATA[Category: srm | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/srm/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-02-29T01:08:53+09:00</updated>
+  <updated>2016-02-29T01:42:13+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,89 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[SRM682 D2H FriendlyRobot]]></title>
+    <link href="http://ry0u.github.io/blog/2016/02/29/srm682-d2h-friendlyrobot/"/>
+    <updated>2016-02-29T01:13:10+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/02/29/srm682-d2h-friendlyrobot</id>
+    <content type="html"><![CDATA[<p>文字列<script type="math/tex"> U,D,R,L </script>の命令で動くロボットがある．この文字列を<script type="math/tex"> K </script>回書き換えられることが出来るときに，最大で何回<script type="math/tex">(0,0)</script>を通ることが出来るか．</p>
+
+<!-- more -->
+
+
+<hr />
+
+<p>移動回数が奇数回の時に<script type="math/tex"> (0,0) </script>に戻ることは出来ない．また偶数回の場合でも横方向，縦方向の移動量が共に偶数回，共に奇数回の場合のみ戻ることが出来る．<br/>
+また，<script type="math/tex"> +を-に，-を+</script>に変えることで<script type="math/tex"> 2 </script>移動量が変わる．<br/>
+そして，戻るために命令を書き換えなければならない回数も以下のように一意に求まる．
+<script type="math/tex; mode=display">
+\begin{eqnarray}
+    共に偶数回 &amp;:=&amp;  \frac{横方向}{2} + \frac{縦方向}{2} \
+    共に奇数回 &amp;:=&amp;  \frac{横方向}{2} + \frac{縦方向}{2} + 1\
+\end{eqnarray}
+</script>
+共に奇数回の場合に<script type="math/tex"> +1 </script>されるのは，例えば命令が<script type="math/tex"> UR </script>の場合に<script type="math/tex"> UD </script>に書き換えることで<script type="math/tex"> (0, 0) </script>に戻れるためである．</p>
+
+<p>これより
+<script type="math/tex; mode=display">
+    dp[i][j] := i番目までの命令列をj回変更した時の(0, 0)を訪れる最大値
+</script>
+として，総当りしてmaxを取った．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">    public:
+    int findMaximumReturns(string s, int K) {
+
+        vector&lt;int&gt; X(s.size() + 1), Y(s.size() + 1);
+        int x = 0, y = 0;
+        rep(i, s.size()) {
+            if(s[i] == 'U') y++;
+            if(s[i] == 'D') y--;
+            if(s[i] == 'R') x++;
+            if(s[i] == 'L') x--;
+
+            X[i+1] = x; Y[i+1] = y;
+        }
+
+        rep(i, s.size() + 1) {
+            rep(j, K + 1) {
+                dp[i][j] = -1;
+            }
+        }
+        dp[0][0] = 0;
+
+        rep(i, s.size() + 1) {
+            rep(j, K + 1) {
+                if(dp[i][j] == -1) continue;
+                for(int k = i + 2; k &lt; s.size() + 1; k += 2) {
+                    int s = abs(X[k] - X[i]), t = abs(Y[k] - Y[i]);
+                    int res = 0;
+
+                    if(s % 2 == 0 &amp;&amp; t % 2 == 1) continue;
+                    if(s % 2 == 1 &amp;&amp; t % 2 == 0) continue;
+                    if(s % 2 == 0 &amp;&amp; t % 2 == 0) res = s / 2 + t / 2;
+                    if(s % 2 == 1 &amp;&amp; t % 2 == 1) res = s / 2 + t / 2 + 1;
+
+                    if(j + res &gt; K) continue;
+                    dp[k][j + res] = max(dp[k][j + res], dp[i][j] + 1);
+                }
+            }
+        }
+
+        ll ans = 0;
+        rep(i, s.size() + 1) {
+            rep(j, K + 1) {
+                ans = max(ans, dp[i][j]);
+            }
+        }
+
+        return ans;
+    }
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[SRM682 D2M TopBiologist]]></title>
@@ -303,157 +386,6 @@ class FoxPlayingGame {
 </code></pre>
 
 <p>SystemTestに落ちまくり．特にscoreAが負，scoreBが負の時に，一度だけscoreBを掛ければよかったが，ここでnBが0の時の処理を加えればいいことに全く気づけなかった．</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[SRM500 D2H GeometricProgressions]]></title>
-    <link href="http://ry0u.github.io/blog/2015/07/14/srm500-geometricprogressions/"/>
-    <updated>2015-07-14T14:45:12+09:00</updated>
-    <id>http://ry0u.github.io/blog/2015/07/14/srm500-geometricprogressions</id>
-    <content type="html"><![CDATA[<p>2つの等比数列が与えられる．この中で異なる数の個数を求める</p>
-
-<h1>考察</h1>
-
-<p>愚直に計算するとオーバーフローする．ここで素因数分解を考える．いつも素因数分解というと
-<script type="math/tex; mode=display">
-S = p<em>{1} p</em>{2} &hellip; p<em>{r}
-</script>
-としていたが，(このままではやったらTLEになるので)
-<script type="math/tex; mode=display">
-S = p</em>{1}^{e<em>{1}} p</em>{2}^{e<em>{2}} &hellip; p</em>{r}^{e_{r}}
-</script>
-とした．</p>
-
-<p>素因数分解は必ず一意に定まるので数が等しければ素因数分解も等しい．後はこれをmapに突っ込んでsizeを取った．<br/>
-SystemTest落ちまくり．以下の事を全く頭に入れていなかった．<br/>
-- 初項が0なら必ず0<br/>
-- 公比が1の場合は，必ず初項<br/>
-- 初項が0でなく公比が0の場合は，n == 1ならば0<sup>0</sup> = 1より初項だけ，n != 1ならば初項と0になる．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;string&gt;
-#include &lt;vector&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;cstring&gt;
-#include &lt;queue&gt;
-#include &lt;set&gt;
-#include &lt;map&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-
-using namespace std;
-typedef long long ll;
-
-vector&lt;int&gt; func(int n) {
-    vector&lt;int&gt; ret;
-    if(n == 0 || n == 1) {
-        ret.push_back(n);
-        return ret;
-    }
-
-    int a = 2;
-    while(n &gt;= a*a) {
-        if(n%a == 0) {
-            n /= a;
-            ret.push_back(a);
-        }
-        else {
-            a++;
-        }
-    }
-
-    if(n &gt; 1) ret.push_back(n);
-
-    return ret;
-}
-
-class GeometricProgressions {
-    public:
-    int count(int b1, int q1, int n1, int b2, int q2, int n2) {
-        map&lt;vector&lt;pair&lt;int,int&gt; &gt;,int&gt; m;
-
-        vector&lt;int&gt; B1 = func(b1);
-        vector&lt;int&gt; Q1 = func(q1);
-        vector&lt;int&gt; B2 = func(b2);
-        vector&lt;int&gt; Q2 = func(q2);
-
-        map&lt;int,int&gt; cnt;
-        rep(i,B1.size()) {
-            cnt[B1[i]]++;
-        }
-
-        vector&lt;pair&lt;int,int&gt; &gt; v;
-        map&lt;int,int&gt;::iterator ite;
-        for(ite = cnt.begin();ite != cnt.end();ite++) {
-            v.push_back(make_pair(ite-&gt;first,ite-&gt;second));
-        }
-
-        m[v]++;
-
-        if(q1 == 0) {
-            if(b1 != 0 &amp;&amp; n1 != 1) {
-                vector&lt;pair&lt;int,int&gt; &gt; res;
-                res.push_back(make_pair(0,1));
-                m[res]++;
-            }
-        }
-        else if(b1 != 0 &amp;&amp; q1 != 1) {
-            rep(i,n1-1) {
-                rep(j,Q1.size()) cnt[Q1[j]]++;
-
-                vector&lt;pair&lt;int,int&gt; &gt; res;
-                map&lt;int,int&gt;::iterator ite;
-                for(ite = cnt.begin();ite != cnt.end();ite++) {
-                    res.push_back(make_pair(ite-&gt;first,ite-&gt;second));
-                }
-                m[res]++;
-            }
-        }
-
-        map&lt;int,int&gt; cnt2;
-        rep(i,B2.size()) {
-            cnt2[B2[i]]++;
-        }
-
-        vector&lt;pair&lt;int,int&gt; &gt; v2;
-        for(ite = cnt2.begin();ite != cnt2.end();ite++) {
-            v2.push_back(make_pair(ite-&gt;first,ite-&gt;second));
-        }
-
-        m[v2]++;
-
-        if(q2 == 0) {
-            if(b2 != 0 &amp;&amp; n2 != 1) {
-                vector&lt;pair&lt;int,int&gt; &gt; res;
-                res.push_back(make_pair(0,1));
-                m[res]++;
-            }
-        }
-        else if(b2 != 0 &amp;&amp; q2 != 1) {
-            rep(i,n2-1) {
-                rep(j,Q2.size()) cnt2[Q2[j]]++;
-
-                vector&lt;pair&lt;int,int&gt; &gt; res;
-                map&lt;int,int&gt;::iterator ite;
-                for(ite = cnt2.begin();ite != cnt2.end();ite++) {
-                    res.push_back(make_pair(ite-&gt;first,ite-&gt;second));
-                }
-
-                m[res]++;
-            }
-        }
-
-        return m.size();
-    }
-};
-</code></pre>
-
-<p>場合分けの書き方がやばい．もっとシンプルに書けるようになりたい．</p>
 ]]></content>
   </entry>
   

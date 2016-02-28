@@ -4,7 +4,7 @@
   <title><![CDATA[Category: topcoder | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/topcoder/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-02-29T01:08:53+09:00</updated>
+  <updated>2016-02-29T01:42:13+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,89 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[SRM682 D2H FriendlyRobot]]></title>
+    <link href="http://ry0u.github.io/blog/2016/02/29/srm682-d2h-friendlyrobot/"/>
+    <updated>2016-02-29T01:13:10+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/02/29/srm682-d2h-friendlyrobot</id>
+    <content type="html"><![CDATA[<p>文字列<script type="math/tex"> U,D,R,L </script>の命令で動くロボットがある．この文字列を<script type="math/tex"> K </script>回書き換えられることが出来るときに，最大で何回<script type="math/tex">(0,0)</script>を通ることが出来るか．</p>
+
+<!-- more -->
+
+
+<hr />
+
+<p>移動回数が奇数回の時に<script type="math/tex"> (0,0) </script>に戻ることは出来ない．また偶数回の場合でも横方向，縦方向の移動量が共に偶数回，共に奇数回の場合のみ戻ることが出来る．<br/>
+また，<script type="math/tex"> +を-に，-を+</script>に変えることで<script type="math/tex"> 2 </script>移動量が変わる．<br/>
+そして，戻るために命令を書き換えなければならない回数も以下のように一意に求まる．
+<script type="math/tex; mode=display">
+\begin{eqnarray}
+    共に偶数回 &amp;:=&amp;  \frac{横方向}{2} + \frac{縦方向}{2} \
+    共に奇数回 &amp;:=&amp;  \frac{横方向}{2} + \frac{縦方向}{2} + 1\
+\end{eqnarray}
+</script>
+共に奇数回の場合に<script type="math/tex"> +1 </script>されるのは，例えば命令が<script type="math/tex"> UR </script>の場合に<script type="math/tex"> UD </script>に書き換えることで<script type="math/tex"> (0, 0) </script>に戻れるためである．</p>
+
+<p>これより
+<script type="math/tex; mode=display">
+    dp[i][j] := i番目までの命令列をj回変更した時の(0, 0)を訪れる最大値
+</script>
+として，総当りしてmaxを取った．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">    public:
+    int findMaximumReturns(string s, int K) {
+
+        vector&lt;int&gt; X(s.size() + 1), Y(s.size() + 1);
+        int x = 0, y = 0;
+        rep(i, s.size()) {
+            if(s[i] == 'U') y++;
+            if(s[i] == 'D') y--;
+            if(s[i] == 'R') x++;
+            if(s[i] == 'L') x--;
+
+            X[i+1] = x; Y[i+1] = y;
+        }
+
+        rep(i, s.size() + 1) {
+            rep(j, K + 1) {
+                dp[i][j] = -1;
+            }
+        }
+        dp[0][0] = 0;
+
+        rep(i, s.size() + 1) {
+            rep(j, K + 1) {
+                if(dp[i][j] == -1) continue;
+                for(int k = i + 2; k &lt; s.size() + 1; k += 2) {
+                    int s = abs(X[k] - X[i]), t = abs(Y[k] - Y[i]);
+                    int res = 0;
+
+                    if(s % 2 == 0 &amp;&amp; t % 2 == 1) continue;
+                    if(s % 2 == 1 &amp;&amp; t % 2 == 0) continue;
+                    if(s % 2 == 0 &amp;&amp; t % 2 == 0) res = s / 2 + t / 2;
+                    if(s % 2 == 1 &amp;&amp; t % 2 == 1) res = s / 2 + t / 2 + 1;
+
+                    if(j + res &gt; K) continue;
+                    dp[k][j + res] = max(dp[k][j + res], dp[i][j] + 1);
+                }
+            }
+        }
+
+        ll ans = 0;
+        rep(i, s.size() + 1) {
+            rep(j, K + 1) {
+                ans = max(ans, dp[i][j]);
+            }
+        }
+
+        return ans;
+    }
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[SRM682 D2M TopBiologist]]></title>
@@ -240,104 +323,6 @@ class TheLotteryBothDivs {
     }
 };
 </code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[SRM501 FoxPlayingGame]]></title>
-    <link href="http://ry0u.github.io/blog/2015/07/16/srm501-foxplayinggame/"/>
-    <updated>2015-07-16T02:56:16+09:00</updated>
-    <id>http://ry0u.github.io/blog/2015/07/16/srm501-foxplayinggame</id>
-    <content type="html"><![CDATA[<p>scoreAをnA回足す，scoreBをnB回掛ける．この操作による最大値を求める．また</p>
-
-<p><script type="math/tex; mode=display">
-scoreA = paramA / 1000.0 \
-scoreB = paramB / 1000.0
-</script></p>
-
-<p>として与えられる．</p>
-
-<h1>考察</h1>
-
-<p>掛ける場合は最初の0の状態に掛けることができるので，回数を調整できるが，足す場合はそのようなことができない．よって，まずscoreAをnA回足す．また，この値が+か-かによって場合分けをする</p>
-
-<hr />
-
-<ul>
-<li>+の場合かつscoreBが1以上の場合は，全て掛ける．</li>
-<li>+の場合かつscoreBが-1以下の場合は，(scoreB)<sup>2</sup>は正なので偶数回掛けるのが最大</li>
-<li>+の場合かつscoreBがそれ以外の場合は，減少するため，最初の0に掛けて消す</li>
-</ul>
-
-
-<hr />
-
-<ul>
-<li>-の場合かつscoreBが1以上の場合は，負の値が増加してしまうので掛けない</li>
-<li>-の場合かつscoreBが-1以下の場合は，奇数回掛けることによって値を正にすることができる</li>
-<li>-の場合かつscoreBが0より大きく1以下の場合は，負の値を小さくすることができるので全部掛ける</li>
-<li>-の場合かつscoreBが-1以上0より小さい場合は，一度だけ掛けて値を正することが最大</li>
-</ul>
-
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;sstream&gt;
-#include &lt;algorithm&gt;
-#include &lt;set&gt;
-#include &lt;map&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-
-using namespace std;
-typedef long long ll;
-
-class FoxPlayingGame {
-    public:
-    double theMax(int nA, int nB, int paramA, int paramB) {
-        double A = paramA / 1000.0;
-        double B = paramB / 1000.0;
-
-        double res = nA * A;
-        if(res &gt; 0) {
-            if(B &lt;= -1) {
-                nB -= nB%2;
-                rep(i,nB) {
-                    res *= B;
-                }
-            }else if(B &gt;= 1) {
-                rep(i,nB) {
-                    res *= B;
-                }
-            }
-        }else {
-            if(0 &lt;= B &amp;&amp; B &lt; 1.0) {
-                rep(i,nB) {
-                    res *= B;
-                }
-            }
-            else if(-1.0 &lt; B &amp;&amp; B &lt; 0) {
-                if(nB != 0) res *= B;
-            }
-            else if(B &lt;= -1) {
-                if(nB%2 == 0) nB--;
-                rep(i,nB) {
-                    res *= B;
-                }
-            }
-        }
-
-        return res;
-
-    }
-};
-</code></pre>
-
-<p>SystemTestに落ちまくり．特にscoreAが負，scoreBが負の時に，一度だけscoreBを掛ければよかったが，ここでnBが0の時の処理を加えればいいことに全く気づけなかった．</p>
 ]]></content>
   </entry>
   
