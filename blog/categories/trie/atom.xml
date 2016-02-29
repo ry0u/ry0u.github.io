@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: trie | ry0u_ydのblog]]></title>
+  <link href="http://ry0u.github.io/blog/categories/trie/atom.xml" rel="self"/>
+  <link href="http://ry0u.github.io/"/>
+  <updated>2016-02-29T15:45:23+09:00</updated>
+  <id>http://ry0u.github.io/</id>
+  <author>
+    <name><![CDATA[ry0u_yd]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Manthan, Codefest 16C Spy Syndrome 2]]></title>
+    <link href="http://ry0u.github.io/blog/2016/02/29/manthan-codefest-16c-spy-syndrome-2/"/>
+    <updated>2016-02-29T15:32:14+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/02/29/manthan-codefest-16c-spy-syndrome-2</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544"><h4><a href="http://codeforces.com/contest/633/problem/C">Problem - C - Codeforces</a></h4><p>After observing the results of Spy Syndrome, Yash realised the errors of his ways. He now believes that a super spy such as Siddhant can't use a cipher as basic and ancient as Caesar cipher. After many weeks of observation of Siddhant's sentences, Yash determined a new cipher technique.</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>原文を全て小文字にしてreverseして，接合した文を復元する．<br/>
+まずTrie木を作って文字列が単語リストにあるかを判定出来るようにする．<br/>
+次に，
+<script type="math/tex; mode=display">
+    dp[i] := i番目の文字まで復元可能
+</script>
+とする．Trieのfind関数にその単語そのものがあればTrue, また現在のノードがendであり，その場所の<script type="math/tex"> dp[i] </script>をみて復元可能な時にTrueを返す．その文字列を<script type="math/tex"> S[i] </script>にとっておく．<br/>
+後は末尾から帰ってくれば原文の単語の逆順がわかるのでreverseする．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+string S[10005], ret = "", res = "";
+bool dp[10005];
+
+struct Trie {
+    Trie *next[26];
+    bool end;
+
+    Trie() {
+        fill(next,next+26,(Trie *)0);
+        end = false;
+    }
+
+    void insert(string &amp;s,int i) {
+        if(i == s.size()) {
+            this-&gt;end = true;
+            return;
+        }
+
+        if(this-&gt;next[s[i]-'a'] == NULL) {
+            this-&gt;next[s[i]-'a'] = new Trie();
+        }
+
+        this-&gt;next[s[i]-'a']-&gt;insert(s,i+1);
+    }
+
+    bool find(int s, int i) {
+        if(s - i &gt;= 0 &amp;&amp; dp[s - i] &amp;&amp; this-&gt;end) {
+            string t = "";
+            rep(j, i) {
+                t += ret[s-j];
+            }
+            res = t;
+            return true;
+        }
+
+        if((s + 1) - i == 0) {
+            if(this-&gt;end) {
+                string t = "";
+                rep(j, i) {
+                    t += ret[s-j];
+                }
+                res = t;
+                return true;
+            }
+            else return false;
+        }
+
+        if(this-&gt;next[ret[s-i]-'a'] != NULL) {
+            if(this-&gt;next[ret[s-i]-'a']-&gt;find(s, i+1)) return true;
+        }
+
+        return false;
+    }
+};
+
+
+int main() {
+    int n;
+    cin &gt;&gt; n;
+
+    string s;
+    cin &gt;&gt; s;
+
+    int m;
+    cin &gt;&gt; m;
+
+    vector&lt;string&gt; v(m);
+    map&lt;string, string&gt; f;
+    Trie *trie = new Trie();
+
+    rep(i, m) {
+        cin &gt;&gt; v[i];
+
+        string t = v[i];
+        rep(j, t.size()) {
+            t[j] = tolower(t[j]);
+        }
+
+        f[t] = v[i];
+        trie-&gt;insert(t, 0);
+    }
+
+    memset(dp, 0, sizeof(dp));
+
+    rep(i, n) {
+        ret = ret + s[i];
+
+        if(trie-&gt;find(i, 0)) {
+            S[i] = f[res];
+            dp[i] = true;
+        }
+    }
+
+    vector&lt;string&gt; ans;
+    int cur = n-1;
+    while(dp[cur]) {
+        string t = S[cur];
+        ans.push_back(t);
+        cur -= t.size();
+    }
+
+    reverse(ans.begin(), ans.end());
+
+    rep(i, ans.size()) {
+        cout &lt;&lt; ans[i];
+        if(i == ans.size()-1) cout &lt;&lt; endl;
+        else cout &lt;&lt; " ";
+    }
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+</feed>
