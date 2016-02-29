@@ -4,7 +4,7 @@
   <title><![CDATA[Category: codeforces | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/codeforces/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-02-29T15:45:23+09:00</updated>
+  <updated>2016-02-29T16:15:00+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,108 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Manthan, Codefest 16D Fibonacci-ish]]></title>
+    <link href="http://ry0u.github.io/blog/2016/02/29/manthan-codefest-16d-fibonacci-ish/"/>
+    <updated>2016-02-29T15:59:40+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/02/29/manthan-codefest-16d-fibonacci-ish</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0"><h4><a href="http://codeforces.com/contest/633/problem/D">Problem - D - Codeforces</a></h4><p>Yash has recently learnt about the Fibonacci sequence and is very excited about it. He calls a sequence Fibonacci-ish if You are given some sequence of integers . Your task is rearrange elements of this sequence in such a way that its longest possible prefix is Fibonacci-ish sequence.</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>やることは， <script type="math/tex"> f_0とf_1 </script>選び，シュミレーションする．本番中はpretest 3でTLEを出して，これじゃあ間に合わないと考えていたが，単純に<script type="math/tex"> 0 </script>を考慮していないためだった．<br/>
+最初に <script type="math/tex"> 0 </script>をはじいて，全て<script type="math/tex"> 0 </script>のみのパターンか最初に<script type="math/tex"> 0 </script>をつけるパターンのみでいいと思っていたが，途中で<script type="math/tex"> 0 </script>を経由するパターンも普通にあってそこに気づかなかった．<br/>
+またsetに突っ込んでその数があるかを確認していたけど，同じ数が出てくるパターンがあるので最初にどの数が何個あるかをmapで持たなければいけなかった．<br/>
+stackに積んでおけば後に続く項の個数が分かるので
+<script type="math/tex; mode=display">
+    memo[mp(a, b)] := (a, b)の時の後に続く項の個数
+</script>
+とかやるのかな思ったけど，(a, b)にいたるまでに使ってきた数が違えば後に続く項も違いダメだった．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+#include &lt;stack&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int main() {
+    int n;
+    cin &gt;&gt; n;
+
+    vector&lt;ll&gt; v(n);
+    map&lt;ll, int&gt; m;
+    set&lt;int&gt; st;
+
+    rep(i, n) {
+        cin &gt;&gt; v[i];
+        m[v[i]]++;
+        st.insert(v[i]);
+    }
+
+    int ans = m[0];
+    rep(i, n) {
+        rep(j, n) {
+            ll a = v[i], b = v[j], c;
+
+            if(i == j) continue;
+            if(a == 0 &amp;&amp; b == 0) continue;
+
+            m[a]--;
+            m[b]--;
+
+            stack&lt;ll&gt; S;
+            S.push(a);
+            S.push(b);
+
+            while(st.find(a + b) != st.end() &amp;&amp; m[a + b] &gt; 0) {
+                    c = a + b;
+                    a = b;
+                    b = c;
+
+                    m[c]--;
+                    S.push(c);
+            }
+
+            ans = max(ans, (int)S.size());
+
+            while(S.size()) {
+                m[S.top()]++;
+                S.pop();
+            }
+        }
+    }
+
+    cout &lt;&lt; ans &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Manthan, Codefest 16C Spy Syndrome 2]]></title>
@@ -442,86 +544,6 @@ int main() {
 </code></pre>
 
 <p>選んだ辺のコストを超えないようにするということは，まず１つの辺を選んだ時に，それより小さい辺を見なければいけなかったが，大きい方の辺をずらしていくという意味の分からないことをしていてWAを連発した．</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Codeforces334-div2C Alternative Thinking]]></title>
-    <link href="http://ry0u.github.io/blog/2015/12/15/codeforces334-div2c-alternative-thinking/"/>
-    <updated>2015-12-15T09:50:00+09:00</updated>
-    <id>http://ry0u.github.io/blog/2015/12/15/codeforces334-div2c-alternative-thinking</id>
-    <content type="html"><![CDATA[<p>長さ<script type="math/tex">N</script>の'0'と'1'で構成された文字列が与えられる．ある区間を1度だけ反転して'0'と'1'が交互となる列の長さを最大化する．</p>
-
-<h1>考察</h1>
-
-<p>まず，文字列の交互列の長さを<script type="math/tex"> m </script>とすると，一度の反転で最大2しか増えないことが分かる．例えば，
-<script type="math/tex; mode=display">
-    1111(m = 1) \Rightarrow 11\color{red}01(m = 3) \
-    1101(m = 3) \Rightarrow \color{red}0101(m = 4) \
-    1100(m = 2) \Rightarrow 1\color{red}0\color{red}10(m = 4) \
-</script>
-のように出来る．また，<script type="math/tex"> m = N </script>の時以外に，区間を反転して長さが増えないケースを考えると，そのようなケースは無いと分かる．反転する区間で01を内包している場合，反転後をその部分は10で交互列になるからである．
-<script type="math/tex; mode=display">
-11 0101 00(m = 4) \Rightarrow 1 \color{red}0 \color{red}1\color{red}0\color{red}1\color{red}0 \color{red}1 0(m = 6) \
-</script></p>
-
-<p>よって，<script type="math/tex">N</script>を超えないように，+1，+2したらACが貰えた</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-int main() {
-    int n;
-    cin &gt;&gt; n;
-
-    string s;
-    cin &gt;&gt; s;
-
-    int cnt = 0;
-    bool flag = true;
-
-    if(s[0] == '1') cnt++;
-
-    rep(i, n) {
-        if(flag) {
-            if(s[i] == '1') continue;
-            else {
-                cnt++;
-                flag = false;
-            }
-        } else {
-            if(s[i] == '1') {
-                cnt++;
-                flag = true;
-            } else continue;
-        }
-    }
-
-    if(cnt + 2 &lt;= n) cout &lt;&lt; cnt + 2 &lt;&lt; endl;
-    else if(cnt + 1 &lt;= n) cout &lt;&lt; cnt + 1 &lt;&lt; endl;
-    else cout &lt;&lt; cnt &lt;&lt; endl;
-
-    return 0;
-}
-</code></pre>
 ]]></content>
   </entry>
   
