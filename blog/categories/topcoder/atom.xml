@@ -4,7 +4,7 @@
   <title><![CDATA[Category: topcoder | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/topcoder/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-02-29T16:15:00+09:00</updated>
+  <updated>2016-03-03T23:57:46+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,68 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[SRM683 D2M MoveStonesEasy]]></title>
+    <link href="http://ry0u.github.io/blog/2016/03/03/srm683-d2m-movestoneseasy/"/>
+    <updated>2016-03-03T23:54:40+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/03/03/srm683-d2m-movestoneseasy</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-chrome="0" data-card-controls="0"><h4><a href="https://community.topcoder.com/stat?c=problem_statement&pm=14182&rd=16653">TopCoder Statistics - Problem Statement</a></h4><p>There are n piles of stones arranged in a line. The piles are numbered 0 through n-1, in order. In other words, for each valid i, piles i and i+1 are adjacent. You are given two int[]s a and b, each with n elements.</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>現在の石の山と目的の石の山が渡されるので，左から順番に目的の石の山にしていく．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">    public:
+    int get(vector &lt;int&gt; a, vector &lt;int&gt; b) {
+        int n = a.size();
+
+        ll ans = 0;
+        ll asum = 0, bsum = 0;
+
+        rep(i, n) asum += a[i];
+        rep(i, n) bsum += b[i];
+
+        if(asum != bsum) return -1;
+
+        rep(i, n) {
+            if(a[i] == b[i]) continue;
+            if(a[i] &gt; b[i]) {
+                a[i+1] += a[i] - b[i];
+                ans += a[i] - b[i];
+            } else {
+                int len = 1, j = i+1;
+                while(a[i] &lt; b[i]) {
+                    int d = b[i] - a[i];
+                    if(a[j] &gt;= d) {
+                        a[j] -= d;
+                        a[i] += d;
+                        ans += d * len;
+                    } else {
+                        a[i] += a[j];
+                        ans += a[j] * len;
+                        a[j] = 0;
+                        j++;
+                        len++;
+                    }
+                }
+            }
+        }
+
+        return ans;
+    }
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[SRM682 D2H FriendlyRobot]]></title>
@@ -245,84 +307,6 @@ class ABBA {
 <li>twitter関連のモノを載せると何でもかんでもFollowボタンが付いてしまって，鬱陶しい(消したい)</li>
 </ul>
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[SRM502 TheLotteryBothDivs]]></title>
-    <link href="http://ry0u.github.io/blog/2015/07/17/srm502-thelotterybothdivs/"/>
-    <updated>2015-07-17T19:44:40+09:00</updated>
-    <id>http://ry0u.github.io/blog/2015/07/17/srm502-thelotterybothdivs</id>
-    <content type="html"><![CDATA[<p>000000000~999999999の10<sup>9</sup>の中で宝くじが当たる確率を求める．また下の桁が一致していれば当たりとなる．</p>
-
-<h1>考察</h1>
-
-<p>まず同じ数が与えられる可能性もあるので，setに投げて重複を消してから，下の桁が一致している数を消す．桁数が小さいほうが含まれるものが多いので，桁数が大きい方を消す．
-後は0.1<sup>桁数</sup>のsumが答えとなる．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;string&gt;
-#include &lt;vector&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;cstring&gt;
-#include &lt;queue&gt;
-#include &lt;set&gt;
-#include &lt;map&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-
-using namespace std;
-typedef long long ll;
-
-class TheLotteryBothDivs {
-    public:
-    double find(vector &lt;string&gt; goodSuffixes) {
-        set&lt;string&gt; st;
-        rep(i,goodSuffixes.size()) {
-            st.insert(goodSuffixes[i]);
-        }
-
-        vector&lt;string&gt; v;
-        set&lt;string&gt;::iterator ite;
-        for(ite = st.begin();ite != st.end(); ite++) {
-            v.push_back(*ite);
-        }
-
-        vector&lt;string&gt; res;
-        rep(i,v.size()) {
-            bool flag = false;
-            rep(j,v.size()) {
-                if(v[i].size() &gt; v[j].size()) {
-                    bool ch = true;
-                    rep(k,v[j].size()) {
-                        if(v[i][v[i].size()-1-k] == v[j][v[j].size()-1-k]) continue;
-                        ch = false;
-                    }
-
-                    if(ch) flag = true;
-                }
-            }
-            if(!flag) res.push_back(v[i]);
-        }
-
-        double ans = 0;
-        rep(i,res.size()) {
-            double t = 1.0;
-
-            rep(j,res[i].size()) {
-                t *= 0.1;
-            }
-
-            ans += t;
-        }
-        return ans;
-    }
-};
-</code></pre>
 ]]></content>
   </entry>
   
