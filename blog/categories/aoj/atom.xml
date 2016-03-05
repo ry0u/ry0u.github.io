@@ -4,7 +4,7 @@
   <title><![CDATA[Category: aoj | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/aoj/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-03-06T00:59:21+09:00</updated>
+  <updated>2016-03-06T01:36:15+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,180 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ0595 Schedule]]></title>
+    <link href="http://ry0u.github.io/blog/2016/03/06/aoj0595-schedule/"/>
+    <updated>2016-03-06T01:11:01+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/03/06/aoj0595-schedule</id>
+    <content type="html"><![CDATA[<!-- more -->
+
+
+<p>J君，O君，I君がいるかいないかを3ビットで持つ．
+<script type="math/tex; mode=display">
+    dp[i][j] := i日目に状態jの場合のスケジュール表として考えられるものの数
+</script>
+とする．</p>
+
+<ul>
+<li><p><script type="math/tex"> i </script>日目の鍵当番がいるか<br/>
+<script type="math/tex; mode=display">
+  j \ &amp; \ (1 &lt;&lt; d)
+</script></p></li>
+<li><p><script type="math/tex"> i-1日目に鍵を持ち帰れた人がいるか </script>
+<script type="math/tex; mode=display">
+  j \ &amp; \ k
+</script></p></li>
+</ul>
+
+
+<p>この条件を満たす場合に遷移可能．<script type="math/tex"> O(n \cdot 2 ^3 \cdot 2 ^3) </script>．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+#include &lt;bitset&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+#define MOD 10007
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+ll dp[1005][8];
+
+int main() {
+    int n;
+    cin &gt;&gt; n;
+
+    string s;
+    cin &gt;&gt; s;
+
+    map&lt;char, int&gt; id;
+    id['J'] = 2; id['O'] = 1, id['I'] = 0;
+
+    memset(dp, 0, sizeof(dp));
+    dp[0][1 &lt;&lt; 2] = 1;
+
+    REP(i, 1, n + 1) {
+        int d = id[ s[i-1] ];
+        rep(j, 1 &lt;&lt; 3) {
+            if(!(j &amp; (1 &lt;&lt; d))) continue;
+            rep(k, 1 &lt;&lt; 3) {
+                if(j &amp; k) { 
+                    dp[i][j] += dp[i-1][k];
+                    dp[i][j] %= MOD;
+                }
+            }
+        }
+    }
+
+    ll ans = 0;
+    rep(i, 1 &lt;&lt; 3) {
+        ans += dp[n][i];
+    }
+
+    cout &lt;&lt; ans % MOD &lt;&lt; endl;
+
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ0594 Super Metropolis]]></title>
+    <link href="http://ry0u.github.io/blog/2016/03/06/aoj0594-super-metropolis/"/>
+    <updated>2016-03-06T01:03:49+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/03/06/aoj0594-super-metropolis</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0594">Super Metropolis | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>右上または左下に行く場合は，斜めの移動が使えるので<script type="math/tex"> \max(dx, dy) </script>でいける．右下または左上に行く場合は<script type="math/tex"> dx + dy </script>かかる．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int main() {
+    int w, h, n;
+    cin &gt;&gt; w &gt;&gt; h &gt;&gt; n;
+
+    int x, y;
+    cin &gt;&gt; x &gt;&gt; y;
+
+    int ans = 0;
+    rep(i, n - 1) {
+        int a, b;
+        cin &gt;&gt; a &gt;&gt; b;
+
+        if(x &lt;= a) {
+            if(y &lt;= b) {
+                int c = a - x, d = b - y;
+                ans += max(c, d);
+            } else {
+                int c = a - x, d = y - b;
+                ans += c + d;
+            }
+        } else {
+            if(y &lt;= b) {
+                int c = x - a, d = b - y;
+                ans += c + d;
+            } else {
+                int c = x - a, d = y - b;
+                ans += max(c, d);
+            }
+        }
+
+        x = a;
+        y = b;
+    }
+
+    cout &lt;&lt; ans &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[AOJ0590 Available Areas]]></title>
@@ -306,209 +480,6 @@ int main() {
     }
 
     cout &lt;&lt; c &lt;&lt; endl;
-
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[AOJ0580 Fish]]></title>
-    <link href="http://ry0u.github.io/blog/2016/02/23/aoj0580-fish/"/>
-    <updated>2016-02-23T00:00:36+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/02/23/aoj0580-fish</id>
-    <content type="html"><![CDATA[<p>問題文<br/>
-<a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0580">http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0580</a></p>
-
-<!-- more -->
-
-
-<p>魚の種類<script type="math/tex"> Nが最大で50 </script>なので，座標圧縮すると，3重ループがかける．<br/>
-座標圧縮は<br/>
-<a href="http://algoogle.hadrori.jp/algorithm/compress.html">http://algoogle.hadrori.jp/algorithm/compress.html</a><br/>
-が非常に分かりやすかった（蟻本の問題みたいに前後+1，-1した場所まで取っておく置く必要なし）．</p>
-
-<p>座圧後の<script type="math/tex"> i, j, k </script>の座圧前の体積は
-<script type="math/tex; mode=display">
-    (\mbox{xunzip}[i+1] - \mbox{xunzip}[i]) \cdot (\mbox{yunzip}[j+1] - \mbox{yunzip}[j]) \cdot (\mbox{zunzip}[k+1] - \mbox{zunzip}[k])
-</script>
-で求められる．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-#include &lt;cmath&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-#define EPS 1e-8
-#define equals(a,b) fabs((a) - (b)) &lt; EPS
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-int compress(vector&lt;int&gt;&amp; v, map&lt;int, int&gt;&amp; zip, map&lt;int, int&gt;&amp; unzip) {
-    sort(v.begin(), v.end());
-    v.erase(unique(v.begin(),v.end()),v.end());
-
-    rep(i, v.size()) {
-        zip[v[i]] = i;
-        unzip[i] = v[i];
-    }
-
-    return v.size();
-}
-
-int d[55 * 3][55 * 3][55 * 5];
-
-int main() {
-    int n, K;
-    cin &gt;&gt; n &gt;&gt; K;
-
-    vector&lt;int&gt; x, y, z;
-    vector&lt;int&gt; x1(n), y1(n), z1(n), x2(n), y2(n), z2(n);
-
-    rep(i, n) {
-        cin &gt;&gt; x1[i] &gt;&gt; y1[i] &gt;&gt; z1[i] &gt;&gt; x2[i] &gt;&gt; y2[i] &gt;&gt; z2[i];
-        x.push_back(x1[i]);
-        x.push_back(x2[i]);
-
-        y.push_back(y1[i]);
-        y.push_back(y2[i]);
-
-        z.push_back(z1[i]);
-        z.push_back(z2[i]);
-    }
-
-    map&lt;int, int&gt; xzip, yzip, zzip;
-    map&lt;int, int&gt; xunzip, yunzip, zunzip;
-
-    int X = compress(x, xzip, xunzip);
-    int Y = compress(y, yzip, yunzip);
-    int Z = compress(z, zzip, zunzip);
-
-    memset(d, 0, sizeof(d));
-
-    rep(i, n) {
-        REP(j, xzip[x1[i]], xzip[x2[i]]) {
-            REP(k, yzip[y1[i]], yzip[y2[i]]) {
-                REP(l, zzip[z1[i]], zzip[z2[i]]) {
-                    d[j][k][l]++;
-                }
-            }
-        }
-    }
-
-    ll ans = 0;
-    rep(i, X) {
-        rep(j, Y) {
-            rep(k, Z) {
-                if(d[i][j][k] &gt;= K) {
-                    ans += ll(xunzip[i+1] - xunzip[i]) * ll(yunzip[j+1] - yunzip[j]) * ll(zunzip[k+1] - zunzip[k]);
-                }
-            }
-        }
-    }
-
-    cout &lt;&lt; ans &lt;&lt; endl;
-
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[AOJ0579 Hot days]]></title>
-    <link href="http://ry0u.github.io/blog/2016/02/22/aoj0579-hot-days/"/>
-    <updated>2016-02-22T22:24:12+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/02/22/aoj0579-hot-days</id>
-    <content type="html"><![CDATA[<p>問題文<br/>
-<a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0579">http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0579</a></p>
-
-<!-- more -->
-
-
-<p><script type="math/tex; mode=display">
-    dp[i][j] := i日目に服jを着た時の最大値 \
-</script>
-として，最大化したい値は</p>
-
-<p><script type="math/tex; mode=display">
-    |C<em>{x_1} - C</em>{x_2}| + |C<em>{x_2} - C</em>{x_3}| + \cdots +  |C<em>{x</em>{D-1}} - C_{x_D}|
-</script></p>
-
-<p>なので，<script type="math/tex"> 1日目に切れる服には0を入れておき， i-1日目からi日目に遷移する．(2 \leq i \leq D)</script><br/>
-遷移可能(<script type="math/tex">i</script>日目の最高気温によって服が着れるか着れないか)な場合，<script type="math/tex">i-1</script>日目に何を着ていた場合が値が最大になるかを選ぶ．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-int main() {
-    int d, n;
-    cin &gt;&gt; d &gt;&gt; n;
-
-    vector&lt;int&gt; t(d);
-    rep(i, d) cin &gt;&gt; t[i];
-
-    vector&lt;int&gt; a(n), b(n), c(n);
-    rep(i, n) cin &gt;&gt; a[i] &gt;&gt; b[i] &gt;&gt; c[i];
-
-    int dp[205][205];
-    rep(i, 205) rep(j, 205) dp[i][j] = -1;
-
-    rep(i, n) {
-        if(a[i] &lt;= t[0] &amp;&amp; t[0] &lt;= b[i]) dp[0][i] = 0;
-    }
-
-    REP(i, 1, d) {
-        rep(j, n) {
-            if(a[j] &lt;= t[i] &amp;&amp; t[i] &lt;= b[j]) {
-                rep(k, n) {
-                    if(dp[i-1][k] == -1) continue;
-                    dp[i][j] = max(dp[i][j], dp[i-1][k] + abs(c[k] - c[j]));
-                }
-            }
-        }
-    }
-
-    int ans = 0;
-    rep(i, n) {
-        ans = max(ans, dp[d-1][i]);
-    }
-
-    cout &lt;&lt; ans &lt;&lt; endl;
-
 
     return 0;
 }
