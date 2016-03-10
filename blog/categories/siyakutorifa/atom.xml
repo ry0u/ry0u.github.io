@@ -4,7 +4,7 @@
   <title><![CDATA[Category: しゃくとり法 | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/siyakutorifa/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-03-08T17:38:28+09:00</updated>
+  <updated>2016-03-10T23:45:44+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,99 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ0600 Baumkuchen]]></title>
+    <link href="http://ry0u.github.io/blog/2016/03/10/aoj0600-baumkuchen/"/>
+    <updated>2016-03-10T23:01:54+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/03/10/aoj0600-baumkuchen</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0600">Baumkuchen | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>円環を切って2つ繋げて表現する．{% m %} sum[i]をi {% em %}未満の切り込み間の大きさの和として持っておく．区間{% m %} (s, t] {% em %}を{% m %}3{% em %}ピースに分けた時の最小値，もう1つの切れ込みを入れる場所を {% m %} id {% em %}と置くと，</p>
+
+<ul>
+<li>{% m %} (s, t] {% em %}</li>
+<li>{% m %} (t, id] {% em %}</li>
+<li>{% m %} (id, s+n]{% em %}</li>
+</ul>
+
+
+<p>の{% m %} 3 {% em %}ピースに分けることになる．区間{% m %} (s, t] {% em %}を最小にしたいので，その区間の大きさ{% m %} d {% em %}を初めて超える場所をlower_boundで取ってくる．後は取ってきた場所から{% m %} s+n {% em %}までの和が{% m %} d {% em %}よりも大きければ良い．もしをこれを満たすようなら，右端を伸ばしてみて，ダメだったら左端を縮める．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int main() {
+    int n;
+    cin &gt;&gt; n;
+
+    vector&lt;ll&gt; v(n);
+    rep(i, n) cin &gt;&gt; v[i];
+
+    vector&lt;ll&gt; sum(2*n + 1);
+    rep(i, n) {
+        sum[i+1] += sum[i] + v[i];
+    }
+
+    rep(i, n) {
+        sum[n+i+1] += sum[n + i] + v[i];
+    }
+
+    ll ans = 0;
+    int s = 0, t = 0,cnt = 0;
+    bool flag = true, first = true;
+
+    while(true) {
+        if(flag) t++;
+        else s++;
+
+        if(s + n &gt;= sum.size()) break;
+
+        ll d = sum[t] - sum[s];
+        int id = lower_bound(sum.begin(), sum.end(), sum[t]  + (sum[t] - sum[s])) - sum.begin();
+
+        if(s + n &gt; id &amp;&amp; d &lt; sum[s+n] - sum[id]) {
+            ans = max(ans, d);
+            flag = true;
+        } else {
+            flag = false;
+        }
+    }
+
+    cout &lt;&lt; ans &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[AOJ0572 Card Game is Fun]]></title>
@@ -25,9 +118,9 @@
 
 
 <p>ブルーノは上から何枚か，下から何枚かを削る．つまり連続したカードが残る．もしブルーノのカードの山が決まった時に，アンナがそのカードの山を作れるかは，先頭から見ていきアンナの山にあるかどうかを見れば良い．<br/>
-ブルーノの残すと考えてる暫定カードの先頭と末尾の<script type="math/tex">id</script>を持っておき，<br/>
-そのカードの山をアンナが作れるのであれば，末尾を<script type="math/tex">+1もしそうでなければ先頭を+1する． </script><br/>
-この<script type="math/tex">maxを取れば良いのでO(n ^2)</script>．</p>
+ブルーノの残すと考えてる暫定カードの先頭と末尾の{% m %}id{% em %}を持っておき，<br/>
+そのカードの山をアンナが作れるのであれば，末尾を{% m %}+1もしそうでなければ先頭を+1する． {% em %}<br/>
+この{% m %}maxを取れば良いのでO(n ^2){% em %}．</p>
 
 <h1>Code</h1>
 
