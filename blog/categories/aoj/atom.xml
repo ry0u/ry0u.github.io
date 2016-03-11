@@ -4,7 +4,7 @@
   <title><![CDATA[Category: aoj | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/aoj/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-03-10T23:45:44+09:00</updated>
+  <updated>2016-03-11T16:59:30+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,139 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ0601 Sugar Glider]]></title>
+    <link href="http://ry0u.github.io/blog/2016/03/11/aoj0601-sugar-glider/"/>
+    <updated>2016-03-11T16:43:50+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/03/11/aoj0601-sugar-glider</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0601">Sugar Glider | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>現在の場所までのコスト，高さを持ってdijkstra．次の木に飛び移る時に高さが<script type="math/tex"> 0 </script>より小さくなる場合，不足分を登ってから飛び移る．この時に，現在の木の高さが(現在の高さ+不足分)より小さいかをチェックする．また，次の木の高さを超えて場合，逆に下ってから飛び移る．この時に，不足分下った高さが<script type="math/tex"> 0 </script>より大きいかどうかをチェックする．<br/>
+最終目標が木<script type="math/tex"> N </script>の一番上なので，答えは<script type="math/tex"> d[n-1] + (H[n-1] - Y[n-1]) </script>となる．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+#include &lt;queue&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1LL&lt;&lt;62
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;ll, ll&gt; P;
+typedef pair&lt;P, ll&gt; PP;
+
+struct edge {
+    int from,to;
+    ll cost;
+
+    edge(int t,int c) : to(t),cost(c) {}
+    edge(int f,int t,int c) : from(f),to(t),cost(c) {}
+
+    bool operator&lt;(const edge &amp;e) const {
+        return cost &lt; e.cost;
+    }
+};
+
+ll H[100005], Y[100005];
+vector&lt;edge&gt; G[100005];
+ll d[100005];
+
+void dijkstra(int s, int n, int h) {
+    priority_queue&lt;PP,vector&lt;PP&gt;,greater&lt;PP&gt; &gt; que;
+    fill(d,d+n,INF);
+
+    d[s] = 0;
+    Y[s] = h;
+    que.push(PP(P(0, h), s));
+
+    while(que.size()) {
+        PP p = que.top();
+        que.pop();
+
+        ll cost = p.first.first;
+        ll cur = p.first.second;
+        int v = p.second;
+        if(d[v] &lt; cost) continue;
+
+        rep(i,G[v].size()) {
+            edge e = G[v][i];
+
+            if(H[v] &lt; e.cost) continue;
+
+            if(cur - e.cost &lt; 0) {
+                if(e.cost - cur &lt;= H[v] - cur &amp;&amp; d[e.to] &gt; d[v] + (e.cost - cur) + e.cost) {
+                    d[e.to] = d[v] + (e.cost - cur) + e.cost;
+                    Y[e.to] = 0;
+                    que.push(PP(P(d[e.to], 0), e.to));
+                }
+            } else if(cur - e.cost &gt; H[e.to]) {
+                if(cur - ((cur - e.cost) - H[e.to]) &gt;= 0 &amp;&amp; d[e.to] &gt; d[v] + ((cur - e.cost) - H[e.to]) + e.cost) {
+                    d[e.to] = d[v] + ((cur - e.cost) - H[e.to]) + e.cost;
+                    Y[e.to] = cur - ((cur - e.cost) - H[e.to]) - e.cost;
+                    que.push(PP(P(d[e.to], cur - ((cur - e.cost) - H[e.to]) - e.cost), e.to));
+                }
+            } else {
+                if(d[e.to] &gt; d[v] + e.cost) {
+                    d[e.to] = d[v] + e.cost;
+                    Y[e.to] = cur - e.cost;
+                    que.push(PP(P(d[e.to], cur - e.cost), e.to));
+                }
+            }
+        }
+    }
+}
+
+int main() {
+    int n, m, h;
+    cin &gt;&gt; n &gt;&gt; m &gt;&gt; h;
+
+    memset(H, 0, sizeof(H));
+    memset(Y, 0, sizeof(Y));
+
+    rep(i, n) cin &gt;&gt; H[i];
+    rep(i, m) {
+        ll a, b, c;
+        cin &gt;&gt; a &gt;&gt; b &gt;&gt; c;
+
+        a--;
+        b--;
+
+        G[a].push_back(edge(b, c));
+        G[b].push_back(edge(a, c));
+    }
+
+    dijkstra(0, n, h);
+
+    if(d[n-1] == INF) cout &lt;&lt; -1 &lt;&lt; endl;
+    else cout &lt;&lt; d[n-1] + (H[n-1] - Y[n-1]) &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[AOJ0600 Baumkuchen]]></title>
@@ -29,16 +162,16 @@
 <!-- more -->
 
 
-<p>円環を切って2つ繋げて表現する．{% m %} sum[i]をi {% em %}未満の切り込み間の大きさの和として持っておく．区間{% m %} (s, t] {% em %}を{% m %}3{% em %}ピースに分けた時の最小値，もう1つの切れ込みを入れる場所を {% m %} id {% em %}と置くと，</p>
+<p>円環を切って2つ繋げて表現する．<script type="math/tex"> sum[i]をi </script>未満の切り込み間の大きさの和として持っておく．区間<script type="math/tex"> (s, t] </script>を<script type="math/tex">3</script>ピースに分けた時の最小値，もう1つの切れ込みを入れる場所を <script type="math/tex"> id </script>と置くと，</p>
 
 <ul>
-<li>{% m %} (s, t] {% em %}</li>
-<li>{% m %} (t, id] {% em %}</li>
-<li>{% m %} (id, s+n]{% em %}</li>
+<li><script type="math/tex"> (s, t] </script></li>
+<li><script type="math/tex"> (t, id] </script></li>
+<li><script type="math/tex"> (id, s+n]</script></li>
 </ul>
 
 
-<p>の{% m %} 3 {% em %}ピースに分けることになる．区間{% m %} (s, t] {% em %}を最小にしたいので，その区間の大きさ{% m %} d {% em %}を初めて超える場所をlower_boundで取ってくる．後は取ってきた場所から{% m %} s+n {% em %}までの和が{% m %} d {% em %}よりも大きければ良い．もしをこれを満たすようなら，右端を伸ばしてみて，ダメだったら左端を縮める．</p>
+<p>の<script type="math/tex"> 3 </script>ピースに分けることになる．区間<script type="math/tex"> (s, t] </script>を最小にしたいので，その区間の大きさ<script type="math/tex"> d </script>を初めて超える場所をlower_boundで取ってくる．後は取ってきた場所から<script type="math/tex"> s+n </script>までの和が<script type="math/tex"> d </script>よりも大きければ良い．もしをこれを満たすようなら，右端を伸ばしてみて，ダメだったら左端を縮める．</p>
 
 <h1>Code</h1>
 
@@ -122,19 +255,19 @@ int main() {
 <!-- more -->
 
 
-<p>饅頭{% m %} i {% em %}から饅頭{% m %} j {% em %}まで選んだ時の価格が欲しいので，累積和を取っておく．<br/>
-{% math %}
+<p>饅頭<script type="math/tex"> i </script>から饅頭<script type="math/tex"> j </script>まで選んだ時の価格が欲しいので，累積和を取っておく．<br/>
+<script type="math/tex; mode=display">
     dp[i][j] := i番目以内の箱を使い，饅頭jまで詰めた時の最大値
-{% endmath %}
-とする．{% m %} i {% em %}番目の箱を</p>
+</script>
+とする．<script type="math/tex"> i </script>番目の箱を</p>
 
 <ul>
-<li>使う遷移は，{% m %} dp[i][j]+(d[j+c[i]]-d[j])-e[i]{% em %}</li>
-<li>使わない遷移は{% m %} dp[i][j+c[i]]{% em %}．</li>
+<li>使う遷移は，<script type="math/tex"> dp[i][j]+(d[j+c[i]]-d[j])-e[i]</script></li>
+<li>使わない遷移は<script type="math/tex"> dp[i][j+c[i]]</script>．</li>
 </ul>
 
 
-<p>{% img /images/AOJ/0599.png %}</p>
+<p><img src="/images/AOJ/0599.png"></p>
 
 <h1>Code</h1>
 
@@ -356,8 +489,8 @@ int main() {
 <!-- more -->
 
 
-<p>タクシーの移動しか使わないのでタクシーの移動の場合のグラフを作り直す．まず連結している町の辺のコストを{% m %} 1 {% em %}にする．<br/>
-頂点{% m %} i {% em %}からdijkstraして{% m %} d[j] \leq R[i] {% em %}以下の場合に，{% m %} i \to j{% em %}にコスト{% m %} C[i] {% em %}の辺を張る．<br/>
+<p>タクシーの移動しか使わないのでタクシーの移動の場合のグラフを作り直す．まず連結している町の辺のコストを<script type="math/tex"> 1 </script>にする．<br/>
+頂点<script type="math/tex"> i </script>からdijkstraして<script type="math/tex"> d[j] \leq R[i] </script>以下の場合に，<script type="math/tex"> i \to j</script>にコスト<script type="math/tex"> C[i] </script>の辺を張る．<br/>
 新しいグラフを構築したらそのグラフでdijkstra．</p>
 
 <h1>Code</h1>
@@ -475,107 +608,6 @@ int main() {
     dijkstra(0, n);
 
     cout &lt;&lt; d[n-1] &lt;&lt; endl;
-
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[AOJ0595 Schedule]]></title>
-    <link href="http://ry0u.github.io/blog/2016/03/06/aoj0595-schedule/"/>
-    <updated>2016-03-06T01:11:01+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/03/06/aoj0595-schedule</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0595">Schedule | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
-
-
-<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
-
-
-
-
-<!-- more -->
-
-
-<p>J君，O君，I君がいるかいないかを3ビットで持つ．
-{% math %}
-    dp[i][j] := i日目に状態jの場合のスケジュール表として考えられるものの数
-{% endmath %}
-とする．</p>
-
-<ul>
-<li><p>{% m %} i {% em %}日目の鍵当番がいるか<br/>
-{% math %}
-  j \ &amp; \ (1 &lt;&lt; d)
-{% endmath %}</p></li>
-<li><p>{% m %} i-1日目に鍵を持ち帰れた人がいるか {% em %}
-{% math %}
-  j \ &amp; \ k
-{% endmath %}</p></li>
-</ul>
-
-
-<p>この条件を満たす場合に遷移可能．{% m %} O(n \cdot 2 ^3 \cdot 2 ^3) {% em %}．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-#include &lt;bitset&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-#define MOD 10007
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-ll dp[1005][8];
-
-int main() {
-    int n;
-    cin &gt;&gt; n;
-
-    string s;
-    cin &gt;&gt; s;
-
-    map&lt;char, int&gt; id;
-    id['J'] = 2; id['O'] = 1, id['I'] = 0;
-
-    memset(dp, 0, sizeof(dp));
-    dp[0][1 &lt;&lt; 2] = 1;
-
-    REP(i, 1, n + 1) {
-        int d = id[ s[i-1] ];
-        rep(j, 1 &lt;&lt; 3) {
-            if(!(j &amp; (1 &lt;&lt; d))) continue;
-            rep(k, 1 &lt;&lt; 3) {
-                if(j &amp; k) { 
-                    dp[i][j] += dp[i-1][k];
-                    dp[i][j] %= MOD;
-                }
-            }
-        }
-    }
-
-    ll ans = 0;
-    rep(i, 1 &lt;&lt; 3) {
-        ans += dp[n][i];
-    }
-
-    cout &lt;&lt; ans % MOD &lt;&lt; endl;
-
 
     return 0;
 }
