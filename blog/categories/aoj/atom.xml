@@ -4,7 +4,7 @@
   <title><![CDATA[Category: aoj | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/aoj/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-03-16T00:24:12+09:00</updated>
+  <updated>2016-03-16T01:22:24+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,132 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ0604 Take the 'IOI' train]]></title>
+    <link href="http://ry0u.github.io/blog/2016/03/16/aoj0604-take-the-ioi-train/"/>
+    <updated>2016-03-16T00:31:03+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/03/16/aoj0604-take-the-ioi-train</id>
+    <content type="html"><![CDATA[<!-- more -->
+
+
+<p>待機用レールは列車を組み始めたら使えない．最初に避難させることは出来るが使いはじめる場所を決めたら，その列車を使うか，その列車以降を使わないかになる．</p>
+
+<p><script type="math/tex; mode=display">
+\begin{eqnarray}
+    dp[i][j][0] &amp;:=&amp; Sをiまで，Tをjまで見て，末尾がOの時の最大値 \
+    dp[i][j][1] &amp;:=&amp; Sをiまで，Tをjまで見て，末尾がIの時の最大値
+\end{eqnarray}
+</script></p>
+
+<p>このように状態を持つと遷移は4パターンになる．</p>
+
+<p><img src="/images/AOJ/0604-1.png">
+<img src="/images/AOJ/0604-2.png"></p>
+
+<p><img src="/images/AOJ/0604-3.png">
+<img src="/images/AOJ/0604-4.png"></p>
+
+<p>最初は <script type="math/tex"> I </script>で始め， <script type="math/tex"> I </script>で終わることに注意する．また，どちらかの列車を全く使わなくても良いので最初に空白を入れて表現してみた(変だ)．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int dp[2005][2005][2];
+
+int main() {
+    int n, m;
+    cin &gt;&gt; n &gt;&gt; m;
+
+    string s, t;
+    cin &gt;&gt; s &gt;&gt; t;
+
+    n++;
+    m++;
+    s = " " + s;
+    t = " " + t;
+
+    memset(dp, 0, sizeof(dp));
+
+    REP(i, 0, n) {
+        REP(j, 0, m) {
+
+            if(i == 0 &amp;&amp; j == 0) continue;
+
+            bool a = false, b = false;
+            if(i == 0) {
+                b = true;
+            } else if(j == 0) {
+                a = true;
+            } else {
+                a = true;
+                b = true;
+            }
+
+            if(a) {
+                if(dp[i-1][j][1] == 0) {
+                    if(s[i] == 'I') {
+                        dp[i][j][1] = max(dp[i][j][1], dp[i-1][j][0] + 1);
+                    }
+                } else {
+                    if(s[i] == 'I') {
+                        dp[i][j][1] = max(dp[i][j][1], dp[i-1][j][0] + 1);
+                    } else {
+                        dp[i][j][0] = max(dp[i][j][0], dp[i-1][j][1] + 1);
+                    }
+                }
+            }
+
+            if(b) {
+                if(dp[i][j-1][1] == 0) {
+                    if(t[j] == 'I') {
+                        dp[i][j][1] = max(dp[i][j][1], dp[i][j-1][0] + 1);
+                    }
+                } else {
+                    if(t[j] == 'I') {
+                        dp[i][j][1] = max(dp[i][j][1], dp[i][j-1][0] + 1);
+                    } else {
+                        dp[i][j][0] = max(dp[i][j][0], dp[i][j-1][1] + 1);
+                    }
+                }
+            }
+        }
+    }
+
+    int ans = 0;
+    rep(i, n) {
+        rep(j, m) {
+            // cout &lt;&lt; "(" &lt;&lt; dp[i][j][0] &lt;&lt; "," &lt;&lt; dp[i][j][1] &lt;&lt; ") ";
+            ans = max(ans, dp[i][j][1]);
+        }
+        // cout &lt;&lt; endl;
+    }
+
+    cout &lt;&lt; ans &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[AOJ0603 Illumination]]></title>
@@ -426,130 +552,6 @@ int main() {
     }
 
     cout &lt;&lt; ans &lt;&lt; endl;
-
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[AOJ0598 JOI Emblem]]></title>
-    <link href="http://ry0u.github.io/blog/2016/03/07/aoj0598-joi-emblem/"/>
-    <updated>2016-03-07T09:47:00+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/03/07/aoj0598-joi-emblem</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0598">JOI Emblem | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
-
-
-<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
-
-
-
-
-<!-- more -->
-
-
-<p>最初に今の旗に紋章がいくつあるかをみる．次に1文字ずつ変更し，新たに紋章となった所をカウントする．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-int h, w;
-bool used[1005][1005];
-vector&lt;string&gt; s, v(2);
-
-
-int func(int i, int j) {
-    int ret = 0;
-    if(i-1 &gt;= 0 &amp;&amp; j-1 &gt;= 0) {
-        if(s[i-1][j-1] == v[0][0] &amp;&amp; s[i-1][j] == v[0][1] &amp;&amp; s[i][j-1] == v[1][0] &amp;&amp; s[i][j] == v[1][1]) {
-            ret++;
-        }
-    }
-
-    if(i-1 &gt;= 0 &amp;&amp; j+1 &lt; w) {
-        if(s[i-1][j] == v[0][0] &amp;&amp; s[i-1][j+1] == v[0][1] &amp;&amp; s[i][j] == v[1][0] &amp;&amp; s[i][j+1] == v[1][1]) {
-            ret++;
-        }
-    }
-    if(i+1 &lt; h &amp;&amp; j-1 &gt;= 0) {
-        if(s[i][j-1] == v[0][0] &amp;&amp; s[i][j] == v[0][1] &amp;&amp; s[i+1][j-1] == v[1][0] &amp;&amp; s[i+1][j] == v[1][1]) {
-            ret++;
-        }
-    }
-
-    if(i+1 &lt; h &amp;&amp; j+1 &lt; w) {
-        if(s[i][j] == v[0][0] &amp;&amp; s[i][j+1] == v[0][1] &amp;&amp; s[i+1][j] == v[1][0] &amp;&amp; s[i+1][j+1] == v[1][1]) {
-            ret++;
-        }
-    }
-    return ret;
-}
-
-int main() {
-    cin &gt;&gt; h &gt;&gt; w;
-
-    s.resize(h);
-
-    rep(i, h) cin &gt;&gt; s[i];
-    rep(i, 2) cin &gt;&gt; v[i];
-
-    int ans = 0;
-    memset(used, 0, sizeof(used));
-
-    rep(i, h-1) {
-        rep(j, w-1) {
-            if(s[i][j] == v[0][0] &amp;&amp; s[i][j+1] == v[0][1] &amp;&amp; s[i+1][j] == v[1][0] &amp;&amp; s[i+1][j+1] == v[1][1]) {
-                ans++;
-                used[i][j] = true;
-                used[i][j+1] = true;
-                used[i+1][j] = true;
-                used[i+1][j+1] = true;
-            }
-        }
-    }
-
-    int res = 0;
-    rep(i, h) {
-        rep(j, w) {
-            int t = func(i, j), t2 = 0;
-            char c = s[i][j];
-
-            s[i][j] = 'J';
-            t2 = func(i, j);
-            res = max(res, t2 - t);
-
-            s[i][j] = 'O';
-            t2 = func(i, j);
-            res = max(res, t2 - t);
-
-            s[i][j] = 'I';
-            t2 = func(i, j);
-            res = max(res, t2 - t);
-
-            s[i][j] = c;
-        }
-    }
-
-    cout &lt;&lt; ans + res &lt;&lt; endl;
 
     return 0;
 }
