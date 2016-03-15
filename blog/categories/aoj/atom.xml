@@ -4,7 +4,7 @@
   <title><![CDATA[Category: aoj | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/aoj/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-03-16T01:22:24+09:00</updated>
+  <updated>2016-03-16T01:43:55+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -14,11 +14,168 @@
 
   
   <entry>
+    <title type="html"><![CDATA[AOJ0605 Modern Mansion]]></title>
+    <link href="http://ry0u.github.io/blog/2016/03/16/aoj0605-modern-mansion/"/>
+    <updated>2016-03-16T01:28:12+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/03/16/aoj0605-modern-mansion</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0605">Modern Mansion | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>状態を <script type="math/tex"> (cost, id, state) </script>として，現在どちら方向の扉が空いているかを持ってdijkstra．扉が空いている方向で最小値を更新出来る場所に行く．TLEを連発した．時間制限が1secで0.94secでギリギリ通した．変にlogをつけて死んでいた．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+#include &lt;queue&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1LL&lt;&lt;60
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+typedef pair&lt;P, bool&gt; PI;
+
+int w, h, k;
+vector&lt;P&gt; X[200005], Y[200005];
+vector&lt;P&gt; xy;
+ll d[200005][2];
+
+// PI f(int a, int b, int c) {
+//  return mp(mp(a, b), c);
+// }
+
+void dijkstra() {
+    rep(i, 200005) {
+        d[i][0] = INF;
+        d[i][1] = INF;
+    }
+
+    // cost id (0 or 1)
+    priority_queue&lt;PI, vector&lt;PI&gt;, greater&lt;PI&gt; &gt; que;
+
+    rep(i, X[1].size()) {
+        int y = X[1][i].first;
+        int to = X[1][i].second;
+
+        d[to][1] = y;
+        // que.push(f(y, to, 1));
+        que.push(mp(mp(y, to), 1));
+    }
+
+    while(que.size()) {
+        PI p = que.top(); 
+        que.pop();
+
+        int c = p.first.first;
+        int v = p.first.second;
+        int state = p.second;
+
+        if(d[v][state] &lt; c) continue;
+
+        int y = xy[v].first;
+        int x = xy[v].second;
+
+        if(state == 0) {
+            rep(i, X[x].size()) {
+                int ny = X[x][i].first;
+                int to = X[x][i].second;
+
+                if(ny == y) continue;
+
+                if(d[to][1] &gt; d[v][state] + abs(ny - y) + 1) {
+                    d[to][1] = d[v][state] + abs(ny- y) + 1;
+                    // que.push(f(d[to][1], to, 1));
+                    que.push(mp(mp(d[to][1], to), 1));
+                }
+            }
+        } else {
+            rep(i, Y[y].size()) {
+                int nx = Y[y][i].first;
+                int to = Y[y][i].second;
+
+                if(nx == x) continue;
+
+                if(d[to][0] &gt; d[v][state] + abs(nx - x) + 1) {
+                    d[to][0] = d[v][state] + abs(nx - x) + 1;
+                    // que.push(f(d[to][0], to, 0));
+                    que.push(mp(mp(d[to][0], to), 0));
+                }
+            }
+        }
+    }
+}
+
+int main() {
+    cin &gt;&gt; w &gt;&gt; h &gt;&gt; k;
+
+    xy.resize(k);
+    rep(i, k) {
+        int x, y;
+        cin &gt;&gt; x &gt;&gt; y;
+
+        xy[i] = mp(y, x);
+        X[x].push_back(mp(y, i));
+        Y[y].push_back(mp(x, i));
+    }
+
+    dijkstra();
+
+    ll ans = INF;
+    rep(i, k) {
+        int y = xy[i].first;
+        int x = xy[i].second;
+
+        if(y == h) {
+            ans = min(ans, d[i][1] + abs(w - x));
+        }
+
+        if(x == w) {
+            ans = min(ans, d[i][0] + abs(h - y));
+        }
+    }
+
+    if(ans == INF) cout &lt;&lt; -1 &lt;&lt; endl;
+    else cout &lt;&lt; ans &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[AOJ0604 Take the 'IOI' train]]></title>
     <link href="http://ry0u.github.io/blog/2016/03/16/aoj0604-take-the-ioi-train/"/>
     <updated>2016-03-16T00:31:03+09:00</updated>
     <id>http://ry0u.github.io/blog/2016/03/16/aoj0604-take-the-ioi-train</id>
-    <content type="html"><![CDATA[<!-- more -->
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0604">Take the 'IOI' train | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
 
 
 <p>待機用レールは列車を組み始めたら使えない．最初に避難させることは出来るが使いはじめる場所を決めたら，その列車を使うか，その列車以降を使わないかになる．</p>
@@ -438,116 +595,6 @@ int main() {
             flag = true;
         } else {
             flag = false;
-        }
-    }
-
-    cout &lt;&lt; ans &lt;&lt; endl;
-
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[AOJ0599 IOI Manju]]></title>
-    <link href="http://ry0u.github.io/blog/2016/03/08/aoj0599-ioi-manju/"/>
-    <updated>2016-03-08T15:01:46+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/03/08/aoj0599-ioi-manju</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0599">IOI Manju | Aizu Online Judge</a></h4><p>ところで，あなたはJust Odd Inventions 社を知っているだろうか？ この会社の業務は「ただ奇妙な発明(just odd inventions)」をすることである．ここでは略してJOI 社と呼ぶ．IOI 社は，饅頭を詰めるための高級な箱をJOI 社に発注することになった．JOI 社の製作する饅頭用の箱は$N$ 種類あり， $j$ 番目$(1 \leq j \leq N)$の箱は最大で$C_j$ 個の饅頭を詰められる大きさであり，販売価格は$E_j$ 円である．これらの$N$ 種類の箱のうちの何種類か(0 種類以上$N$ 種類以下) を1 個ずつ発注し，饅頭をそれらの箱に詰め分けてセットで販売することになった．各饅頭セットの価格は，それに含まれる饅頭の価格の合計である．</p></blockquote>
-
-
-<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
-
-
-
-
-<!-- more -->
-
-
-<p>饅頭<script type="math/tex"> i </script>から饅頭<script type="math/tex"> j </script>まで選んだ時の価格が欲しいので，累積和を取っておく．<br/>
-<script type="math/tex; mode=display">
-    dp[i][j] := i番目以内の箱を使い，饅頭jまで詰めた時の最大値
-</script>
-とする．<script type="math/tex"> i </script>番目の箱を</p>
-
-<ul>
-<li>使う遷移は，<script type="math/tex"> dp[i][j]+(d[j+c[i]]-d[j])-e[i]</script></li>
-<li>使わない遷移は<script type="math/tex"> dp[i][j+c[i]]</script>．</li>
-</ul>
-
-
-<p><img src="/images/AOJ/0599.png"></p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-ll dp[505][10005];
-
-int main() {
-    int m, n;
-    cin &gt;&gt; m &gt;&gt; n;
-
-    vector&lt;int&gt; v(m);
-    rep(i, m) cin &gt;&gt; v[i];
-
-    vector&lt;P&gt; p(n);
-    rep(i, n) {
-        cin &gt;&gt; p[i].first &gt;&gt; p[i].second;
-    }
-
-    sort(v.begin(), v.end(), greater&lt;int&gt;());
-
-    int d[10005];
-    memset(d, 0, sizeof(d));
-    REP(i, 1, m + 1) {
-        d[i] += d[i-1] + v[i-1];
-    }
-
-    memset(dp, 0, sizeof(dp));
-    rep(i, 505) {
-        rep(j, 10005) dp[i][j]  = -1;
-    }
-
-    dp[0][0] = 0;
-
-    rep(i, n) {
-        rep(j, m + 1) {
-            dp[i+1][j] = max(dp[i+1][j], dp[i][j]);
-        }
-
-        rep(j, m) {
-            if(dp[i][j] == -1) continue;
-
-            int id = j + p[i].first;
-            id = min(id, m);
-            dp[i+1][id] = max(dp[i+1][id], max(dp[i][id], dp[i][j] + (d[id] - d[j]) - p[i].second));
-        }
-    }
-
-
-    ll ans = 0;
-    rep(i, n + 1) {
-        rep(j, m + 1) {
-            ans = max(ans, dp[i][j]);
         }
     }
 
