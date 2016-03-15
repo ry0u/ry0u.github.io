@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 動的計画法 | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/dong-de-ji-hua-fa/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-03-12T22:07:10+09:00</updated>
+  <updated>2016-03-15T23:55:03+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,111 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[SRM684D2M DivFreed2]]></title>
+    <link href="http://ry0u.github.io/blog/2016/03/15/srm684d2m-divfreed2/"/>
+    <updated>2016-03-15T23:11:13+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/03/15/srm684d2m-divfreed2</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="https://community.topcoder.com/stat?c=problem_statement&pm=14186&rd=16688">TopCoder Statistics - Problem Statement</a></h4><p>This problem statement is the exclusive and proprietary property of TopCoder, Inc. Any unauthorized use or reproduction of this information without the prior written consent of TopCoder, Inc. is strictly prohibited. (c)2010, TopCoder, Inc. All rights reserved.</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>数列の隣り合う全ての要素<script type="math/tex"> A(1 \leq A \leq k), B(1 \leq B \leq k) </script>が</p>
+
+<ul>
+<li><script type="math/tex"> A \leq B </script></li>
+<li><script type="math/tex"> A \ \rm{mod} \  B \neq 0 </script></li>
+</ul>
+
+
+<p>のどちらかを満たす数列の数を<script type="math/tex"> \rm{mod} \ 10 ^9 + 7 </script> で求める．</p>
+
+<hr />
+
+<p><script type="math/tex; mode=display">
+    dp[i][j] := i番目にjを選んだ時の数列の数
+</script></p>
+
+<p>とする．数列に追加する可能なものを選ぶので<script type="math/tex"> B </script>から考えると，<script type="math/tex"> B </script>より大きい，または<script type="math/tex"> AがB </script>を約数に持たなければ良い．基本的に全て遷移可能として(<script type="math/tex"> dp[i+1][j] += \sum_{l = 1} ^{k} dp[i][l]</script>)，後に約数の場所の遷移を無かったことにすれば良い．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">ll dp[15][100005];
+vector&lt;ll&gt; d[100005];
+
+vector&lt;ll&gt; divisor(ll n) {
+    vector&lt;ll&gt; res;
+    for(ll i = 2; i*i &lt;= n; i++) {
+        if(n % i == 0) {
+            res.push_back(i);
+            if(i != n/i) res.push_back(n/i);
+        }
+    }
+    return res;
+}
+
+class DivFreed2 {
+    public:
+    int count(int n, int k) {
+        memset(dp, 0, sizeof(dp));
+
+        rep(i, k + 1) {
+            d[i].clear();
+        }
+
+        REP(i, 2, k + 1) {
+            vector&lt;ll&gt; ret = divisor(i);
+            ret.push_back(1);
+
+            d[i].resize(ret.size());
+            rep(j, ret.size()) {
+                d[i][j] = ret[j];
+            }
+        }
+
+        REP(i, 1, k + 1) {
+            dp[1][i] = 1;
+        }
+
+        REP(i, 1, n) {
+            ll sum = 0;
+            REP(j, 1, k + 1) {
+                sum += dp[i][j];
+                sum %= MOD;
+            }
+
+            REP(j, 1, k + 1) {
+                dp[i+1][j] += sum;
+                dp[i+1][j] %= MOD;
+            }
+
+            REP(j, 1, k + 1) {
+                rep(l, d[j].size()) {
+                    dp[i+1][d[j][l]] -= dp[i][j];
+                }
+            }
+        }
+
+        ll ans = 0;
+        rep(j, k + 1) {
+            ans += dp[n][j];
+            ans %= MOD;
+        }
+
+        return ans;
+    }
+};
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[AOJ0599 IOI Manju]]></title>
@@ -453,89 +558,6 @@ int main() {
 
     return 0;
 }
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[SRM682 D2H FriendlyRobot]]></title>
-    <link href="http://ry0u.github.io/blog/2016/02/29/srm682-d2h-friendlyrobot/"/>
-    <updated>2016-02-29T01:13:10+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/02/29/srm682-d2h-friendlyrobot</id>
-    <content type="html"><![CDATA[<p>文字列<script type="math/tex"> U,D,R,L </script>の命令で動くロボットがある．この文字列を<script type="math/tex"> K </script>回書き換えられることが出来るときに，最大で何回<script type="math/tex">(0,0)</script>を通ることが出来るか．</p>
-
-<!-- more -->
-
-
-<hr />
-
-<p>移動回数が奇数回の時に<script type="math/tex"> (0,0) </script>に戻ることは出来ない．また偶数回の場合でも横方向，縦方向の移動量が共に偶数回，共に奇数回の場合のみ戻ることが出来る．<br/>
-また，<script type="math/tex"> +を-に，-を+</script>に変えることで<script type="math/tex"> 2 </script>移動量が変わる．<br/>
-そして，戻るために命令を書き換えなければならない回数も以下のように一意に求まる．
-<script type="math/tex; mode=display">
-\begin{eqnarray}
-    共に偶数回 &amp;:=&amp;  \frac{横方向}{2} + \frac{縦方向}{2} \
-    共に奇数回 &amp;:=&amp;  \frac{横方向}{2} + \frac{縦方向}{2} + 1\
-\end{eqnarray}
-</script>
-共に奇数回の場合に<script type="math/tex"> +1 </script>されるのは，例えば命令が<script type="math/tex"> UR </script>の場合に<script type="math/tex"> UD </script>に書き換えることで<script type="math/tex"> (0, 0) </script>に戻れるためである．</p>
-
-<p>これより
-<script type="math/tex; mode=display">
-    dp[i][j] := i番目までの命令列をj回変更した時の(0, 0)を訪れる最大値
-</script>
-として，総当りしてmaxを取った．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">    public:
-    int findMaximumReturns(string s, int K) {
-
-        vector&lt;int&gt; X(s.size() + 1), Y(s.size() + 1);
-        int x = 0, y = 0;
-        rep(i, s.size()) {
-            if(s[i] == 'U') y++;
-            if(s[i] == 'D') y--;
-            if(s[i] == 'R') x++;
-            if(s[i] == 'L') x--;
-
-            X[i+1] = x; Y[i+1] = y;
-        }
-
-        rep(i, s.size() + 1) {
-            rep(j, K + 1) {
-                dp[i][j] = -1;
-            }
-        }
-        dp[0][0] = 0;
-
-        rep(i, s.size() + 1) {
-            rep(j, K + 1) {
-                if(dp[i][j] == -1) continue;
-                for(int k = i + 2; k &lt; s.size() + 1; k += 2) {
-                    int s = abs(X[k] - X[i]), t = abs(Y[k] - Y[i]);
-                    int res = 0;
-
-                    if(s % 2 == 0 &amp;&amp; t % 2 == 1) continue;
-                    if(s % 2 == 1 &amp;&amp; t % 2 == 0) continue;
-                    if(s % 2 == 0 &amp;&amp; t % 2 == 0) res = s / 2 + t / 2;
-                    if(s % 2 == 1 &amp;&amp; t % 2 == 1) res = s / 2 + t / 2 + 1;
-
-                    if(j + res &gt; K) continue;
-                    dp[k][j + res] = max(dp[k][j + res], dp[i][j] + 1);
-                }
-            }
-        }
-
-        ll ans = 0;
-        rep(i, s.size() + 1) {
-            rep(j, K + 1) {
-                ans = max(ans, dp[i][j]);
-            }
-        }
-
-        return ans;
-    }
 </code></pre>
 ]]></content>
   </entry>
