@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: メモ化再帰 | ry0u_ydのblog]]></title>
+  <link href="http://ry0u.github.io/blog/categories/memohua-zai-gui/atom.xml" rel="self"/>
+  <link href="http://ry0u.github.io/"/>
+  <updated>2016-03-18T16:21:13+09:00</updated>
+  <id>http://ry0u.github.io/</id>
+  <author>
+    <name><![CDATA[ry0u_yd]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ0615 Cake2]]></title>
+    <link href="http://ry0u.github.io/blog/2016/03/18/aoj0615-cake2/"/>
+    <updated>2016-03-18T16:03:17+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/03/18/aoj0615-cake2</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0615">Cake 2 | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>左端と右端を持ってdpだろうとずっと考えていたけど全く分からなかった．調べた．</p>
+
+<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://lattemalta.hatenablog.jp/entry/2015/09/07/220749">aoj0615:Cake2 - らての精進日記</a></h4><p>問題文 http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0615</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+<p>非常に分かりやすかった．左端と右端を持つ区間DPを初めて書いた（写経）．バームクーヘンとかの時は円環を配列を繋げて表現する時に2つを繋げれば良かったが，とり方によってどっちにずれるかわからないので，真ん中を基準として左に1個，右に1個つなげる．</p>
+
+<ul>
+<li>区間の偶奇でどちらの順番かがわかる</li>
+<li>左端から一個取る <script type="math/tex"> \to \rm{dfs}(l-1, r) + A[l]</script></li>
+<li>右端から一個取る <script type="math/tex"> \to \rm{dfs}(l, r-1) + A[r]</script></li>
+<li>memoに代入するのを忘れない</li>
+</ul>
+
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+#include &lt;queue&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;ll,ll&gt; P;
+
+int n;
+vector&lt;ll&gt; v;
+ll memo[4005][6005];
+
+ll dfs(int l, int r) {
+    if(memo[l][r] != -1) return memo[l][r];
+
+    int turn = r - l - 1;
+
+    if(turn == n) return memo[l][r] = 0;
+    else if(turn % 2 == 1) {
+        if(v[l] &lt; v[r]) {
+            return memo[l][r] = dfs(l, r+1);
+        } else {
+            return memo[l][r] = dfs(l-1, r);
+        }
+    } else {
+        return memo[l][r] = max(dfs(l-1, r) + v[l], dfs(l, r+1) + v[r]);
+    }
+}
+
+int main() {
+    cin &gt;&gt; n;
+
+    v.resize(n*3);
+    rep(i, n) { 
+        cin &gt;&gt; v[i];
+        v[i+n] = v[i];
+        v[i+n+n] = v[i];
+    }
+
+    ll ans = 0;
+    memset(memo, -1, sizeof(memo));
+
+    rep(i, n) {
+        ans = max(ans, dfs(i-1+n, i+1+n) + v[i]);
+    }
+
+    cout &lt;&lt; ans &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+</feed>
