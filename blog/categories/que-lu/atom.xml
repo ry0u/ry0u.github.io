@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: 確率 | ry0u_ydのblog]]></title>
+  <link href="http://ry0u.github.io/blog/categories/que-lu/atom.xml" rel="self"/>
+  <link href="http://ry0u.github.io/"/>
+  <updated>2016-03-18T23:11:03+09:00</updated>
+  <id>http://ry0u.github.io/</id>
+  <author>
+    <name><![CDATA[ry0u_yd]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ1277 Minimal Backgammon]]></title>
+    <link href="http://ry0u.github.io/blog/2016/03/18/aoj1277-minimal-backgammon/"/>
+    <updated>2016-03-18T22:14:05+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/03/18/aoj1277-minimal-backgammon</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1277">Minimal Backgammon</a></h4><p>Here is a very simple variation of the game backgammon, named "Minimal Backgammon". The game is played by only one player, using only one of the dice and only one checker (the token used by the player). The game board is a line of ( N + 1) squares labeled as 0 (the start) to N (the goal).</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>動的計画法．
+<script type="math/tex; mode=display">
+    dp[i][j] := iターン目にマスjにいる確率
+</script></p>
+
+<p>とする．<script type="math/tex"> i </script>ターン目にマス<script type="math/tex"> j </script>にいる時にサイコロを振るのは
+<script type="math/tex; mode=display">
+    dp[i+1][j+k] = dp[i][j] \cdot (1.0 / 6.0);
+</script>
+と書ける．一回休みの時は<script type="math/tex"> dp[i+2][j+k] </script>，戻るマスは <script type="math/tex"> dp[i+1][0] </script>に遷移する．<script type="math/tex"> n </script>マスを追い越した時に戻ってくる処理でバグバグした．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+double dp[105][105];
+
+int main() {
+    int n, t, l, b;
+    while(cin &gt;&gt; n &gt;&gt; t &gt;&gt; l &gt;&gt; b) {
+        if(n == 0 &amp;&amp; t == 0 &amp;&amp; l == 0 &amp;&amp; b == 0) break;
+
+        memset(dp, 0, sizeof(dp));
+
+        bool lose[105], back[1005];
+        memset(lose, 0, sizeof(lose));
+        memset(back, 0, sizeof(back));
+
+        rep(i, l) {
+            int x;
+            cin &gt;&gt; x;
+            lose[x] = true;
+        }
+
+        rep(i, b) {
+            int x;
+            cin &gt;&gt; x;
+            back[x] = true;
+        }
+
+        memset(dp, 0, sizeof(dp));
+
+        dp[0][0] = 1.0;
+        rep(i, t) {
+            rep(j, n) {
+                if(dp[i][j] == 0.0) continue;
+                REP(k, 1, 7) {
+                    int p = j + k;
+                    if(p &gt; n) p = n - (p - n);
+
+                    if(lose[p]) {
+                        dp[i+2][p] += dp[i][j] * (1.0 / 6.0);
+                    } else if(back[p]) {
+                        dp[i+1][0] += dp[i][j] * (1.0 / 6.0);
+                    } else {
+                        dp[i+1][p] += dp[i][j] * (1.0 / 6.0);
+                    }
+                }
+            }
+        }
+
+        double ans = 0;
+        rep(i, t + 1) {
+            ans += dp[i][n];
+        }
+
+        cout &lt;&lt; fixed;
+        cout.precision(20);
+        cout &lt;&lt; ans &lt;&lt; endl;
+    }
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+</feed>
