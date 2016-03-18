@@ -4,7 +4,7 @@
   <title><![CDATA[Category: aoj | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/aoj/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-03-18T09:31:45+09:00</updated>
+  <updated>2016-03-18T15:46:07+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,127 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ0612 Sandcastle]]></title>
+    <link href="http://ry0u.github.io/blog/2016/03/18/aoj0612-sandcastle/"/>
+    <updated>2016-03-18T15:40:40+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/03/18/aoj0612-sandcastle</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0612">Sandcastle | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>最初に崩壊するマスをqueueに突っ込む．そのマスが崩壊したことによって崩壊するマスは隣接しているマスのみなので，queueから取ってきた時に隣接するマスのカウンタを<script type="math/tex"> +1 </script>して崩壊するならまたqueueに突っ込む．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+#include &lt;queue&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int h, w;
+int dy[8] = { 1, 1, 1, 0, 0,-1,-1,-1};
+int dx[8] = { 1, 0,-1, 1,-1, 1, 0,-1};
+
+bool can(int y, int x) {
+    if(0 &lt;= y &amp;&amp; y &lt; h &amp;&amp; 0 &lt;= x &amp;&amp; x &lt; w) return true;
+    return false;
+}
+
+
+int cnt[1005][1005];
+bool inQ[1005][1005], used[1005][1005];
+
+int main() {
+    cin &gt;&gt; h &gt;&gt; w;
+
+    vector&lt;string&gt; s(h);
+    rep(i, h) cin &gt;&gt; s[i];
+
+    memset(cnt, 0, sizeof(cnt));
+    memset(used, 0, sizeof(used));
+    memset(inQ, 0, sizeof(inQ));
+
+    queue&lt;P&gt; que;
+    rep(i, h) {
+        rep(j, w) {
+            if(s[i][j] != '.') {
+                rep(k, 8) {
+                    int y = i + dy[k];
+                    int x = j + dx[k];
+                    if(can(y, x) &amp;&amp; s[y][x] == '.') {
+                        cnt[i][j]++;
+                    }
+                }
+                if(s[i][j] - '0' &lt;= cnt[i][j]) {
+                    que.push(mp(i, j));
+                    used[i][j] = true;
+                }
+            }
+        }
+    }
+
+
+    int ans = 0;
+    while(que.size()) {
+        queue&lt;P&gt; tmp;
+        while(que.size()) {
+            P p = que.front();
+            que.pop();
+
+            rep(k, 8) {
+                int y = p.first + dy[k];
+                int x = p.second + dx[k];
+
+                if(can(y, x)) {
+                    cnt[y][x]++;
+                    if(s[y][x] != '.' &amp;&amp; (s[y][x] - '0') &lt;= cnt[y][x] &amp;&amp; !used[y][x]) {
+                        used[y][x] = true;
+                        tmp.push(mp(y, x));
+                    }
+                }
+            }
+        }
+
+        while(tmp.size()) {
+            P p = tmp.front();
+            tmp.pop();
+            que.push(p);
+        }
+
+        ans++;
+    }
+
+    cout &lt;&lt; ans &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[AOJ0611 Silk Road]]></title>
@@ -29,11 +150,11 @@
 <!-- more -->
 
 
-<p>{% math %}
+<p><script type="math/tex; mode=display">
     dp[i][j] := 都市iにj日目に到達した時に疲労度の最小値
-{% endmath %}</p>
+</script></p>
 
-<p>とする．{% m %} 都市i-1 {% em %}に{% m %} j日未満に {% em %}到達している時の最小値から移動するのが，都市{% m %} i {% em %}に {% m %} j {% em %}日目に到達する時の最小となる．これを繰り返す．{% m %} O(nm log m) {% em %}．</p>
+<p>とする．<script type="math/tex"> 都市i-1 </script>に<script type="math/tex"> j日未満に </script>到達している時の最小値から移動するのが，都市<script type="math/tex"> i </script>に <script type="math/tex"> j </script>日目に到達する時の最小となる．これを繰り返す．<script type="math/tex"> O(nm log m) </script>．</p>
 
 <h1>Code</h1>
 
@@ -155,7 +276,7 @@ int main() {
 <!-- more -->
 
 
-<p>状態を {% m %} (cost, id, state) {% em %}として，現在どちら方向の扉が空いているかを持ってdijkstra．扉が空いている方向で最小値を更新出来る場所に行く．TLEを連発した．時間制限が1secで0.94secでギリギリ通した．変にlogをつけて死んでいた．</p>
+<p>状態を <script type="math/tex"> (cost, id, state) </script>として，現在どちら方向の扉が空いているかを持ってdijkstra．扉が空いている方向で最小値を更新出来る場所に行く．TLEを連発した．時間制限が1secで0.94secでギリギリ通した．変にlogをつけて死んでいた．</p>
 
 <h1>Code</h1>
 
@@ -306,22 +427,22 @@ int main() {
 
 <p>待機用レールは列車を組み始めたら使えない．最初に避難させることは出来るが使いはじめる場所を決めたら，その列車を使うか，その列車以降を使わないかになる．</p>
 
-<p>{% math %}
+<p><script type="math/tex; mode=display">
 \begin{eqnarray}
     dp[i][j][0] &amp;:=&amp; Sをiまで，Tをjまで見て，末尾がOの時の最大値 \
     dp[i][j][1] &amp;:=&amp; Sをiまで，Tをjまで見て，末尾がIの時の最大値
 \end{eqnarray}
-{% endmath %}</p>
+</script></p>
 
 <p>このように状態を持つと遷移は4パターンになる．</p>
 
-<p>{% img /images/AOJ/0604-1.png %}
-{% img /images/AOJ/0604-2.png %}</p>
+<p><img src="/images/AOJ/0604-1.png">
+<img src="/images/AOJ/0604-2.png"></p>
 
-<p>{% img /images/AOJ/0604-3.png %}
-{% img /images/AOJ/0604-4.png %}</p>
+<p><img src="/images/AOJ/0604-3.png">
+<img src="/images/AOJ/0604-4.png"></p>
 
-<p>最初は {% m %} I {% em %}で始め， {% m %} I {% em %}で終わることに注意する．また，どちらかの列車を全く使わなくても良いので最初に空白を入れて表現してみた(変だ)．</p>
+<p>最初は <script type="math/tex"> I </script>で始め， <script type="math/tex"> I </script>で終わることに注意する．また，どちらかの列車を全く使わなくても良いので最初に空白を入れて表現してみた(変だ)．</p>
 
 <h1>Code</h1>
 
@@ -447,7 +568,7 @@ int main() {
 
 
 <p>と思ったけど，連続，非連続で違った．<br/>
-連続して{% m %} 01 {% em %}，または{% m %} 10 {% em %}の列に分ける．{% m %} 1 {% em %}つの列を反転するとその前後の列を含む{% m %} 01, 10 {% em %}列になる．</p>
+連続して<script type="math/tex"> 01 </script>，または<script type="math/tex"> 10 </script>の列に分ける．<script type="math/tex"> 1 </script>つの列を反転するとその前後の列を含む<script type="math/tex"> 01, 10 </script>列になる．</p>
 
 <h1>Code</h1>
 
@@ -499,139 +620,6 @@ int main() {
     }
 
     cout &lt;&lt; ans &lt;&lt; endl;
-
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[AOJ0601 Sugar Glider]]></title>
-    <link href="http://ry0u.github.io/blog/2016/03/11/aoj0601-sugar-glider/"/>
-    <updated>2016-03-11T16:43:50+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/03/11/aoj0601-sugar-glider</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0601">Sugar Glider | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
-
-
-<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
-
-
-
-
-<!-- more -->
-
-
-<p>現在の場所までのコスト，高さを持ってdijkstra．次の木に飛び移る時に高さが{% m %} 0 {% em %}より小さくなる場合，不足分を登ってから飛び移る．この時に，現在の木の高さが(現在の高さ+不足分)より小さいかをチェックする．また，次の木の高さを超えて場合，逆に下ってから飛び移る．この時に，不足分下った高さが{% m %} 0 {% em %}より大きいかどうかをチェックする．<br/>
-最終目標が木{% m %} N {% em %}の一番上なので，答えは{% m %} d[n-1] + (H[n-1] - Y[n-1]) {% em %}となる．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-#include &lt;queue&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1LL&lt;&lt;62
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;ll, ll&gt; P;
-typedef pair&lt;P, ll&gt; PP;
-
-struct edge {
-    int from,to;
-    ll cost;
-
-    edge(int t,int c) : to(t),cost(c) {}
-    edge(int f,int t,int c) : from(f),to(t),cost(c) {}
-
-    bool operator&lt;(const edge &amp;e) const {
-        return cost &lt; e.cost;
-    }
-};
-
-ll H[100005], Y[100005];
-vector&lt;edge&gt; G[100005];
-ll d[100005];
-
-void dijkstra(int s, int n, int h) {
-    priority_queue&lt;PP,vector&lt;PP&gt;,greater&lt;PP&gt; &gt; que;
-    fill(d,d+n,INF);
-
-    d[s] = 0;
-    Y[s] = h;
-    que.push(PP(P(0, h), s));
-
-    while(que.size()) {
-        PP p = que.top();
-        que.pop();
-
-        ll cost = p.first.first;
-        ll cur = p.first.second;
-        int v = p.second;
-        if(d[v] &lt; cost) continue;
-
-        rep(i,G[v].size()) {
-            edge e = G[v][i];
-
-            if(H[v] &lt; e.cost) continue;
-
-            if(cur - e.cost &lt; 0) {
-                if(e.cost - cur &lt;= H[v] - cur &amp;&amp; d[e.to] &gt; d[v] + (e.cost - cur) + e.cost) {
-                    d[e.to] = d[v] + (e.cost - cur) + e.cost;
-                    Y[e.to] = 0;
-                    que.push(PP(P(d[e.to], 0), e.to));
-                }
-            } else if(cur - e.cost &gt; H[e.to]) {
-                if(cur - ((cur - e.cost) - H[e.to]) &gt;= 0 &amp;&amp; d[e.to] &gt; d[v] + ((cur - e.cost) - H[e.to]) + e.cost) {
-                    d[e.to] = d[v] + ((cur - e.cost) - H[e.to]) + e.cost;
-                    Y[e.to] = cur - ((cur - e.cost) - H[e.to]) - e.cost;
-                    que.push(PP(P(d[e.to], cur - ((cur - e.cost) - H[e.to]) - e.cost), e.to));
-                }
-            } else {
-                if(d[e.to] &gt; d[v] + e.cost) {
-                    d[e.to] = d[v] + e.cost;
-                    Y[e.to] = cur - e.cost;
-                    que.push(PP(P(d[e.to], cur - e.cost), e.to));
-                }
-            }
-        }
-    }
-}
-
-int main() {
-    int n, m, h;
-    cin &gt;&gt; n &gt;&gt; m &gt;&gt; h;
-
-    memset(H, 0, sizeof(H));
-    memset(Y, 0, sizeof(Y));
-
-    rep(i, n) cin &gt;&gt; H[i];
-    rep(i, m) {
-        ll a, b, c;
-        cin &gt;&gt; a &gt;&gt; b &gt;&gt; c;
-
-        a--;
-        b--;
-
-        G[a].push_back(edge(b, c));
-        G[b].push_back(edge(a, c));
-    }
-
-    dijkstra(0, n, h);
-
-    if(d[n-1] == INF) cout &lt;&lt; -1 &lt;&lt; endl;
-    else cout &lt;&lt; d[n-1] + (H[n-1] - Y[n-1]) &lt;&lt; endl;
 
     return 0;
 }

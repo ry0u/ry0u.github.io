@@ -4,7 +4,7 @@
   <title><![CDATA[Category: シュミレーション | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/siyumiresiyon/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-03-18T09:31:45+09:00</updated>
+  <updated>2016-03-18T15:46:07+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,127 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ0612 Sandcastle]]></title>
+    <link href="http://ry0u.github.io/blog/2016/03/18/aoj0612-sandcastle/"/>
+    <updated>2016-03-18T15:40:40+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/03/18/aoj0612-sandcastle</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0612">Sandcastle | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>最初に崩壊するマスをqueueに突っ込む．そのマスが崩壊したことによって崩壊するマスは隣接しているマスのみなので，queueから取ってきた時に隣接するマスのカウンタを<script type="math/tex"> +1 </script>して崩壊するならまたqueueに突っ込む．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+#include &lt;queue&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int h, w;
+int dy[8] = { 1, 1, 1, 0, 0,-1,-1,-1};
+int dx[8] = { 1, 0,-1, 1,-1, 1, 0,-1};
+
+bool can(int y, int x) {
+    if(0 &lt;= y &amp;&amp; y &lt; h &amp;&amp; 0 &lt;= x &amp;&amp; x &lt; w) return true;
+    return false;
+}
+
+
+int cnt[1005][1005];
+bool inQ[1005][1005], used[1005][1005];
+
+int main() {
+    cin &gt;&gt; h &gt;&gt; w;
+
+    vector&lt;string&gt; s(h);
+    rep(i, h) cin &gt;&gt; s[i];
+
+    memset(cnt, 0, sizeof(cnt));
+    memset(used, 0, sizeof(used));
+    memset(inQ, 0, sizeof(inQ));
+
+    queue&lt;P&gt; que;
+    rep(i, h) {
+        rep(j, w) {
+            if(s[i][j] != '.') {
+                rep(k, 8) {
+                    int y = i + dy[k];
+                    int x = j + dx[k];
+                    if(can(y, x) &amp;&amp; s[y][x] == '.') {
+                        cnt[i][j]++;
+                    }
+                }
+                if(s[i][j] - '0' &lt;= cnt[i][j]) {
+                    que.push(mp(i, j));
+                    used[i][j] = true;
+                }
+            }
+        }
+    }
+
+
+    int ans = 0;
+    while(que.size()) {
+        queue&lt;P&gt; tmp;
+        while(que.size()) {
+            P p = que.front();
+            que.pop();
+
+            rep(k, 8) {
+                int y = p.first + dy[k];
+                int x = p.second + dx[k];
+
+                if(can(y, x)) {
+                    cnt[y][x]++;
+                    if(s[y][x] != '.' &amp;&amp; (s[y][x] - '0') &lt;= cnt[y][x] &amp;&amp; !used[y][x]) {
+                        used[y][x] = true;
+                        tmp.push(mp(y, x));
+                    }
+                }
+            }
+        }
+
+        while(tmp.size()) {
+            P p = tmp.front();
+            tmp.pop();
+            que.push(p);
+        }
+
+        ans++;
+    }
+
+    cout &lt;&lt; ans &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[SRM683 D2M MoveStonesEasy]]></title>
@@ -91,13 +212,13 @@
 <!-- more -->
 
 
-<p>やることは， {% m %} f_0とf_1 {% em %}選び，シュミレーションする．本番中はpretest 3でTLEを出して，これじゃあ間に合わないと考えていたが，単純に{% m %} 0 {% em %}を考慮していないためだった．<br/>
-最初に {% m %} 0 {% em %}をはじいて，全て{% m %} 0 {% em %}のみのパターンか最初に{% m %} 0 {% em %}をつけるパターンのみでいいと思っていたが，途中で{% m %} 0 {% em %}を経由するパターンも普通にあってそこに気づかなかった．<br/>
+<p>やることは， <script type="math/tex"> f_0とf_1 </script>選び，シュミレーションする．本番中はpretest 3でTLEを出して，これじゃあ間に合わないと考えていたが，単純に<script type="math/tex"> 0 </script>を考慮していないためだった．<br/>
+最初に <script type="math/tex"> 0 </script>をはじいて，全て<script type="math/tex"> 0 </script>のみのパターンか最初に<script type="math/tex"> 0 </script>をつけるパターンのみでいいと思っていたが，途中で<script type="math/tex"> 0 </script>を経由するパターンも普通にあってそこに気づかなかった．<br/>
 またsetに突っ込んでその数があるかを確認していたけど，同じ数が出てくるパターンがあるので最初にどの数が何個あるかをmapで持たなければいけなかった．<br/>
 stackに積んでおけば後に続く項の個数が分かるので
-{% math %}
+<script type="math/tex; mode=display">
     memo[mp(a, b)] := (a, b)の時の後に続く項の個数
-{% endmath %}
+</script>
 とかやるのかな思ったけど，(a, b)にいたるまでに使ってきた数が違えば後に続く項も違いダメだった．</p>
 
 <h1>Code</h1>
@@ -182,14 +303,14 @@ int main() {
     <link href="http://ry0u.github.io/blog/2016/02/29/srm682-d2m-topbiologist/"/>
     <updated>2016-02-29T00:36:01+09:00</updated>
     <id>http://ry0u.github.io/blog/2016/02/29/srm682-d2m-topbiologist</id>
-    <content type="html"><![CDATA[<p>大文字アルファベットの{% m %}A, C, G, T{% em %}で構成される文字列が与えられる．この文字列に含まれない最小の{% m %}A, C, G, T{% em %}で構成される文字列を返す．</p>
+    <content type="html"><![CDATA[<p>大文字アルファベットの<script type="math/tex">A, C, G, T</script>で構成される文字列が与えられる．この文字列に含まれない最小の<script type="math/tex">A, C, G, T</script>で構成される文字列を返す．</p>
 
 <!-- more -->
 
 
 <hr />
 
-<p>与えられる文字列の長さは最大で{% m %}2000{% em %}なので長さ{% m %}6{% em %}の文字列が最大となる（長さ{% m %}5{% em %}の文字列を単純に連結すれば{% m %}5120{% em %}になるが上手いこと組み合わせれば{% m %}2000{% em %}以下になる）．</p>
+<p>与えられる文字列の長さは最大で<script type="math/tex">2000</script>なので長さ<script type="math/tex">6</script>の文字列が最大となる（長さ<script type="math/tex">5</script>の文字列を単純に連結すれば<script type="math/tex">5120</script>になるが上手いこと組み合わせれば<script type="math/tex">2000</script>以下になる）．</p>
 
 <p>愚直に探索し，その文字列が見つからなければ返す．<br/>
 部分文字列を全て列挙しmapに突っ込んだらMLEして落とした．</p>
@@ -322,127 +443,6 @@ int main() {
     return 0;
 }
 </code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[AOJ0534 Chain]]></title>
-    <link href="http://ry0u.github.io/blog/2016/02/09/aoj0534-chain/"/>
-    <updated>2016-02-09T15:14:15+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/02/09/aoj0534-chain</id>
-    <content type="html"><![CDATA[<p>問題文<br/>
-<a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0534">http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0534</a></p>
-
-<!-- more -->
-
-
-<p>まず，色を変えるのを選ぶ．変える色は前後のどちらかの色にする．次に色を変えた状態で何個残るかをシュミレーションする．<br/>
-シュミレーションは上から見て行く．同じ色の塊で(色，個数)をstackに積んでいく．もし4つ以上連続している場合はstackには積まない(消える)．stackのtopと現在見てる個数が4を超えればpopして，超えない場合はpushすることで連鎖を表現出来る．{% m %} O(N^2) {% em %}</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-#include &lt;stack&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-int func(vector&lt;int&gt;&amp; v) {
-    stack&lt;P&gt; st;
-    int n = v.size(), ret = 0;
-
-    rep(i, n) {
-        int len = 1, c = v[i];
-        REP(j, i+1, n) {
-            if(c == v[j]) {
-                i++;
-                len++;
-                continue;
-            } else break;
-        }
-
-        if(len &gt;= 4) continue;
-        else {
-            if(st.size() == 0) {
-                st.push(mp(c, len));
-                ret += len;
-            } else {
-                P p = st.top();
-                if(p.first == c) {
-                    if(p.second + len &lt; 4) {
-                        st.top().second += len;
-                        ret += len;
-                    } else {
-                        st.pop();
-                        ret -= p.second;
-                    }
-                } else {
-                    st.push(mp(c, len));
-                    ret += len;
-                }
-            }
-        }
-    }
-
-    return ret;
-}
-
-int main() {
-    int n;
-    while(cin &gt;&gt; n &amp;&amp; n) {
-
-        vector&lt;int&gt; v(n);
-        rep(i, n) cin &gt;&gt; v[i];
-
-        int ans = n + 1;
-        rep(i, n) {
-            int t = v[i];
-
-            v[i] = 1;
-            if(i == 0) {
-                v[i] = v[i+1];
-                ans = min(ans, func(v));
-            } else if(i == n-1) {
-                v[i] = v[i-1];
-                ans = min(ans, func(v));
-            } else {
-                if(v[i+1] == v[i-1]) {
-                    v[i] = v[i+1];
-                    ans = min(ans, func(v));
-                } else {
-                    v[i] = v[i-1];
-                    ans = min(ans, func(v));
-
-                    v[i] = v[i+1];
-                    ans = min(ans, func(v));
-                }
-            }
-
-            v[i] = t;
-        }
-
-        cout &lt;&lt; ans &lt;&lt; endl;
-    }
-
-    return 0;
-}
-</code></pre>
-
-<p>制限時間が結構厳しかった．TLEを連発して0.96secまで落とした．</p>
 ]]></content>
   </entry>
   
