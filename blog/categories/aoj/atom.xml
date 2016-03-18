@@ -4,7 +4,7 @@
   <title><![CDATA[Category: aoj | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/aoj/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-03-16T01:43:55+09:00</updated>
+  <updated>2016-03-18T09:31:45+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,132 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ0611 Silk Road]]></title>
+    <link href="http://ry0u.github.io/blog/2016/03/18/aoj0611-silk-road/"/>
+    <updated>2016-03-18T01:27:54+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/03/18/aoj0611-silk-road</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0611">Silk Road | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>{% math %}
+    dp[i][j] := 都市iにj日目に到達した時に疲労度の最小値
+{% endmath %}</p>
+
+<p>とする．{% m %} 都市i-1 {% em %}に{% m %} j日未満に {% em %}到達している時の最小値から移動するのが，都市{% m %} i {% em %}に {% m %} j {% em %}日目に到達する時の最小となる．これを繰り返す．{% m %} O(nm log m) {% em %}．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+struct RMQ {
+    int n;
+    vector&lt;ll&gt; dat;
+
+    RMQ(int n_) {
+        n = 1;
+        while(n &lt; n_) n *= 2;
+
+        dat.resize(n*4);
+        rep(i,n*4) dat[i] = INF;
+    }
+
+    void update(int k,ll a) {
+        int i = k+n-1;
+        dat[i] = a;
+
+        while(i &gt; 0) {
+            i = (i-1) / 2;
+            dat[i] = min(dat[i*2+1],dat[i*2+2]);
+        }
+    }
+
+    //[a,b)
+    //query(a,b,0,0,n)
+    ll _query(int a,int b,int k,int l,int r) {
+        if(r &lt;= a || b &lt;= l) return INF;
+
+        if(a &lt;= l &amp;&amp; r &lt;= b) return dat[k];
+        else { 
+            ll vl = _query(a,b,k*2+1,l,(l+r)/2);
+            ll vr = _query(a,b,k*2+2,(l+r)/2,r);
+            return min(vl,vr);
+        }
+    }
+
+    //[a,b)
+    ll query(int a,int b) {
+        return _query(a,b,0,0,n);
+    }
+};
+
+ll dp[1005][1005], d[1005][1005];
+
+int main() {
+    int n, m;
+    cin &gt;&gt; n &gt;&gt; m;
+
+    vector&lt;ll&gt; D(n), C(m);
+    rep(i, n) cin &gt;&gt; D[i];
+    rep(i, m) cin &gt;&gt; C[i];
+
+    rep(i, n) {
+        rep(j, m) dp[i][j] = INF;
+    }
+
+    rep(i, n) {
+        rep(j, m) d[i][j] = D[i] * C[j];
+    }
+
+    rep(j, m) dp[0][j] = D[0] * C[j];
+
+    REP(i, 1, n) {
+        RMQ rmq(m);
+        rep(j, m) rmq.update(j, dp[i-1][j]);
+
+        rep(j, m) {
+            dp[i][j] = rmq.query(0, j) + d[i][j];
+        }
+    }
+
+    ll ans = INF;
+    rep(j, m) {
+        ans = min(ans, dp[n-1][j]);
+    }
+
+    cout &lt;&lt; ans &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[AOJ0605 Modern Mansion]]></title>
@@ -29,7 +155,7 @@
 <!-- more -->
 
 
-<p>状態を <script type="math/tex"> (cost, id, state) </script>として，現在どちら方向の扉が空いているかを持ってdijkstra．扉が空いている方向で最小値を更新出来る場所に行く．TLEを連発した．時間制限が1secで0.94secでギリギリ通した．変にlogをつけて死んでいた．</p>
+<p>状態を {% m %} (cost, id, state) {% em %}として，現在どちら方向の扉が空いているかを持ってdijkstra．扉が空いている方向で最小値を更新出来る場所に行く．TLEを連発した．時間制限が1secで0.94secでギリギリ通した．変にlogをつけて死んでいた．</p>
 
 <h1>Code</h1>
 
@@ -180,22 +306,22 @@ int main() {
 
 <p>待機用レールは列車を組み始めたら使えない．最初に避難させることは出来るが使いはじめる場所を決めたら，その列車を使うか，その列車以降を使わないかになる．</p>
 
-<p><script type="math/tex; mode=display">
+<p>{% math %}
 \begin{eqnarray}
     dp[i][j][0] &amp;:=&amp; Sをiまで，Tをjまで見て，末尾がOの時の最大値 \
     dp[i][j][1] &amp;:=&amp; Sをiまで，Tをjまで見て，末尾がIの時の最大値
 \end{eqnarray}
-</script></p>
+{% endmath %}</p>
 
 <p>このように状態を持つと遷移は4パターンになる．</p>
 
-<p><img src="/images/AOJ/0604-1.png">
-<img src="/images/AOJ/0604-2.png"></p>
+<p>{% img /images/AOJ/0604-1.png %}
+{% img /images/AOJ/0604-2.png %}</p>
 
-<p><img src="/images/AOJ/0604-3.png">
-<img src="/images/AOJ/0604-4.png"></p>
+<p>{% img /images/AOJ/0604-3.png %}
+{% img /images/AOJ/0604-4.png %}</p>
 
-<p>最初は <script type="math/tex"> I </script>で始め， <script type="math/tex"> I </script>で終わることに注意する．また，どちらかの列車を全く使わなくても良いので最初に空白を入れて表現してみた(変だ)．</p>
+<p>最初は {% m %} I {% em %}で始め， {% m %} I {% em %}で終わることに注意する．また，どちらかの列車を全く使わなくても良いので最初に空白を入れて表現してみた(変だ)．</p>
 
 <h1>Code</h1>
 
@@ -321,7 +447,7 @@ int main() {
 
 
 <p>と思ったけど，連続，非連続で違った．<br/>
-連続して<script type="math/tex"> 01 </script>，または<script type="math/tex"> 10 </script>の列に分ける．<script type="math/tex"> 1 </script>つの列を反転するとその前後の列を含む<script type="math/tex"> 01, 10 </script>列になる．</p>
+連続して{% m %} 01 {% em %}，または{% m %} 10 {% em %}の列に分ける．{% m %} 1 {% em %}つの列を反転するとその前後の列を含む{% m %} 01, 10 {% em %}列になる．</p>
 
 <h1>Code</h1>
 
@@ -396,8 +522,8 @@ int main() {
 <!-- more -->
 
 
-<p>現在の場所までのコスト，高さを持ってdijkstra．次の木に飛び移る時に高さが<script type="math/tex"> 0 </script>より小さくなる場合，不足分を登ってから飛び移る．この時に，現在の木の高さが(現在の高さ+不足分)より小さいかをチェックする．また，次の木の高さを超えて場合，逆に下ってから飛び移る．この時に，不足分下った高さが<script type="math/tex"> 0 </script>より大きいかどうかをチェックする．<br/>
-最終目標が木<script type="math/tex"> N </script>の一番上なので，答えは<script type="math/tex"> d[n-1] + (H[n-1] - Y[n-1]) </script>となる．</p>
+<p>現在の場所までのコスト，高さを持ってdijkstra．次の木に飛び移る時に高さが{% m %} 0 {% em %}より小さくなる場合，不足分を登ってから飛び移る．この時に，現在の木の高さが(現在の高さ+不足分)より小さいかをチェックする．また，次の木の高さを超えて場合，逆に下ってから飛び移る．この時に，不足分下った高さが{% m %} 0 {% em %}より大きいかどうかをチェックする．<br/>
+最終目標が木{% m %} N {% em %}の一番上なので，答えは{% m %} d[n-1] + (H[n-1] - Y[n-1]) {% em %}となる．</p>
 
 <h1>Code</h1>
 
@@ -506,99 +632,6 @@ int main() {
 
     if(d[n-1] == INF) cout &lt;&lt; -1 &lt;&lt; endl;
     else cout &lt;&lt; d[n-1] + (H[n-1] - Y[n-1]) &lt;&lt; endl;
-
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[AOJ0600 Baumkuchen]]></title>
-    <link href="http://ry0u.github.io/blog/2016/03/10/aoj0600-baumkuchen/"/>
-    <updated>2016-03-10T23:01:54+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/03/10/aoj0600-baumkuchen</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0600">Baumkuchen | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
-
-
-<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
-
-
-
-
-<!-- more -->
-
-
-<p>円環を切って2つ繋げて表現する．<script type="math/tex"> sum[i]をi </script>未満の切り込み間の大きさの和として持っておく．区間<script type="math/tex"> (s, t] </script>を<script type="math/tex">3</script>ピースに分けた時の最小値，もう1つの切れ込みを入れる場所を <script type="math/tex"> id </script>と置くと，</p>
-
-<ul>
-<li><script type="math/tex"> (s, t] </script></li>
-<li><script type="math/tex"> (t, id] </script></li>
-<li><script type="math/tex"> (id, s+n]</script></li>
-</ul>
-
-
-<p>の<script type="math/tex"> 3 </script>ピースに分けることになる．区間<script type="math/tex"> (s, t] </script>を最小にしたいので，その区間の大きさ<script type="math/tex"> d </script>を初めて超える場所をlower_boundで取ってくる．後は取ってきた場所から<script type="math/tex"> s+n </script>までの和が<script type="math/tex"> d </script>よりも大きければ良い．もしをこれを満たすようなら，右端を伸ばしてみて，ダメだったら左端を縮める．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-int main() {
-    int n;
-    cin &gt;&gt; n;
-
-    vector&lt;ll&gt; v(n);
-    rep(i, n) cin &gt;&gt; v[i];
-
-    vector&lt;ll&gt; sum(2*n + 1);
-    rep(i, n) {
-        sum[i+1] += sum[i] + v[i];
-    }
-
-    rep(i, n) {
-        sum[n+i+1] += sum[n + i] + v[i];
-    }
-
-    ll ans = 0;
-    int s = 0, t = 0,cnt = 0;
-    bool flag = true, first = true;
-
-    while(true) {
-        if(flag) t++;
-        else s++;
-
-        if(s + n &gt;= sum.size()) break;
-
-        ll d = sum[t] - sum[s];
-        int id = lower_bound(sum.begin(), sum.end(), sum[t]  + (sum[t] - sum[s])) - sum.begin();
-
-        if(s + n &gt; id &amp;&amp; d &lt; sum[s+n] - sum[id]) {
-            ans = max(ans, d);
-            flag = true;
-        } else {
-            flag = false;
-        }
-    }
-
-    cout &lt;&lt; ans &lt;&lt; endl;
 
     return 0;
 }

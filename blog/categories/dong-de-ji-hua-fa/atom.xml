@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 動的計画法 | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/dong-de-ji-hua-fa/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-03-16T01:43:55+09:00</updated>
+  <updated>2016-03-18T09:31:45+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,132 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ0611 Silk Road]]></title>
+    <link href="http://ry0u.github.io/blog/2016/03/18/aoj0611-silk-road/"/>
+    <updated>2016-03-18T01:27:54+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/03/18/aoj0611-silk-road</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0611">Silk Road | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>{% math %}
+    dp[i][j] := 都市iにj日目に到達した時に疲労度の最小値
+{% endmath %}</p>
+
+<p>とする．{% m %} 都市i-1 {% em %}に{% m %} j日未満に {% em %}到達している時の最小値から移動するのが，都市{% m %} i {% em %}に {% m %} j {% em %}日目に到達する時の最小となる．これを繰り返す．{% m %} O(nm log m) {% em %}．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+struct RMQ {
+    int n;
+    vector&lt;ll&gt; dat;
+
+    RMQ(int n_) {
+        n = 1;
+        while(n &lt; n_) n *= 2;
+
+        dat.resize(n*4);
+        rep(i,n*4) dat[i] = INF;
+    }
+
+    void update(int k,ll a) {
+        int i = k+n-1;
+        dat[i] = a;
+
+        while(i &gt; 0) {
+            i = (i-1) / 2;
+            dat[i] = min(dat[i*2+1],dat[i*2+2]);
+        }
+    }
+
+    //[a,b)
+    //query(a,b,0,0,n)
+    ll _query(int a,int b,int k,int l,int r) {
+        if(r &lt;= a || b &lt;= l) return INF;
+
+        if(a &lt;= l &amp;&amp; r &lt;= b) return dat[k];
+        else { 
+            ll vl = _query(a,b,k*2+1,l,(l+r)/2);
+            ll vr = _query(a,b,k*2+2,(l+r)/2,r);
+            return min(vl,vr);
+        }
+    }
+
+    //[a,b)
+    ll query(int a,int b) {
+        return _query(a,b,0,0,n);
+    }
+};
+
+ll dp[1005][1005], d[1005][1005];
+
+int main() {
+    int n, m;
+    cin &gt;&gt; n &gt;&gt; m;
+
+    vector&lt;ll&gt; D(n), C(m);
+    rep(i, n) cin &gt;&gt; D[i];
+    rep(i, m) cin &gt;&gt; C[i];
+
+    rep(i, n) {
+        rep(j, m) dp[i][j] = INF;
+    }
+
+    rep(i, n) {
+        rep(j, m) d[i][j] = D[i] * C[j];
+    }
+
+    rep(j, m) dp[0][j] = D[0] * C[j];
+
+    REP(i, 1, n) {
+        RMQ rmq(m);
+        rep(j, m) rmq.update(j, dp[i-1][j]);
+
+        rep(j, m) {
+            dp[i][j] = rmq.query(0, j) + d[i][j];
+        }
+    }
+
+    ll ans = INF;
+    rep(j, m) {
+        ans = min(ans, dp[n-1][j]);
+    }
+
+    cout &lt;&lt; ans &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[AOJ0604 Take the 'IOI' train]]></title>
@@ -31,22 +157,22 @@
 
 <p>待機用レールは列車を組み始めたら使えない．最初に避難させることは出来るが使いはじめる場所を決めたら，その列車を使うか，その列車以降を使わないかになる．</p>
 
-<p><script type="math/tex; mode=display">
+<p>{% math %}
 \begin{eqnarray}
     dp[i][j][0] &amp;:=&amp; Sをiまで，Tをjまで見て，末尾がOの時の最大値 \
     dp[i][j][1] &amp;:=&amp; Sをiまで，Tをjまで見て，末尾がIの時の最大値
 \end{eqnarray}
-</script></p>
+{% endmath %}</p>
 
 <p>このように状態を持つと遷移は4パターンになる．</p>
 
-<p><img src="/images/AOJ/0604-1.png">
-<img src="/images/AOJ/0604-2.png"></p>
+<p>{% img /images/AOJ/0604-1.png %}
+{% img /images/AOJ/0604-2.png %}</p>
 
-<p><img src="/images/AOJ/0604-3.png">
-<img src="/images/AOJ/0604-4.png"></p>
+<p>{% img /images/AOJ/0604-3.png %}
+{% img /images/AOJ/0604-4.png %}</p>
 
-<p>最初は <script type="math/tex"> I </script>で始め， <script type="math/tex"> I </script>で終わることに注意する．また，どちらかの列車を全く使わなくても良いので最初に空白を入れて表現してみた(変だ)．</p>
+<p>最初は {% m %} I {% em %}で始め， {% m %} I {% em %}で終わることに注意する．また，どちらかの列車を全く使わなくても良いので最初に空白を入れて表現してみた(変だ)．</p>
 
 <h1>Code</h1>
 
@@ -163,23 +289,23 @@ int main() {
 <!-- more -->
 
 
-<p>数列の隣り合う全ての要素<script type="math/tex"> A(1 \leq A \leq k), B(1 \leq B \leq k) </script>が</p>
+<p>数列の隣り合う全ての要素{% m %} A(1 \leq A \leq k), B(1 \leq B \leq k) {% em %}が</p>
 
 <ul>
-<li><script type="math/tex"> A \leq B </script></li>
-<li><script type="math/tex"> A \ \rm{mod} \  B \neq 0 </script></li>
+<li>{% m %} A \leq B {% em %}</li>
+<li>{% m %} A \ \rm{mod} \  B \neq 0 {% em %}</li>
 </ul>
 
 
-<p>のどちらかを満たす数列の数を<script type="math/tex"> \rm{mod} \ 10 ^9 + 7 </script> で求める．</p>
+<p>のどちらかを満たす数列の数を{% m %} \rm{mod} \ 10 ^9 + 7 {% em %} で求める．</p>
 
 <hr />
 
-<p><script type="math/tex; mode=display">
+<p>{% math %}
     dp[i][j] := i番目にjを選んだ時の数列の数
-</script></p>
+{% endmath %}</p>
 
-<p>とする．数列に追加する可能なものを選ぶので<script type="math/tex"> B </script>から考えると，<script type="math/tex"> B </script>より大きい，または<script type="math/tex"> AがB </script>を約数に持たなければ良い．基本的に全て遷移可能として(<script type="math/tex"> dp[i+1][j] += \sum_{l = 1} ^{k} dp[i][l]</script>)，後に約数の場所の遷移を無かったことにすれば良い．</p>
+<p>とする．数列に追加する可能なものを選ぶので{% m %} B {% em %}から考えると，{% m %} B {% em %}より大きい，または{% m %} AがB {% em %}を約数に持たなければ良い．基本的に全て遷移可能として({% m %} dp[i+1][j] += \sum_{l = 1} ^{k} dp[i][l]{% em %})，後に約数の場所の遷移を無かったことにすれば良い．</p>
 
 <h1>Code</h1>
 
@@ -268,19 +394,19 @@ class DivFreed2 {
 <!-- more -->
 
 
-<p>饅頭<script type="math/tex"> i </script>から饅頭<script type="math/tex"> j </script>まで選んだ時の価格が欲しいので，累積和を取っておく．<br/>
-<script type="math/tex; mode=display">
+<p>饅頭{% m %} i {% em %}から饅頭{% m %} j {% em %}まで選んだ時の価格が欲しいので，累積和を取っておく．<br/>
+{% math %}
     dp[i][j] := i番目以内の箱を使い，饅頭jまで詰めた時の最大値
-</script>
-とする．<script type="math/tex"> i </script>番目の箱を</p>
+{% endmath %}
+とする．{% m %} i {% em %}番目の箱を</p>
 
 <ul>
-<li>使う遷移は，<script type="math/tex"> dp[i][j]+(d[j+c[i]]-d[j])-e[i]</script></li>
-<li>使わない遷移は<script type="math/tex"> dp[i][j+c[i]]</script>．</li>
+<li>使う遷移は，{% m %} dp[i][j]+(d[j+c[i]]-d[j])-e[i]{% em %}</li>
+<li>使わない遷移は{% m %} dp[i][j+c[i]]{% em %}．</li>
 </ul>
 
 
-<p><img src="/images/AOJ/0599.png"></p>
+<p>{% img /images/AOJ/0599.png %}</p>
 
 <h1>Code</h1>
 
@@ -379,24 +505,24 @@ int main() {
 
 
 <p>J君，O君，I君がいるかいないかを3ビットで持つ．
-<script type="math/tex; mode=display">
+{% math %}
     dp[i][j] := i日目に状態jの場合のスケジュール表として考えられるものの数
-</script>
+{% endmath %}
 とする．</p>
 
 <ul>
-<li><p><script type="math/tex"> i </script>日目の鍵当番がいるか<br/>
-<script type="math/tex; mode=display">
+<li><p>{% m %} i {% em %}日目の鍵当番がいるか<br/>
+{% math %}
   j \ &amp; \ (1 &lt;&lt; d)
-</script></p></li>
-<li><p><script type="math/tex"> i-1日目に鍵を持ち帰れた人がいるか </script>
-<script type="math/tex; mode=display">
+{% endmath %}</p></li>
+<li><p>{% m %} i-1日目に鍵を持ち帰れた人がいるか {% em %}
+{% math %}
   j \ &amp; \ k
-</script></p></li>
+{% endmath %}</p></li>
 </ul>
 
 
-<p>この条件を満たす場合に遷移可能．<script type="math/tex"> O(n \cdot 2 ^3 \cdot 2 ^3) </script>．</p>
+<p>この条件を満たす場合に遷移可能．{% m %} O(n \cdot 2 ^3 \cdot 2 ^3) {% em %}．</p>
 
 <h1>Code</h1>
 
@@ -456,164 +582,6 @@ int main() {
 
     cout &lt;&lt; ans % MOD &lt;&lt; endl;
 
-
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Manthan, Codefest 16C Spy Syndrome 2]]></title>
-    <link href="http://ry0u.github.io/blog/2016/02/29/manthan-codefest-16c-spy-syndrome-2/"/>
-    <updated>2016-02-29T15:32:14+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/02/29/manthan-codefest-16c-spy-syndrome-2</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-chrome="0" data-card-controls="0"><h4><a href="http://codeforces.com/contest/633/problem/C">Problem - C - Codeforces</a></h4><p>After observing the results of Spy Syndrome, Yash realised the errors of his ways. He now believes that a super spy such as Siddhant can't use a cipher as basic and ancient as Caesar cipher. After many weeks of observation of Siddhant's sentences, Yash determined a new cipher technique.</p></blockquote>
-
-
-
-
-<!-- more -->
-
-
-<p>原文を全て小文字にしてreverseして，接合した文を復元する．<br/>
-まずTrie木を作って文字列が単語リストにあるかを判定出来るようにする．<br/>
-次に，
-<script type="math/tex; mode=display">
-    dp[i] := i番目の文字まで復元可能
-</script>
-とする．Trieのfind関数にその単語そのものがあればTrue, また現在のノードがendであり，その場所の<script type="math/tex"> dp[i] </script>をみて復元可能な時にTrueを返す．その文字列を<script type="math/tex"> S[i] </script>にとっておく．<br/>
-後は末尾から帰ってくれば原文の単語の逆順がわかるのでreverseする．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-string S[10005], ret = "", res = "";
-bool dp[10005];
-
-struct Trie {
-    Trie *next[26];
-    bool end;
-
-    Trie() {
-        fill(next,next+26,(Trie *)0);
-        end = false;
-    }
-
-    void insert(string &amp;s,int i) {
-        if(i == s.size()) {
-            this-&gt;end = true;
-            return;
-        }
-
-        if(this-&gt;next[s[i]-'a'] == NULL) {
-            this-&gt;next[s[i]-'a'] = new Trie();
-        }
-
-        this-&gt;next[s[i]-'a']-&gt;insert(s,i+1);
-    }
-
-    bool find(int s, int i) {
-        if(s - i &gt;= 0 &amp;&amp; dp[s - i] &amp;&amp; this-&gt;end) {
-            string t = "";
-            rep(j, i) {
-                t += ret[s-j];
-            }
-            res = t;
-            return true;
-        }
-
-        if((s + 1) - i == 0) {
-            if(this-&gt;end) {
-                string t = "";
-                rep(j, i) {
-                    t += ret[s-j];
-                }
-                res = t;
-                return true;
-            }
-            else return false;
-        }
-
-        if(this-&gt;next[ret[s-i]-'a'] != NULL) {
-            if(this-&gt;next[ret[s-i]-'a']-&gt;find(s, i+1)) return true;
-        }
-
-        return false;
-    }
-};
-
-
-int main() {
-    int n;
-    cin &gt;&gt; n;
-
-    string s;
-    cin &gt;&gt; s;
-
-    int m;
-    cin &gt;&gt; m;
-
-    vector&lt;string&gt; v(m);
-    map&lt;string, string&gt; f;
-    Trie *trie = new Trie();
-
-    rep(i, m) {
-        cin &gt;&gt; v[i];
-
-        string t = v[i];
-        rep(j, t.size()) {
-            t[j] = tolower(t[j]);
-        }
-
-        f[t] = v[i];
-        trie-&gt;insert(t, 0);
-    }
-
-    memset(dp, 0, sizeof(dp));
-
-    rep(i, n) {
-        ret = ret + s[i];
-
-        if(trie-&gt;find(i, 0)) {
-            S[i] = f[res];
-            dp[i] = true;
-        }
-    }
-
-    vector&lt;string&gt; ans;
-    int cur = n-1;
-    while(dp[cur]) {
-        string t = S[cur];
-        ans.push_back(t);
-        cur -= t.size();
-    }
-
-    reverse(ans.begin(), ans.end());
-
-    rep(i, ans.size()) {
-        cout &lt;&lt; ans[i];
-        if(i == ans.size()-1) cout &lt;&lt; endl;
-        else cout &lt;&lt; " ";
-    }
 
     return 0;
 }
