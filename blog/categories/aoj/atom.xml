@@ -4,7 +4,7 @@
   <title><![CDATA[Category: aoj | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/aoj/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-03-18T23:11:03+09:00</updated>
+  <updated>2016-03-20T22:39:58+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,205 +12,6 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
-  
-  <entry>
-    <title type="html"><![CDATA[AOJ1286 Expected Allowance]]></title>
-    <link href="http://ry0u.github.io/blog/2016/03/18/aoj1286-expected-allowance/"/>
-    <updated>2016-03-18T22:54:03+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/03/18/aoj1286-expected-allowance</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1286">Expected Allowance | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
-
-
-<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
-
-
-
-
-<!-- more -->
-
-
-<p><script type="math/tex; mode=display">
-    dp[i][j] := i回，m面のサイコロを降った時にjが出る回数
-</script></p>
-
-<p>として，シュミレーション．サイコロを振るのは <script type="math/tex"> dp[i+1][j+k] += dp[i][j] </script>と書ける．配列を再利用するために，<script type="math/tex"> iとi+1 </script>の偶奇を見て遷移する．次に遷移する場所に値が残っているとおかしいことになるので，<script type="math/tex"> dp[i][j] </script>からサイコロを振ったらそこは初期化する．分母は全て <script type="math/tex"> m ^n </script>で， <script type="math/tex"> k </script>引いた時に最低でも <script type="math/tex"> 1 </script>になるようにして期待値を求める．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-int dp[2][100005];
-
-int main() {
-    int n, m, k;
-    while(cin &gt;&gt; n &gt;&gt; m &gt;&gt; k) {
-        if(n == 0 &amp;&amp; m == 0 &amp;&amp; k == 0) break;
-
-        memset(dp, 0, sizeof(dp));
-        REP(j, 1, m + 1) {
-            dp[1][j] = 1;
-        }
-
-        rep(i, n) {
-            rep(j, 100005) {
-                if(dp[i &amp; 1][j] == 0) continue;
-                REP(k, 1, m+1) {
-                    dp[(i+1)&amp;1][j+k] += dp[i&amp;1][j];
-                }
-                dp[i&amp;1][j] = 0;
-            }
-        }
-
-        double ans = 0, t = 1;
-        rep(i, n) {
-            t *= m;
-        }
-
-        rep(j, 100005) {
-            if(dp[n&amp;1][j] == 0) continue;
-
-            double l = j - k;
-            if(l &lt;= 0) l = 1;
-            ans += (dp[n &amp; 1][j] / t) * l;
-        }
-
-        cout &lt;&lt; fixed;
-        cout.precision(20);
-        cout &lt;&lt; ans &lt;&lt; endl;
-    }
-
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[AOJ1277 Minimal Backgammon]]></title>
-    <link href="http://ry0u.github.io/blog/2016/03/18/aoj1277-minimal-backgammon/"/>
-    <updated>2016-03-18T22:14:05+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/03/18/aoj1277-minimal-backgammon</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1277">Minimal Backgammon</a></h4><p>Here is a very simple variation of the game backgammon, named "Minimal Backgammon". The game is played by only one player, using only one of the dice and only one checker (the token used by the player). The game board is a line of ( N + 1) squares labeled as 0 (the start) to N (the goal).</p></blockquote>
-
-
-<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
-
-
-
-
-<!-- more -->
-
-
-<p>動的計画法．
-<script type="math/tex; mode=display">
-    dp[i][j] := iターン目にマスjにいる確率
-</script></p>
-
-<p>とする．<script type="math/tex"> i </script>ターン目にマス<script type="math/tex"> j </script>にいる時にサイコロを振るのは
-<script type="math/tex; mode=display">
-    dp[i+1][j+k] = dp[i][j] \cdot (1.0 / 6.0);
-</script>
-と書ける．一回休みの時は<script type="math/tex"> dp[i+2][j+k] </script>，戻るマスは <script type="math/tex"> dp[i+1][0] </script>に遷移する．<script type="math/tex"> n </script>マスを追い越した時に戻ってくる処理でバグバグした．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-double dp[105][105];
-
-int main() {
-    int n, t, l, b;
-    while(cin &gt;&gt; n &gt;&gt; t &gt;&gt; l &gt;&gt; b) {
-        if(n == 0 &amp;&amp; t == 0 &amp;&amp; l == 0 &amp;&amp; b == 0) break;
-
-        memset(dp, 0, sizeof(dp));
-
-        bool lose[105], back[1005];
-        memset(lose, 0, sizeof(lose));
-        memset(back, 0, sizeof(back));
-
-        rep(i, l) {
-            int x;
-            cin &gt;&gt; x;
-            lose[x] = true;
-        }
-
-        rep(i, b) {
-            int x;
-            cin &gt;&gt; x;
-            back[x] = true;
-        }
-
-        memset(dp, 0, sizeof(dp));
-
-        dp[0][0] = 1.0;
-        rep(i, t) {
-            rep(j, n) {
-                if(dp[i][j] == 0.0) continue;
-                REP(k, 1, 7) {
-                    int p = j + k;
-                    if(p &gt; n) p = n - (p - n);
-
-                    if(lose[p]) {
-                        dp[i+2][p] += dp[i][j] * (1.0 / 6.0);
-                    } else if(back[p]) {
-                        dp[i+1][0] += dp[i][j] * (1.0 / 6.0);
-                    } else {
-                        dp[i+1][p] += dp[i][j] * (1.0 / 6.0);
-                    }
-                }
-            }
-        }
-
-        double ans = 0;
-        rep(i, t + 1) {
-            ans += dp[i][n];
-        }
-
-        cout &lt;&lt; fixed;
-        cout.precision(20);
-        cout &lt;&lt; ans &lt;&lt; endl;
-    }
-
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
   
   <entry>
     <title type="html"><![CDATA[AOJ0616 JOI Park]]></title>
@@ -529,6 +330,253 @@ int main() {
     ll ans = 0;
     rep(i, n-1) {
         ans += min(cnt[i] * a[i], cnt[i] * b[i] + c[i]);
+    }
+
+    cout &lt;&lt; ans &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ0612 Sandcastle]]></title>
+    <link href="http://ry0u.github.io/blog/2016/03/18/aoj0612-sandcastle/"/>
+    <updated>2016-03-18T15:40:40+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/03/18/aoj0612-sandcastle</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0612">Sandcastle | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>最初に崩壊するマスをqueueに突っ込む．そのマスが崩壊したことによって崩壊するマスは隣接しているマスのみなので，queueから取ってきた時に隣接するマスのカウンタを<script type="math/tex"> +1 </script>して崩壊するならまたqueueに突っ込む．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+#include &lt;queue&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int h, w;
+int dy[8] = { 1, 1, 1, 0, 0,-1,-1,-1};
+int dx[8] = { 1, 0,-1, 1,-1, 1, 0,-1};
+
+bool can(int y, int x) {
+    if(0 &lt;= y &amp;&amp; y &lt; h &amp;&amp; 0 &lt;= x &amp;&amp; x &lt; w) return true;
+    return false;
+}
+
+
+int cnt[1005][1005];
+bool inQ[1005][1005], used[1005][1005];
+
+int main() {
+    cin &gt;&gt; h &gt;&gt; w;
+
+    vector&lt;string&gt; s(h);
+    rep(i, h) cin &gt;&gt; s[i];
+
+    memset(cnt, 0, sizeof(cnt));
+    memset(used, 0, sizeof(used));
+    memset(inQ, 0, sizeof(inQ));
+
+    queue&lt;P&gt; que;
+    rep(i, h) {
+        rep(j, w) {
+            if(s[i][j] != '.') {
+                rep(k, 8) {
+                    int y = i + dy[k];
+                    int x = j + dx[k];
+                    if(can(y, x) &amp;&amp; s[y][x] == '.') {
+                        cnt[i][j]++;
+                    }
+                }
+                if(s[i][j] - '0' &lt;= cnt[i][j]) {
+                    que.push(mp(i, j));
+                    used[i][j] = true;
+                }
+            }
+        }
+    }
+
+
+    int ans = 0;
+    while(que.size()) {
+        queue&lt;P&gt; tmp;
+        while(que.size()) {
+            P p = que.front();
+            que.pop();
+
+            rep(k, 8) {
+                int y = p.first + dy[k];
+                int x = p.second + dx[k];
+
+                if(can(y, x)) {
+                    cnt[y][x]++;
+                    if(s[y][x] != '.' &amp;&amp; (s[y][x] - '0') &lt;= cnt[y][x] &amp;&amp; !used[y][x]) {
+                        used[y][x] = true;
+                        tmp.push(mp(y, x));
+                    }
+                }
+            }
+        }
+
+        while(tmp.size()) {
+            P p = tmp.front();
+            tmp.pop();
+            que.push(p);
+        }
+
+        ans++;
+    }
+
+    cout &lt;&lt; ans &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ0611 Silk Road]]></title>
+    <link href="http://ry0u.github.io/blog/2016/03/18/aoj0611-silk-road/"/>
+    <updated>2016-03-18T01:27:54+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/03/18/aoj0611-silk-road</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0611">Silk Road | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p><script type="math/tex; mode=display">
+    dp[i][j] := 都市iにj日目に到達した時に疲労度の最小値
+</script></p>
+
+<p>とする．<script type="math/tex"> 都市i-1 </script>に<script type="math/tex"> j日未満に </script>到達している時の最小値から移動するのが，都市<script type="math/tex"> i </script>に <script type="math/tex"> j </script>日目に到達する時の最小となる．これを繰り返す．<script type="math/tex"> O(nm log m) </script>．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+struct RMQ {
+    int n;
+    vector&lt;ll&gt; dat;
+
+    RMQ(int n_) {
+        n = 1;
+        while(n &lt; n_) n *= 2;
+
+        dat.resize(n*4);
+        rep(i,n*4) dat[i] = INF;
+    }
+
+    void update(int k,ll a) {
+        int i = k+n-1;
+        dat[i] = a;
+
+        while(i &gt; 0) {
+            i = (i-1) / 2;
+            dat[i] = min(dat[i*2+1],dat[i*2+2]);
+        }
+    }
+
+    //[a,b)
+    //query(a,b,0,0,n)
+    ll _query(int a,int b,int k,int l,int r) {
+        if(r &lt;= a || b &lt;= l) return INF;
+
+        if(a &lt;= l &amp;&amp; r &lt;= b) return dat[k];
+        else { 
+            ll vl = _query(a,b,k*2+1,l,(l+r)/2);
+            ll vr = _query(a,b,k*2+2,(l+r)/2,r);
+            return min(vl,vr);
+        }
+    }
+
+    //[a,b)
+    ll query(int a,int b) {
+        return _query(a,b,0,0,n);
+    }
+};
+
+ll dp[1005][1005], d[1005][1005];
+
+int main() {
+    int n, m;
+    cin &gt;&gt; n &gt;&gt; m;
+
+    vector&lt;ll&gt; D(n), C(m);
+    rep(i, n) cin &gt;&gt; D[i];
+    rep(i, m) cin &gt;&gt; C[i];
+
+    rep(i, n) {
+        rep(j, m) dp[i][j] = INF;
+    }
+
+    rep(i, n) {
+        rep(j, m) d[i][j] = D[i] * C[j];
+    }
+
+    rep(j, m) dp[0][j] = D[0] * C[j];
+
+    REP(i, 1, n) {
+        RMQ rmq(m);
+        rep(j, m) rmq.update(j, dp[i-1][j]);
+
+        rep(j, m) {
+            dp[i][j] = rmq.query(0, j) + d[i][j];
+        }
+    }
+
+    ll ans = INF;
+    rep(j, m) {
+        ans = min(ans, dp[n-1][j]);
     }
 
     cout &lt;&lt; ans &lt;&lt; endl;
