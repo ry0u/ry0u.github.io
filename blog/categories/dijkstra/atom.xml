@@ -4,7 +4,7 @@
   <title><![CDATA[Category: dijkstra | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/dijkstra/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-03-22T17:13:19+09:00</updated>
+  <updated>2016-03-22T22:11:56+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,206 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ2620 Trodden Cable]]></title>
+    <link href="http://ry0u.github.io/blog/2016/03/22/aoj2620-trodden-cable/"/>
+    <updated>2016-03-22T21:52:44+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/03/22/aoj2620-trodden-cable</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2620">Trodden Cable</a></h4><p>Nathan O. Davis is running a company. His company owns a web service which has a lot of users. So his office is full of servers, routers and messy LAN cables. He is now very puzzling over the messy cables, because they are causing many kinds of problems. For example, staff working at the company often trip over a cable.</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>全く分からずに調べた．</p>
+
+<p><a href="http://acm-icpc.aitea.net/index.php?plugin=attach&amp;refer=2013%2FPractice%2F%E5%A4%8F%E5%90%88%E5%AE%BF%2F%E8%AC%9B%E8%A9%95&amp;openfile=trodden_cable.pdf:image=http://acm-icpc.aitea.net/index.php?plugin=attach&amp;refer=2013%2FPractice%2F%E5%A4%8F%E5%90%88%E5%AE%BF%2F%E8%AC%9B%E8%A9%95&amp;openfile=trodden_cable.pdf">http://acm-icpc.aitea.net/index.php?plugin=attach&amp;refer=2013%2FPractice%2F%E5%A4%8F%E5%90%88%E5%AE%BF%2F%E8%AC%9B%E8%A9%95&amp;openfile=trodden_cable.pdf:image=http://acm-icpc.aitea.net/index.php?plugin=attach&amp;refer=2013%2FPractice%2F%E5%A4%8F%E5%90%88%E5%AE%BF%2F%E8%AC%9B%E8%A9%95&amp;openfile=trodden_cable.pdf</a></p>
+
+<p>この画像が非常に分かりやすい．移動する時にまたがる線のコストを<script type="math/tex"> +1 </script>して，移動が終わったグリッドグラフでdijkstra．</p>
+
+<p>現在位置を(y, x)と置くと</p>
+
+<ul>
+<li><script type="math/tex"> R </script>の時， <script type="math/tex"> (y, x+1) \to (y+1, x+1) </script></li>
+<li><script type="math/tex"> L </script>の時， <script type="math/tex"> (y, x) \to (y+1, x) </script></li>
+<li><script type="math/tex"> U </script>の時， <script type="math/tex"> (y, x) \to (y, x+1) </script></li>
+<li><script type="math/tex"> D </script>の時， <script type="math/tex"> (y+1, x) \to (y+1, x+1) </script></li>
+</ul>
+
+
+<p>に <script type="math/tex"> +1 </script>した．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+#include &lt;queue&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int w, h, n;
+int sx,sy,gx,gy;
+int dx[4] = {1,0,-1,0};
+int dy[4] = {0,1,0,-1};
+
+bool can(int y, int x) {
+    if(0 &lt;= y &amp;&amp; y &lt; h &amp;&amp; 0 &lt;= x &amp;&amp; x &lt; w) return true;
+    return false;
+}
+
+struct edge {
+    int from,to;
+    ll cost;
+
+    edge(int t,int c) : to(t),cost(c) {}
+    edge(int f,int t,int c) : from(f),to(t),cost(c) {}
+
+    bool operator&lt;(const edge &amp;e) const {
+        return cost &lt; e.cost;
+    }
+};
+
+vector&lt;edge&gt; G[505*505 + 5];
+ll d[505 * 505 + 5];
+
+void dijkstra(int s, int n) {
+    priority_queue&lt;P, vector&lt;P&gt;, greater&lt;P&gt; &gt; que;
+    fill(d, d+n, INF);
+
+    d[s] = 0;
+    que.push(P(0,s));
+
+    while(que.size()) {
+        P p = que.top();
+        que.pop();
+
+        int v = p.second;
+        if(d[v] &lt; p.first) continue;
+
+        rep(i, G[v].size()) {
+            edge e = G[v][i];
+            if(d[e.to] &gt; d[v] + e.cost) {
+                d[e.to] = d[v] + e.cost;
+                que.push(P(d[e.to],e.to));
+            }
+        }
+    }
+}
+
+int main() {
+    cin &gt;&gt; w &gt;&gt; h &gt;&gt; n;
+
+    cin &gt;&gt; sx &gt;&gt; sy &gt;&gt; gx &gt;&gt; gy;
+
+    rep(i, h * w) {
+        G[i].clear();
+    }
+
+    w++;
+    h++;
+
+    rep(i, h) {
+        rep(j, w) {
+            rep(k, 4) {
+                int y = i + dy[k];
+                int x = j + dx[k];
+
+                if(can(y, x)) {
+                    G[i*w + j].push_back(edge(y*w + x, 0));
+                }
+            }
+        }
+    }
+
+    rep(i, n) {
+        int y, x, t;
+        cin &gt;&gt; x &gt;&gt; y &gt;&gt; t;
+
+        string s;
+        cin &gt;&gt; s;
+
+        rep(k, t) {
+            rep(j, s.size()) {
+                int from = -1, to = -1;
+                if(s[j] == 'R' &amp;&amp; x + 1 &lt; w - 1) {
+                    from = y * w + (x + 1);
+                    to = (y + 1) * w + (x + 1);
+                    x++;
+                } else if(s[j] == 'L' &amp;&amp; 0 &lt;= x - 1) {
+                    from = y * w + x;
+                    to = (y + 1) * w + x;
+                    x--;
+                } else if(s[j] == 'U' &amp;&amp; 0 &lt;= y - 1) {
+                    from = y * w + x;
+                    to = y * w + (x + 1);
+                    y--;
+                } else if(s[j] == 'D' &amp;&amp; y + 1 &lt; h - 1) {
+                    from = (y + 1) * w + x;
+                    to = (y + 1) * w + (x + 1);
+                    y++;
+                }
+
+                if(from == -1 &amp;&amp; to == -1) continue;
+                rep(k, G[from].size()) {
+                    if(G[from][k].to == to) {
+                        G[from][k].cost++;
+                    }
+                }
+                rep(k, G[to].size()) {
+                    if(G[to][k].to == from) {
+                        G[to][k].cost++;
+                    }
+                }
+            }
+        }
+    }
+
+    // rep(i, h) {
+    //  rep(j, w) {
+    //      cout &lt;&lt; " --------- " &lt;&lt; i &lt;&lt; ", " &lt;&lt; j &lt;&lt; " :" &lt;&lt; i * w + j &lt;&lt; " |";
+    //      rep(k, G[i*w + j].size()) {
+    //          cout &lt;&lt; "(" &lt;&lt; G[i*w + j][k].to &lt;&lt; ", " &lt;&lt; G[i*w + j][k].cost &lt;&lt; ") ";
+    //      }
+    //      cout &lt;&lt; endl;
+    //  }
+    // }
+
+    dijkstra(sy * w + sx, h * w);
+
+    // rep(i, h) {
+    //  rep(j, w) {
+    //      cout &lt;&lt; d[i*w + j] &lt;&lt; " ";
+    //  }
+    //  cout &lt;&lt; endl;
+    // }
+
+    cout &lt;&lt; d[gy * w + gx] &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[AOJ0616 JOI Park]]></title>
