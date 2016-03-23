@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 深さ優先 | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/shen-sayou-xian/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-03-22T22:44:18+09:00</updated>
+  <updated>2016-03-23T20:46:47+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,120 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ1188 Hierarchical Democracy]]></title>
+    <link href="http://ry0u.github.io/blog/2016/03/23/aoj1188-hierarchical-democracy/"/>
+    <updated>2016-03-23T18:25:06+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/03/23/aoj1188-hierarchical-democracy</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1188">Hierarchical Democracy</a></h4><p>The presidential election in Republic of Democratia is carried out through multiple stages as follows. There are exactly two presidential candidates. At the first stage, eligible voters go to the polls of his/her electoral district. The winner of the district is the candidate who takes a majority of the votes.</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>木として考える．葉にその区画に勝つための最小の値， <script type="math/tex"> \frac{値}{2} + 1 </script>を入れる．子の数の半分，小さい順に取っていく．最後に根の値が最小値になっているはず．</p>
+
+<p><img src="/images/AOJ/1188-1.png">
+<img src="/images/AOJ/1188-2.png"></p>
+
+<p><img src="/images/AOJ/1188-3.png"></p>
+
+<p>子の階層から小さい順に取りたいので，priority_queueを利用した．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+#include &lt;queue&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+priority_queue&lt;ll, vector&lt;ll&gt;, greater&lt;ll&gt; &gt; que[100005];
+
+int main() {
+    int n;
+    cin &gt;&gt; n;
+
+    rep(q, n) {
+        rep(i, 100005) {
+            while(que[i].size()) que[i].pop();
+        }
+
+        string s;
+        cin &gt;&gt; s;
+
+        int dep = 0;
+        rep(i, s.size()) {
+
+            if(s[i] == '[') {
+                if(s[i+1] == '[') {
+                    dep++;
+                } else {
+                    stringstream ss;
+                    REP(j, i+1, s.size()) {
+                        if('0' &lt;= s[j] &amp;&amp; s[j] &lt;= '9') {
+                            ss &lt;&lt; s[j];
+                            i++;
+                        } else {
+                            i++;
+                            break;
+                        }
+                    }
+
+                    ll x;
+                    ss &gt;&gt; x;
+
+                    x = x / 2 + 1;
+                    que[dep].push(x);
+                }
+            } else if(s[i] == ']') {
+                int m = que[dep].size();
+                ll sum = 0;
+
+                rep(j, m/2 + 1) {
+                    sum += que[dep].top();
+                    que[dep].pop();
+                }
+
+                que[dep-1].push(sum);
+
+                while(que[dep].size()) {
+                    que[dep].pop();
+                }
+
+                dep--;
+            }
+
+        }
+
+        cout &lt;&lt; que[0].top() &lt;&lt; endl;
+    }
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[AOJ1144 Curling 2.0]]></title>

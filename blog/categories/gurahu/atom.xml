@@ -4,7 +4,7 @@
   <title><![CDATA[Category: グラフ | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/gurahu/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-03-22T22:44:18+09:00</updated>
+  <updated>2016-03-23T20:46:47+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,142 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ2021 Princess in Danger]]></title>
+    <link href="http://ry0u.github.io/blog/2016/03/23/aoj2021-princess-in-danger/"/>
+    <updated>2016-03-23T19:48:34+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/03/23/aoj2021-princess-in-danger</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2021">Princess in Danger | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>状態を <script type="math/tex"> (cost, 残り時間, 番号) </script>としてdijkstra．現在の状態の残り時間のほうが辺のコストより大きい時に，次の町に行くことが可能．冷凍施設にいるときは， 現在の残り時間から<script type="math/tex"> M </script>まで回復出来るので <script type="math/tex"> 1 </script>分ずつ試す．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+#include &lt;queue&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+typedef pair&lt;P, int&gt; PI;
+typedef pair&lt;P, P &gt; PP;
+
+struct edge {
+    int from,to;
+    int cost;
+
+    edge(int t,int c) : to(t),cost(c) {}
+    edge(int f,int t,int c) : from(f),to(t),cost(c) {}
+
+    bool operator&lt;(const edge &amp;e) const {
+        return cost &lt; e.cost;
+    }
+};
+
+int n, m, l, k, a, h;
+vector&lt;edge&gt; G[105];
+int d[105][105];
+bool L[105];
+
+void dijkstra(int s) {
+    priority_queue&lt;PI, vector&lt;PI&gt;, greater&lt;PI&gt; &gt; que;
+    rep(i, 105) {
+        rep(j, 105) {
+            d[i][j] = INF;
+        }
+    }
+
+    d[s][m] = 0;
+    que.push(PI(P(0, m), s));
+
+    while(que.size()) {
+        PI p = que.top();
+        que.pop();
+
+        int cost = p.first.first;
+        int t = p.first.second;
+        int v = p.second;
+        if(d[v][t] &lt; cost) continue;
+
+        if(L[v]) {
+            REP(i, t+1, m+1) {
+                if(d[v][i] &gt; d[v][t] + (i - t)) {
+                    d[v][i] = d[v][t] + (i - t);
+                    que.push(PI(P(d[v][i], i), v) );
+                }
+            }
+        }
+
+        rep(i, G[v].size()) {
+            edge e = G[v][i];
+            int nt = t - e.cost;
+            if(nt &gt;= 0 &amp;&amp; d[e.to][nt] &gt; d[v][t] + e.cost) {
+                d[e.to][nt] = d[v][t] + e.cost;
+                que.push(PI(P(d[e.to][nt], nt), e.to));
+            }
+        }
+    }
+}
+
+
+int main() {
+    while(cin &gt;&gt; n &gt;&gt; m &gt;&gt; l &gt;&gt; k &gt;&gt; a &gt;&gt; h) {
+        if(n == 0 &amp;&amp; m == 0 &amp;&amp; l == 0 &amp;&amp; k == 0 &amp;&amp; a == 0 &amp;&amp; h == 0) break;
+
+        rep(i, 105) G[i].clear();
+        memset(L, 0, sizeof(L));
+
+        rep(i, l) {
+            int x;
+            cin &gt;&gt; x;
+            L[x] = true;
+        }
+
+        rep(i, k) {
+            int s, t, c;
+            cin &gt;&gt; s &gt;&gt; t &gt;&gt; c;
+            G[s].push_back(edge(t, c));
+            G[t].push_back(edge(s, c));
+        }
+
+        dijkstra(a);
+
+        int ans = INF;
+        rep(i, m + 1) {
+            ans = min(ans, d[h][i]);
+        }
+
+        if(ans == INF) cout &lt;&lt; "Help!" &lt;&lt; endl;
+        else cout &lt;&lt; ans &lt;&lt; endl;
+    }
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[AOJ2620 Trodden Cable]]></title>
@@ -554,177 +690,6 @@ int main() {
 
     return 0;
 }
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[SRM684D2H Autohamil]]></title>
-    <link href="http://ry0u.github.io/blog/2016/03/16/srm684d2h-autohamil/"/>
-    <updated>2016-03-16T00:01:41+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/03/16/srm684d2h-autohamil</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="https://community.topcoder.com/stat?c=problem_statement&pm=14183&rd=16688">TopCoder Statistics - Problem Statement</a></h4><p>In this problem, all strings are binary strings. That is, each character of a string is either '0' or '1'. A deterministic finite automaton is a machine that processes strings. The automaton has a finite set of possible states. The states are numbered 0 through n-1, where n is the number of states.</p></blockquote>
-
-
-<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
-
-
-
-
-<!-- more -->
-
-
-<p>有向グラフが与えられるので，ハミルトン路があるかどうかを判定せよ．</p>
-
-<hr />
-
-<p>閉路があるので，強連結成分分解する．分解後のグラフで<script type="math/tex"> 0 </script>を始点に探索を始め，分かれ道があれば出来ないと思ったが，全然違うしサンプルも合わない．こういう場合は出来る．</p>
-
-<p><img src="/images/SRM/684d2h.png"></p>
-
-<p>強連結成分分解をしDAGになったので，トポロジカルソートしてトポロジカル順序で<script type="math/tex"> i \to i+1 </script>の辺があるかを調べる．また，トポロジカル順序の開始が<script type="math/tex"> 0 </script>で無い場合も出来ないことを忘れない(分からなかった)．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">struct SCC {
-    int n;
-    vector&lt;vector&lt;int&gt; &gt; g, rg, ng, scc; // rg: 逆グラフ, ng: 分解後のグラフ
-    vector&lt;int&gt; res; // scc: 強連結成分に属する頂点, res:強連結成分の番号
-    bool used[100005];
-
-    SCC(int _n) {
-        n = _n;
-        g.resize(n); rg.resize(n) ; scc.resize(n); res.resize(n);
-    }
-
-    SCC(const vector&lt;vector&lt;int&gt; &gt; &amp;g) : n(g.size()), g(g), rg(n), scc(n), res(n) {
-        rep(i, n) {
-            rep(j, g[i].size()) rg[g[i][j]].push_back(i);
-        }
-    }
-
-    // i-jに辺を追加する
-    void add(int i, int j) {
-        g[i].push_back(j);
-        rg[j].push_back(i);
-    }
-
-    vector&lt;int&gt; vs;
-    void dfs(int v) {
-        used[v] = true;
-        rep(i, g[v].size()) {
-            if(!used[ g[v][i] ]) dfs(g[v][i]);
-        }
-        vs.push_back(v);
-    }
-
-    void rdfs(int v, int k) {
-        used[v] = true;
-        res[v] = k; 
-        scc[k].push_back(v);
-        rep(i, rg[v].size()) {
-            if(!used[ rg[v][i] ]) rdfs(rg[v][i], k);
-        }
-    }
-
-    void ng_make(int k) {
-        ng.resize(k);
-        rep(i, n) {
-            set&lt;int&gt; S;
-            rep(j, g[i].size()) {
-                int to = g[i][j];
-                if(res[i] == res[to]) continue;
-                if(S.find(res[to]) != S.end()) continue;
-                ng[res[i]].push_back(res[to]);
-                S.insert(res[to]);
-            }
-        }
-    }
-
-    int run() {
-        memset(used, 0, sizeof(used));
-        rep(i, n) {
-            if (!used[i]) dfs(i);
-        }
-
-        memset(used, 0, sizeof(used));
-        int k = 0;
-        for (int i = vs.size()-1; i &gt;= 0; i--) {
-            if (!used[vs[i]]) rdfs(vs[i], k++);
-        }
-
-        ng_make(k);
-        return k;
-    }
-};
-
-bool used[55];
-vector&lt; vector&lt;int&gt; &gt; ng;
-vector&lt;int&gt; out;
-
-void dfs(int cur) {
-    used[cur] = true;
-    rep(i, ng[cur].size()) {
-        int v = ng[cur][i];
-        if(!used[v]) dfs(v);
-    }
-    out.push_back(cur);
-}
-
-class Autohamil {
-    public:
-    string check(vector &lt;int&gt; z0, vector &lt;int&gt; z1) {
-        int n = z0.size();
-        SCC scc(n);
-
-        rep(i, n) {
-            if(i != z0[i]) scc.add(i, z0[i]);
-            if(i != z1[i]) scc.add(i, z1[i]);
-        }
-
-        int m = scc.run();
-        ng.resize(m);
-        rep(i, m) {
-            ng[i].resize(scc.ng[i].size());
-            rep(j, scc.ng[i].size()) {
-                ng[i][j] = scc.ng[i][j];
-            }
-        }
-
-        int cnt[55];
-        memset(cnt, 0, sizeof(cnt));
-        rep(i, m) {
-            rep(j, ng[i].size()) {
-                cnt[ng[i][j]]++;
-            }
-        }
-
-        REP(i, 1, m) {
-            if(cnt[i] == 0) return "Does not exist";
-        }
-
-        int s = scc.res[0];
-        memset(used, 0, sizeof(used));
-        out.clear();
-        dfs(s);
-        reverse(out.begin(), out.end());
-
-        if(out[0] != 0) return "Does not exist";
-
-        rep(i, out.size()-1) {
-            bool ch = false;
-            rep(j, ng[out[i]].size()) {
-                if(ng[out[i]][j] == out[i+1]) {
-                    ch = true;
-                }
-            }
-
-            if(ch) continue;
-            return "Does not exist";
-        }
-        return "Exists";
-    }
-};
 </code></pre>
 ]]></content>
   </entry>

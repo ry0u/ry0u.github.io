@@ -4,7 +4,7 @@
   <title><![CDATA[Category: aoj-icpc | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/aoj-icpc/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-03-22T22:44:18+09:00</updated>
+  <updated>2016-03-23T20:46:47+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -14,11 +14,11 @@
 
   
   <entry>
-    <title type="html"><![CDATA[AOJ2011 Gather the Maps!]]></title>
-    <link href="http://ry0u.github.io/blog/2016/03/22/aoj2011-gather-the-maps/"/>
-    <updated>2016-03-22T22:32:45+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/03/22/aoj2011-gather-the-maps</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2011">Gather the Maps! | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
+    <title type="html"><![CDATA[AOJ2369 CatChecker]]></title>
+    <link href="http://ry0u.github.io/blog/2016/03/23/aoj2369-catchecker/"/>
+    <updated>2016-03-23T20:34:54+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/03/23/aoj2369-catchecker</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2369">CatChecker | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
 
 
 <script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
@@ -29,7 +29,7 @@
 <!-- more -->
 
 
-<p>この追記の部分の通り， <script type="math/tex"> 1日目 </script>から順番に誰と会えるかを <script type="math/tex"> S[i] </script>で管理して，初めて <script type="math/tex"> N </script>人揃った時の日にちを出力した． <script type="math/tex"> N \leq 50 </script>なのでllに収まるのでビットで管理した．会う，というのが論理和で出来るので楽に感じた．</p>
+<p>区間 <script type="math/tex"> [l, r] </script>がねこ鳴き声か探索する．区間の端が <script type="math/tex"> m </script>， <script type="math/tex"> w </script>で真ん中の <script type="math/tex"> e </script>で区切ってみる．メモ化しないとTLEした．逆からやると一意に決まる系かと思ったけどそんなことなかった．</p>
 
 <h1>Code</h1>
 
@@ -41,7 +41,6 @@
 #include &lt;sstream&gt;
 #include &lt;map&gt;
 #include &lt;set&gt;
-#include &lt;bitset&gt;
 
 #define REP(i,k,n) for(int i=k;i&lt;n;i++)
 #define rep(i,n) for(int i=0;i&lt;n;i++)
@@ -53,53 +52,143 @@ using namespace std;
 typedef long long ll;
 typedef pair&lt;int,int&gt; P;
 
-bool used[55][35];
+string s;
+int memo[505][505];
+
+bool dfs(int l, int r) {
+    if(l &gt; r) return true;
+    if(memo[l][r] != -1) return memo[l][r];
+
+    if(s[l] == 'm' &amp;&amp; s[r] == 'w') {
+        REP(i, l+1, r) {
+            if(s[i] == 'e') {
+                if(dfs(l+1, i-1) &amp;&amp; dfs(i+1, r-1)) {
+                    return memo[l][r] = true;
+                }
+            }
+        }
+    }
+    return memo[l][r] = false;
+}
+
+int main() {
+    cin &gt;&gt; s;
+    memset(memo, -1, sizeof(memo));
+
+    if(dfs(0, s.size()-1)) {
+        cout &lt;&lt; "Cat" &lt;&lt; endl;
+    } else {
+        cout &lt;&lt; "Rabbit" &lt;&lt; endl;
+    }
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ1305 Membership Management]]></title>
+    <link href="http://ry0u.github.io/blog/2016/03/23/aoj1305-membership-management/"/>
+    <updated>2016-03-23T20:07:05+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/03/23/aoj1305-membership-management</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1305">Membership Management</a></h4><p>Peter is a senior manager of Agile Change Management (ACM) Inc., where each employee is a member of one or more task groups. Since ACM is agile, task groups are often reorganized and their members frequently change, so membership management is his constant headache.</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>group1のmenberを順番にstackに入れていく．menberがgroupの時は，そのgroupを全てstackに入れる．重複がないように確定したメンバーはsetに突っ込む．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+#include &lt;stack&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+vector&lt;string&gt; split(const string &amp;str, char delim) {
+    vector&lt;string&gt; res;
+    size_t current = 0, found;
+    while((found = str.find_first_of(delim, current)) != string::npos) {
+        res.push_back(string(str, current, found - current));
+        current = found + 1;
+    }
+    res.push_back(string(str, current, str.size() - current));
+    return res;
+}
 
 int main() {
     int n;
     while(cin &gt;&gt; n &amp;&amp; n) {
+        vector&lt;string&gt; s(n);
+        rep(i, n) cin &gt;&gt; s[i];
 
-        memset(used, 0, sizeof(used));
+        map&lt;string, set&lt;string&gt; &gt; m;
+        map&lt;string, int&gt; id;
+        vector&lt;string&gt; res[n];
         rep(i, n) {
-            int x;
-            cin &gt;&gt; x;
-            rep(j, x) {
-                int y;
-                cin &gt;&gt; y;
-
-                used[i][y] = true;
+            vector&lt;string&gt; ret = split(s[i], ':');
+            id[ret[0]] = i;
+            string t = "";
+            rep(j, ret[1].size()) {
+                if(ret[1][j] == ',' || ret[1][j] == '.') {
+                    m[ret[0]].insert(t);
+                    res[i].push_back(t);
+                    t = "";
+                } else {
+                    t += ret[1][j];
+                }
             }
         }
 
-        ll S[55];
-        memset(S, 0, sizeof(S));
+        set&lt;string&gt; S;
+        stack&lt;string&gt; st;
+        bool used[105];
+        memset(used, 0, sizeof(used));
+        used[0] = true;
 
-        bool flag = true;
-        rep(i, 35) {
-            rep(j, n) {
-                rep(k, n) {
-                    if(used[j][i] &amp;&amp; used[k][i]) {
-                        ll sum = (S[j] | S[k]);
-                        sum |= (1LL &lt;&lt; j);
-                        sum |= (1LL &lt;&lt; k);
+        rep(i, res[0].size()) {
+            st.push(res[0][i]);
 
-                        S[j] = S[k] = sum;
+            while(st.size()) {
+                string tp = st.top();
+                st.pop();
+
+                if(m.count(tp) == 0) {
+                    S.insert(tp);
+                } else if(!used[id[tp]]){
+                    used[ id[tp] ] = true;
+
+                    set&lt;string&gt;::iterator ite;
+                    for(ite = m[tp].begin(); ite != m[tp].end(); ite++) {
+                        st.push(*ite);
                     }
                 }
             }
-
-            rep(j, n) {
-                if(__builtin_popcountll(S[j]) == n) {
-                    cout &lt;&lt; i &lt;&lt; endl;
-                    flag = false;
-                    break;
-                }
-            }
-
-            if(!flag) break;
         }
 
-        if(flag) cout &lt;&lt; -1 &lt;&lt; endl;
+        cout &lt;&lt; S.size() &lt;&lt; endl;
     }
 
     return 0;
@@ -109,11 +198,11 @@ int main() {
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[AOJ1144 Curling 2.0]]></title>
-    <link href="http://ry0u.github.io/blog/2016/03/22/aoj1144-curling-2-dot-0/"/>
-    <updated>2016-03-22T22:22:58+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/03/22/aoj1144-curling-2-dot-0</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1144">Curling 2.0</a></h4><p>On Planet MM-21, after their Olympic games this year, curling is getting popular. But the rules are somewhat different from ours. The game is played on an ice game board on which a square mesh is marked. They use only a single stone.</p></blockquote>
+    <title type="html"><![CDATA[AOJ2021 Princess in Danger]]></title>
+    <link href="http://ry0u.github.io/blog/2016/03/23/aoj2021-princess-in-danger/"/>
+    <updated>2016-03-23T19:48:34+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/03/23/aoj2021-princess-in-danger</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2021">Princess in Danger | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
 
 
 <script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
@@ -124,140 +213,7 @@ int main() {
 <!-- more -->
 
 
-<p>実際に石を滑らせてシュミレーションする．滑らした途中にゴールがあっても大丈夫にようになってなくてWAをたくさん出した．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;queue&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-
-using namespace std;
-typedef long long ll;
-
-int w,h,x,y;
-int sx,sy,gx,gy;
-int dx[4] = {1,0,-1,0};
-int dy[4] = {0,1,0,-1};
-int ans = 0;
-bool f[25][25];
-
-bool can(int y,int x) {
-    if(0 &lt;= y &amp;&amp; y &lt; h &amp;&amp; 0 &lt;= x &amp;&amp; x &lt; w) return true;
-    return false;
-}
-
-void dfs(int y, int x, int cnt) {
-    if(cnt &gt;= 10) return;
-
-    rep(i, 4) {
-        int ny = y;
-        int nx = x;
-        bool flag = false;
-
-        while(can(ny + dy[i], nx + dx[i]) &amp;&amp; f[ny + dy[i]][nx + dx[i]]) {
-            ny += dy[i];
-            nx += dx[i];
-
-            if(ny == gy &amp;&amp; nx == gx) {
-                flag = true;
-                break;
-            }
-        }
-
-        if(flag) {
-            ans = min(ans, cnt + 1);
-            return;
-        }
-
-        if(ny == y &amp;&amp; nx == x) continue;
-        if(!can(ny + dy[i], nx + dx[i])) continue;
-
-
-        f[ny + dy[i]][nx + dx[i]] = true;
-        dfs(ny, nx, cnt + 1);
-        f[ny + dy[i]][nx + dx[i]] = false;
-    }
-}
-
-int main() {
-
-    while(cin &gt;&gt; w &gt;&gt; h) {
-        if(w == 0 &amp;&amp; h == 0) break;
-
-        memset(f, 0, sizeof(f));
-        ans = INF;
-
-        rep(i, h) {
-            rep(j, w) {
-                int x;
-                cin &gt;&gt; x;
-
-                if(x == 0)  f[i][j] = true;
-                if(x == 2) {
-                    sy = i;
-                    sx = j;
-                    f[i][j] = true;
-                }
-                if(x == 3) {
-                    gy = i;
-                    gx = j;
-                    f[i][j] = true;
-                }
-            }
-        }
-
-        dfs(sy, sx, 0);
-
-        if(ans == INF) cout &lt;&lt; -1 &lt;&lt; endl;
-        else cout &lt;&lt; ans &lt;&lt; endl;
-    }
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[AOJ2620 Trodden Cable]]></title>
-    <link href="http://ry0u.github.io/blog/2016/03/22/aoj2620-trodden-cable/"/>
-    <updated>2016-03-22T21:52:44+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/03/22/aoj2620-trodden-cable</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2620">Trodden Cable</a></h4><p>Nathan O. Davis is running a company. His company owns a web service which has a lot of users. So his office is full of servers, routers and messy LAN cables. He is now very puzzling over the messy cables, because they are causing many kinds of problems. For example, staff working at the company often trip over a cable.</p></blockquote>
-
-
-<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
-
-
-
-
-<!-- more -->
-
-
-<p>全く分からずに調べた．</p>
-
-<p><a href="http://acm-icpc.aitea.net/index.php?plugin=attach&amp;refer=2013%2FPractice%2F%E5%A4%8F%E5%90%88%E5%AE%BF%2F%E8%AC%9B%E8%A9%95&amp;openfile=trodden_cable.pdf:image=http://acm-icpc.aitea.net/index.php?plugin=attach&amp;refer=2013%2FPractice%2F%E5%A4%8F%E5%90%88%E5%AE%BF%2F%E8%AC%9B%E8%A9%95&amp;openfile=trodden_cable.pdf">http://acm-icpc.aitea.net/index.php?plugin=attach&amp;refer=2013%2FPractice%2F%E5%A4%8F%E5%90%88%E5%AE%BF%2F%E8%AC%9B%E8%A9%95&amp;openfile=trodden_cable.pdf:image=http://acm-icpc.aitea.net/index.php?plugin=attach&amp;refer=2013%2FPractice%2F%E5%A4%8F%E5%90%88%E5%AE%BF%2F%E8%AC%9B%E8%A9%95&amp;openfile=trodden_cable.pdf</a></p>
-
-<p>この画像が非常に分かりやすい．移動する時にまたがる線のコストを<script type="math/tex"> +1 </script>して，移動が終わったグリッドグラフでdijkstra．</p>
-
-<p>現在位置を(y, x)と置くと</p>
-
-<ul>
-<li><script type="math/tex"> R </script>の時， <script type="math/tex"> (y, x+1) \to (y+1, x+1) </script></li>
-<li><script type="math/tex"> L </script>の時， <script type="math/tex"> (y, x) \to (y+1, x) </script></li>
-<li><script type="math/tex"> U </script>の時， <script type="math/tex"> (y, x) \to (y, x+1) </script></li>
-<li><script type="math/tex"> D </script>の時， <script type="math/tex"> (y+1, x) \to (y+1, x+1) </script></li>
-</ul>
-
-
-<p>に <script type="math/tex"> +1 </script>した．</p>
+<p>状態を <script type="math/tex"> (cost, 残り時間, 番号) </script>としてdijkstra．現在の状態の残り時間のほうが辺のコストより大きい時に，次の町に行くことが可能．冷凍施設にいるときは， 現在の残り時間から<script type="math/tex"> M </script>まで回復出来るので <script type="math/tex"> 1 </script>分ずつ試す．</p>
 
 <h1>Code</h1>
 
@@ -280,20 +236,12 @@ int main() {
 using namespace std;
 typedef long long ll;
 typedef pair&lt;int,int&gt; P;
-
-int w, h, n;
-int sx,sy,gx,gy;
-int dx[4] = {1,0,-1,0};
-int dy[4] = {0,1,0,-1};
-
-bool can(int y, int x) {
-    if(0 &lt;= y &amp;&amp; y &lt; h &amp;&amp; 0 &lt;= x &amp;&amp; x &lt; w) return true;
-    return false;
-}
+typedef pair&lt;P, int&gt; PI;
+typedef pair&lt;P, P &gt; PP;
 
 struct edge {
     int from,to;
-    ll cost;
+    int cost;
 
     edge(int t,int c) : to(t),cost(c) {}
     edge(int f,int t,int c) : from(f),to(t),cost(c) {}
@@ -303,122 +251,82 @@ struct edge {
     }
 };
 
-vector&lt;edge&gt; G[505*505 + 5];
-ll d[505 * 505 + 5];
+int n, m, l, k, a, h;
+vector&lt;edge&gt; G[105];
+int d[105][105];
+bool L[105];
 
-void dijkstra(int s, int n) {
-    priority_queue&lt;P, vector&lt;P&gt;, greater&lt;P&gt; &gt; que;
-    fill(d, d+n, INF);
+void dijkstra(int s) {
+    priority_queue&lt;PI, vector&lt;PI&gt;, greater&lt;PI&gt; &gt; que;
+    rep(i, 105) {
+        rep(j, 105) {
+            d[i][j] = INF;
+        }
+    }
 
-    d[s] = 0;
-    que.push(P(0,s));
+    d[s][m] = 0;
+    que.push(PI(P(0, m), s));
 
     while(que.size()) {
-        P p = que.top();
+        PI p = que.top();
         que.pop();
 
+        int cost = p.first.first;
+        int t = p.first.second;
         int v = p.second;
-        if(d[v] &lt; p.first) continue;
+        if(d[v][t] &lt; cost) continue;
+
+        if(L[v]) {
+            REP(i, t+1, m+1) {
+                if(d[v][i] &gt; d[v][t] + (i - t)) {
+                    d[v][i] = d[v][t] + (i - t);
+                    que.push(PI(P(d[v][i], i), v) );
+                }
+            }
+        }
 
         rep(i, G[v].size()) {
             edge e = G[v][i];
-            if(d[e.to] &gt; d[v] + e.cost) {
-                d[e.to] = d[v] + e.cost;
-                que.push(P(d[e.to],e.to));
+            int nt = t - e.cost;
+            if(nt &gt;= 0 &amp;&amp; d[e.to][nt] &gt; d[v][t] + e.cost) {
+                d[e.to][nt] = d[v][t] + e.cost;
+                que.push(PI(P(d[e.to][nt], nt), e.to));
             }
         }
     }
 }
 
+
 int main() {
-    cin &gt;&gt; w &gt;&gt; h &gt;&gt; n;
+    while(cin &gt;&gt; n &gt;&gt; m &gt;&gt; l &gt;&gt; k &gt;&gt; a &gt;&gt; h) {
+        if(n == 0 &amp;&amp; m == 0 &amp;&amp; l == 0 &amp;&amp; k == 0 &amp;&amp; a == 0 &amp;&amp; h == 0) break;
 
-    cin &gt;&gt; sx &gt;&gt; sy &gt;&gt; gx &gt;&gt; gy;
+        rep(i, 105) G[i].clear();
+        memset(L, 0, sizeof(L));
 
-    rep(i, h * w) {
-        G[i].clear();
-    }
-
-    w++;
-    h++;
-
-    rep(i, h) {
-        rep(j, w) {
-            rep(k, 4) {
-                int y = i + dy[k];
-                int x = j + dx[k];
-
-                if(can(y, x)) {
-                    G[i*w + j].push_back(edge(y*w + x, 0));
-                }
-            }
+        rep(i, l) {
+            int x;
+            cin &gt;&gt; x;
+            L[x] = true;
         }
-    }
 
-    rep(i, n) {
-        int y, x, t;
-        cin &gt;&gt; x &gt;&gt; y &gt;&gt; t;
-
-        string s;
-        cin &gt;&gt; s;
-
-        rep(k, t) {
-            rep(j, s.size()) {
-                int from = -1, to = -1;
-                if(s[j] == 'R' &amp;&amp; x + 1 &lt; w - 1) {
-                    from = y * w + (x + 1);
-                    to = (y + 1) * w + (x + 1);
-                    x++;
-                } else if(s[j] == 'L' &amp;&amp; 0 &lt;= x - 1) {
-                    from = y * w + x;
-                    to = (y + 1) * w + x;
-                    x--;
-                } else if(s[j] == 'U' &amp;&amp; 0 &lt;= y - 1) {
-                    from = y * w + x;
-                    to = y * w + (x + 1);
-                    y--;
-                } else if(s[j] == 'D' &amp;&amp; y + 1 &lt; h - 1) {
-                    from = (y + 1) * w + x;
-                    to = (y + 1) * w + (x + 1);
-                    y++;
-                }
-
-                if(from == -1 &amp;&amp; to == -1) continue;
-                rep(k, G[from].size()) {
-                    if(G[from][k].to == to) {
-                        G[from][k].cost++;
-                    }
-                }
-                rep(k, G[to].size()) {
-                    if(G[to][k].to == from) {
-                        G[to][k].cost++;
-                    }
-                }
-            }
+        rep(i, k) {
+            int s, t, c;
+            cin &gt;&gt; s &gt;&gt; t &gt;&gt; c;
+            G[s].push_back(edge(t, c));
+            G[t].push_back(edge(s, c));
         }
+
+        dijkstra(a);
+
+        int ans = INF;
+        rep(i, m + 1) {
+            ans = min(ans, d[h][i]);
+        }
+
+        if(ans == INF) cout &lt;&lt; "Help!" &lt;&lt; endl;
+        else cout &lt;&lt; ans &lt;&lt; endl;
     }
-
-    // rep(i, h) {
-    //  rep(j, w) {
-    //      cout &lt;&lt; " --------- " &lt;&lt; i &lt;&lt; ", " &lt;&lt; j &lt;&lt; " :" &lt;&lt; i * w + j &lt;&lt; " |";
-    //      rep(k, G[i*w + j].size()) {
-    //          cout &lt;&lt; "(" &lt;&lt; G[i*w + j][k].to &lt;&lt; ", " &lt;&lt; G[i*w + j][k].cost &lt;&lt; ") ";
-    //      }
-    //      cout &lt;&lt; endl;
-    //  }
-    // }
-
-    dijkstra(sy * w + sx, h * w);
-
-    // rep(i, h) {
-    //  rep(j, w) {
-    //      cout &lt;&lt; d[i*w + j] &lt;&lt; " ";
-    //  }
-    //  cout &lt;&lt; endl;
-    // }
-
-    cout &lt;&lt; d[gy * w + gx] &lt;&lt; endl;
-
     return 0;
 }
 </code></pre>
@@ -426,11 +334,11 @@ int main() {
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[AOJ2641 Magic Bullet]]></title>
-    <link href="http://ry0u.github.io/blog/2016/03/22/aoj2641-magic-bullet/"/>
-    <updated>2016-03-22T21:29:19+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/03/22/aoj2641-magic-bullet</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2641">Magic Bullet | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
+    <title type="html"><![CDATA[AOJ2002 X-Ray Screening System]]></title>
+    <link href="http://ry0u.github.io/blog/2016/03/23/aoj2002-x-ray-screening-system/"/>
+    <updated>2016-03-23T19:25:35+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/03/23/aoj2002-x-ray-screening-system</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2002">X-Ray Screening System | Aizu Online Judge</a></h4><p>上記の調査結果をふまえて，以下のような手荷物検査のためのモデルを考案した．それぞれの手荷物は X 線に対して透明である直方体の容器だとみなす．その中には X 線に対して不透明である複数の品物が入っている．ここで，直方体の 3 辺を x 軸，y 軸，z 軸とする座標系を考え，x 軸と平行な方向に X 線を照射して，y-z 平面に投影された画像を撮影する．撮影された画像は適当な大きさの格子に分割され，画像解析によって，それぞれの格子領域に映っている品物の材質が推定される．この会社には非常に高度の解析技術があり，材質の詳細な違いすらも解析することが可能であることから，品物の材質は互いに異なると考えることができる．なお，複数の品物が x 軸方向に関して重なっているときは，それぞれの格子領域について最も手前にある，すなわち x 座標が最小である品物の材質が得られる．また，2 つ以上の品物の x 座標が等しいことはないと仮定する．</p></blockquote>
 
 
 <script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
@@ -441,7 +349,7 @@ int main() {
 <!-- more -->
 
 
-<p>点<script type="math/tex"> (sx, sy, sz) </script>，点 <script type="math/tex"> (dx, dy, dz) </script>を結ぶ線分が<script type="math/tex"> N </script>個の球と交差しているかを見る．それぞれの球の中心から直線への射影を出す．その点が線分に収まっていて，球の中心との距離がr以内なら交差しているとした．</p>
+<p>もっとも手前にある品物から順番に処理していく．長方形なので，一番左上<script type="math/tex"> (sx, sy) </script>と右下 <script type="math/tex"> (gx, gy) </script>を持っておき， <script type="math/tex"> (sx, sy) </script>， <script type="math/tex"> (gx, sy) </script>， <script type="math/tex"> (sx, gy) </script>， <script type="math/tex"> (gx, gy) </script>の4角形全てに同じ品物の材質，または前面に他の品物がある時に埋めた．</p>
 
 <h1>Code</h1>
 
@@ -453,147 +361,6 @@ int main() {
 #include &lt;sstream&gt;
 #include &lt;map&gt;
 #include &lt;set&gt;
-#include &lt;cmath&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-#define EPS 1e-8
-#define equals(a,b) fabs((a) - (b)) &lt; EPS
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-struct Point3D {
-    double x, y, z;
-
-    Point3D() : x(0), y(0), z(0) {}
-
-    Point3D(double x, double y, double z) : x(x), y(y), z(z) {}
-
-    Point3D operator+(const Point3D &amp;o) const { return Point3D(x+o.x, y+o.y, z+o.z); }
-
-    Point3D operator-(const Point3D &amp;o) const { return Point3D(x-o.x, y-o.y, z-o.z); }
-
-    Point3D operator*(const double m) const { return Point3D(x*m, y*m, z*m); }
-
-    Point3D operator/(const double d) const { return Point3D(x/d, y/d, z/d); }
-
-    bool operator==(const Point3D &amp;o) const { return fabs(x-o.x) &lt; EPS &amp;&amp; fabs(y-o.y) &lt; EPS; }
-};
-
-ostream&amp; operator &lt;&lt; (ostream&amp; os, const Point3D&amp; p) {
-    os &lt;&lt; "(" &lt;&lt; p.x &lt;&lt; ", " &lt;&lt; p.y &lt;&lt; ", " &lt;&lt; p.z &lt;&lt; ")";
-    return os;
-}
-
-double dot(Point3D a, Point3D b) { return a.x * b.x + a.y * b.y + a.z * b.z; }
-Point3D cross(Point3D a, Point3D b) { return Point3D(a.y*b.z - a.z*b.y, a.z*b.x - a.x*b.z, a.x*b.y - a.y*b.x); }
-
-double norm(Point3D p) { return dot(p, p); }
-double abs(Point3D p) { return sqrt(norm(p)); }
-
-struct Line {
-    Point3D a, b;
-
-    Line() : a(Point3D(0, 0, 0)), b(Point3D(0, 0, 0)) {}
-
-    Line(Point3D a, Point3D b) : a(a), b(b) {}
-};
-
-ostream&amp; operator &lt;&lt; (ostream&amp; os, const Line&amp; l) {
-    os &lt;&lt; "(" &lt;&lt; l.a.x &lt;&lt; ", " &lt;&lt; l.a.y &lt;&lt; ", " &lt;&lt; l.a.z &lt;&lt;  ")-(" &lt;&lt; l.b.x &lt;&lt; "," &lt;&lt; l.b.y &lt;&lt; ", " &lt;&lt; l.b.z &lt;&lt;  ")";
-    return os;
-}
-
-Point3D project(Line l, Point3D p) {
-    Point3D base = l.b - l.a;
-    double t = dot(base, p-l.a) / dot(base, base);
-    return l.a + base * t;
-}
-
-struct Ball {
-    Point3D p;
-    double r;
-
-    Ball() : p(Point3D(0, 0, 0)), r(0.0) {}
-
-    Ball(Point3D p, double r) : p(p), r(r) {}
-};
-
-ostream&amp; operator &lt;&lt; (ostream&amp; os, const Ball&amp; b) {
-    os &lt;&lt; "(" &lt;&lt; b.p.z &lt;&lt; ", " &lt;&lt; b.p.y &lt;&lt; ", " &lt;&lt; b.p.z &lt;&lt; " :" &lt;&lt; b.r &lt;&lt; ")";
-    return os;
-}
-
-int main() {
-    int n, q;
-    cin &gt;&gt; n &gt;&gt; q;
-
-    vector&lt;Ball&gt; v(n);
-    vector&lt;ll&gt; cost(n);
-    rep(i, n) {
-        cin &gt;&gt; v[i].p.x &gt;&gt; v[i].p.y &gt;&gt; v[i].p.z &gt;&gt; v[i].r &gt;&gt; cost[i];
-    }
-
-    rep(i, q) {
-        ll ans = 0;
-        Point3D s, t;
-        cin &gt;&gt; s.x &gt;&gt; s.y &gt;&gt; s.z &gt;&gt; t.x &gt;&gt; t.y &gt;&gt; t.z;
-
-        Line line(s, t);
-
-        rep(j, n) {
-            Point3D proj = project(line, v[j].p);
-
-            if(abs(line.b - line.a) &gt;= abs(proj - line.a) &amp;&amp; abs(line.a - line.b) &gt;= abs(proj - line.b)) {
-                if(abs(proj - v[j].p) &lt; v[j].r + EPS) {
-                    ans += cost[j];
-                }
-            }
-        }
-
-        cout &lt;&lt; ans &lt;&lt; endl;
-    }
-
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[AOJ1250 Leaky Cryptography]]></title>
-    <link href="http://ry0u.github.io/blog/2016/03/22/aoj1250-leaky-cryptography/"/>
-    <updated>2016-03-22T21:00:41+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/03/22/aoj1250-leaky-cryptography</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1250">Leaky Cryptography</a></h4><p>The ACM ICPC judges are very careful about not leaking their problems, and all communications are encrypted. However, one does sometimes make mistakes, like using too weak an encryption scheme. Here is an example of that. The encryption chosen was very simple: encrypt each chunk of the input by flipping some bits according to a shared key.</p></blockquote>
-
-
-<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
-
-
-
-
-<!-- more -->
-
-
-<p>一番下の桁から順番に決めていく．今までの <script type="math/tex"> \rm{sum} </script>の <script type="math/tex"> i </script>桁目と <script type="math/tex"> N_1 〜 N_8</script>の<script type="math/tex"> i </script>桁の和が <script type="math/tex"> N_9 </script>の <script type="math/tex"> i </script>桁と一致しているかを見る．一致していない場合に， <script type="math/tex"> 8 </script>つの<script type="math/tex"> i </script>桁目を反転して，答えの <script type="math/tex"> i </script>桁目のビットを立てる．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-#include &lt;bitset&gt;
 
 #define REP(i,k,n) for(int i=k;i&lt;n;i++)
 #define rep(i,n) for(int i=0;i&lt;n;i++)
@@ -605,18 +372,36 @@ using namespace std;
 typedef long long ll;
 typedef pair&lt;int,int&gt; P;
 
-ll f(string s) {
-    ll res = 0, t = 1;
+int w, h;
+int sy, sx, gy, gx;
+int dx[4] = {1,0,-1,0};
+int dy[4] = {0,1,0,-1};
 
-    for(int i = s.size()-1; i &gt;= 0; i--) {
-        if('0' &lt;= s[i] &amp;&amp; s[i] &lt;= '9') {
-            res += (s[i] - '0') * t;
-        } else {
-            res += (10 + (s[i] - 'a')) * t;
+bool can(int y,int x) {
+    if(0 &lt;= y &amp;&amp; y &lt; h &amp;&amp; 0 &lt;= x &amp;&amp; x &lt; w) return true;
+    return false;
+}
+
+vector&lt;string&gt; s;
+char c;
+bool used[55][55], visited[55][55];
+
+bool check() {
+    REP(i, sy, gy+1){
+        REP(j, sx, gx+1) {
+            if(s[i][j] == c || used[i][j]) continue;
+            return false;
         }
-        t *= 16;
     }
-    return res;
+    return true;
+}
+
+void f() {
+    REP(i, sy, gy+1) {
+        REP(j, sx, gx+1) {
+            used[i][j] = true;
+        }
+    }
 }
 
 int main() {
@@ -624,46 +409,174 @@ int main() {
     cin &gt;&gt; n;
 
     rep(q, n) {
-        vector&lt;string&gt; v(9);
-        vector&lt;ll&gt; t(9);
-        rep(i, 9) {
-            cin &gt;&gt; v[i];
-            t[i] = f(v[i]);
-        }
+        cin &gt;&gt; h &gt;&gt; w;
+        s.resize(h);
+        rep(i, h) cin &gt;&gt; s[i];
 
-        ll ans = 0;
+        memset(used, 0, sizeof(used));
+        set&lt;char&gt; S;
 
-        vector&lt; vector&lt;int&gt; &gt; bit(9, vector&lt;int&gt;(32));
-        rep(i, 9) {
-            rep(j, 32) {
-                if(t[i] &amp; (1LL &lt;&lt; j)) {
-                    bit[i][j] = 1;
+        bool flag = true, update = true;
+        while(update) {
+            update = false;
+            rep(i, h) {
+                rep(j, w) {
+                    if(s[i][j] == '.') continue;
+
+                    if(used[i][j]) continue;
+
+                    sy = i;
+                    sx = j;
+                    gy = i;
+                    gx = j;
+                    c = s[i][j];
+                    memset(visited, 0, sizeof(visited));
+
+                    rep(k, h) {
+                        rep(l, w) {
+                            if(s[k][l] == c) {
+                                sy = min(sy, k);
+                                sx = min(sx, l);
+                                gy = max(gy, k);
+                                gx = max(gx, l);
+                            }
+                        }
+                    }
+
+                    if(S.find(c) == S.end() &amp;&amp; check()) {
+                        f();
+                        S.insert(c);
+                        update = true;
+                    }
                 }
             }
         }
 
-        ans = 0;
-        ll sum = 0;
-        rep(i, 32) {
-            ll d = 0;
-            rep(j, 8) {
-                d += bit[j][i];
-            }
-            bitset&lt;32&gt; ss(sum);
-
-            if( ((((sum &gt;&gt; i) &amp; 1) + d) &amp; 1) == bit[8][i]) {
-                sum += (d &lt;&lt; i);
-            } else {
-                d = 0;
-                rep(j, 8) {
-                    d += bit[j][i] ^ 1;
-                }
-                sum += (d &lt;&lt; i);
-                ans += (1LL &lt;&lt; i);
+        rep(i, h) {
+            rep(j, w) {
+                if(used[i][j]) continue;
+                if(s[i][j] == '.') continue;
+                flag = false;
             }
         }
 
-        cout &lt;&lt; hex &lt;&lt; ans &lt;&lt; endl;
+        if(flag) cout &lt;&lt; "SAFE" &lt;&lt; endl;
+        else cout &lt;&lt; "SUSPICIOUS" &lt;&lt; endl;
+
+    }
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ1188 Hierarchical Democracy]]></title>
+    <link href="http://ry0u.github.io/blog/2016/03/23/aoj1188-hierarchical-democracy/"/>
+    <updated>2016-03-23T18:25:06+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/03/23/aoj1188-hierarchical-democracy</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1188">Hierarchical Democracy</a></h4><p>The presidential election in Republic of Democratia is carried out through multiple stages as follows. There are exactly two presidential candidates. At the first stage, eligible voters go to the polls of his/her electoral district. The winner of the district is the candidate who takes a majority of the votes.</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>木として考える．葉にその区画に勝つための最小の値， <script type="math/tex"> \frac{値}{2} + 1 </script>を入れる．子の数の半分，小さい順に取っていく．最後に根の値が最小値になっているはず．</p>
+
+<p><img src="/images/AOJ/1188-1.png">
+<img src="/images/AOJ/1188-2.png"></p>
+
+<p><img src="/images/AOJ/1188-3.png"></p>
+
+<p>子の階層から小さい順に取りたいので，priority_queueを利用した．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+#include &lt;queue&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+priority_queue&lt;ll, vector&lt;ll&gt;, greater&lt;ll&gt; &gt; que[100005];
+
+int main() {
+    int n;
+    cin &gt;&gt; n;
+
+    rep(q, n) {
+        rep(i, 100005) {
+            while(que[i].size()) que[i].pop();
+        }
+
+        string s;
+        cin &gt;&gt; s;
+
+        int dep = 0;
+        rep(i, s.size()) {
+
+            if(s[i] == '[') {
+                if(s[i+1] == '[') {
+                    dep++;
+                } else {
+                    stringstream ss;
+                    REP(j, i+1, s.size()) {
+                        if('0' &lt;= s[j] &amp;&amp; s[j] &lt;= '9') {
+                            ss &lt;&lt; s[j];
+                            i++;
+                        } else {
+                            i++;
+                            break;
+                        }
+                    }
+
+                    ll x;
+                    ss &gt;&gt; x;
+
+                    x = x / 2 + 1;
+                    que[dep].push(x);
+                }
+            } else if(s[i] == ']') {
+                int m = que[dep].size();
+                ll sum = 0;
+
+                rep(j, m/2 + 1) {
+                    sum += que[dep].top();
+                    que[dep].pop();
+                }
+
+                que[dep-1].push(sum);
+
+                while(que[dep].size()) {
+                    que[dep].pop();
+                }
+
+                dep--;
+            }
+
+        }
+
+        cout &lt;&lt; que[0].top() &lt;&lt; endl;
     }
 
     return 0;

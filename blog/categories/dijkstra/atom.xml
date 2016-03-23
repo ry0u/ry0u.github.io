@@ -4,7 +4,7 @@
   <title><![CDATA[Category: dijkstra | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/dijkstra/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-03-22T22:44:18+09:00</updated>
+  <updated>2016-03-23T20:46:47+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,142 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ2021 Princess in Danger]]></title>
+    <link href="http://ry0u.github.io/blog/2016/03/23/aoj2021-princess-in-danger/"/>
+    <updated>2016-03-23T19:48:34+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/03/23/aoj2021-princess-in-danger</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2021">Princess in Danger | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>状態を <script type="math/tex"> (cost, 残り時間, 番号) </script>としてdijkstra．現在の状態の残り時間のほうが辺のコストより大きい時に，次の町に行くことが可能．冷凍施設にいるときは， 現在の残り時間から<script type="math/tex"> M </script>まで回復出来るので <script type="math/tex"> 1 </script>分ずつ試す．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+#include &lt;queue&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+typedef pair&lt;P, int&gt; PI;
+typedef pair&lt;P, P &gt; PP;
+
+struct edge {
+    int from,to;
+    int cost;
+
+    edge(int t,int c) : to(t),cost(c) {}
+    edge(int f,int t,int c) : from(f),to(t),cost(c) {}
+
+    bool operator&lt;(const edge &amp;e) const {
+        return cost &lt; e.cost;
+    }
+};
+
+int n, m, l, k, a, h;
+vector&lt;edge&gt; G[105];
+int d[105][105];
+bool L[105];
+
+void dijkstra(int s) {
+    priority_queue&lt;PI, vector&lt;PI&gt;, greater&lt;PI&gt; &gt; que;
+    rep(i, 105) {
+        rep(j, 105) {
+            d[i][j] = INF;
+        }
+    }
+
+    d[s][m] = 0;
+    que.push(PI(P(0, m), s));
+
+    while(que.size()) {
+        PI p = que.top();
+        que.pop();
+
+        int cost = p.first.first;
+        int t = p.first.second;
+        int v = p.second;
+        if(d[v][t] &lt; cost) continue;
+
+        if(L[v]) {
+            REP(i, t+1, m+1) {
+                if(d[v][i] &gt; d[v][t] + (i - t)) {
+                    d[v][i] = d[v][t] + (i - t);
+                    que.push(PI(P(d[v][i], i), v) );
+                }
+            }
+        }
+
+        rep(i, G[v].size()) {
+            edge e = G[v][i];
+            int nt = t - e.cost;
+            if(nt &gt;= 0 &amp;&amp; d[e.to][nt] &gt; d[v][t] + e.cost) {
+                d[e.to][nt] = d[v][t] + e.cost;
+                que.push(PI(P(d[e.to][nt], nt), e.to));
+            }
+        }
+    }
+}
+
+
+int main() {
+    while(cin &gt;&gt; n &gt;&gt; m &gt;&gt; l &gt;&gt; k &gt;&gt; a &gt;&gt; h) {
+        if(n == 0 &amp;&amp; m == 0 &amp;&amp; l == 0 &amp;&amp; k == 0 &amp;&amp; a == 0 &amp;&amp; h == 0) break;
+
+        rep(i, 105) G[i].clear();
+        memset(L, 0, sizeof(L));
+
+        rep(i, l) {
+            int x;
+            cin &gt;&gt; x;
+            L[x] = true;
+        }
+
+        rep(i, k) {
+            int s, t, c;
+            cin &gt;&gt; s &gt;&gt; t &gt;&gt; c;
+            G[s].push_back(edge(t, c));
+            G[t].push_back(edge(s, c));
+        }
+
+        dijkstra(a);
+
+        int ans = INF;
+        rep(i, m + 1) {
+            ans = min(ans, d[h][i]);
+        }
+
+        if(ans == INF) cout &lt;&lt; "Help!" &lt;&lt; endl;
+        else cout &lt;&lt; ans &lt;&lt; endl;
+    }
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[AOJ2620 Trodden Cable]]></title>
@@ -618,148 +754,6 @@ int main() {
 
     if(d[n-1] == INF) cout &lt;&lt; -1 &lt;&lt; endl;
     else cout &lt;&lt; d[n-1] + (H[n-1] - Y[n-1]) &lt;&lt; endl;
-
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[AOJ0596 Taxis]]></title>
-    <link href="http://ry0u.github.io/blog/2016/03/06/aoj0596-taxis/"/>
-    <updated>2016-03-06T01:40:26+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/03/06/aoj0596-taxis</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0596">Taxis | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
-
-
-<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
-
-
-
-
-<!-- more -->
-
-
-<p>タクシーの移動しか使わないのでタクシーの移動の場合のグラフを作り直す．まず連結している町の辺のコストを<script type="math/tex"> 1 </script>にする．<br/>
-頂点<script type="math/tex"> i </script>からdijkstraして<script type="math/tex"> d[j] \leq R[i] </script>以下の場合に，<script type="math/tex"> i \to j</script>にコスト<script type="math/tex"> C[i] </script>の辺を張る．<br/>
-新しいグラフを構築したらそのグラフでdijkstra．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-#include &lt;queue&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-struct edge {
-    int from,to;
-    int cost;
-
-    edge(int t,int c) : to(t),cost(c) {}
-    edge(int f,int t,int c) : from(f),to(t),cost(c) {}
-
-    bool operator&lt;(const edge &amp;e) const {
-        return cost &lt; e.cost;
-    }
-};
-
-vector&lt;edge&gt; G[5005];
-vector&lt;int&gt; g[5005];
-int C[5005], R[5005], d[5005];
-
-void dijkstra(int s,int n) {
-    priority_queue&lt;P,vector&lt;P&gt;,greater&lt;P&gt; &gt; que;
-    fill(d,d+n,INF);
-
-    d[s] = 0;
-    que.push(P(0,s));
-
-    while(que.size()) {
-        P p = que.top();
-        que.pop();
-
-        int v = p.second;
-        if(d[v] &lt; p.first) continue;
-
-        rep(i,G[v].size()) {
-            edge e = G[v][i];
-            if(d[e.to] &gt; d[v] + e.cost) {
-                d[e.to] = d[v] + e.cost;
-                que.push(P(d[e.to],e.to));
-            }
-        }
-    }
-}
-
-int main() {
-    int n, m;
-    cin &gt;&gt; n &gt;&gt; m;
-
-    memset(C, 0, sizeof(C));
-    memset(R, 0, sizeof(R));
-    rep(i, n) cin &gt;&gt; C[i] &gt;&gt; R[i];
-    rep(i, m) {
-        int s, t;
-        cin &gt;&gt; s &gt;&gt; t;
-
-        s--;
-        t--;
-
-        g[s].push_back(t);
-        g[t].push_back(s);
-    }
-
-    rep(i, n) {
-        fill(d, d + n, INF);
-
-        priority_queue&lt;P, vector&lt;P&gt;, greater&lt;P&gt; &gt; que;
-        que.push(mp(0, i));
-
-        d[i] = 0;
-
-        while(que.size()) {
-            P p = que.top();
-            que.pop();
-
-            int v = p.second;
-
-            if(d[v] &lt; p.first) continue;
-
-            rep(i, g[v].size()) {
-                if(d[g[v][i]] &gt; d[v] + 1) {
-                    d[g[v][i]] = d[v] + 1;
-                    que.push(mp(d[v] + 1, g[v][i]));
-                }
-            }
-        }
-
-        rep(j, n) {
-            if(i == j) continue;
-            if(d[j] &lt;= R[i]) {
-                G[i].push_back(edge(j, C[i]));
-            }
-        }
-    }
-
-    dijkstra(0, n);
-
-    cout &lt;&lt; d[n-1] &lt;&lt; endl;
 
     return 0;
 }
