@@ -4,7 +4,7 @@
   <title><![CDATA[Category: aoj-icpc | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/aoj-icpc/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-03-23T20:46:47+09:00</updated>
+  <updated>2016-03-23T21:16:20+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,193 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ1306 Balloon Collecting]]></title>
+    <link href="http://ry0u.github.io/blog/2016/03/23/aoj1306-balloon-collecting/"/>
+    <updated>2016-03-23T21:01:17+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/03/23/aoj1306-balloon-collecting</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1306">Balloon Collecting</a></h4><p>"Balloons should be captured efficiently", the game designer says. He is designing an oldfashioned game with two dimensional graphics. In the game, balloons fall onto the ground one after another, and the player manipulates a robot vehicle on the ground to capture the balloons.</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>動的計画法．</p>
+
+<p><script type="math/tex; mode=display">
+    dp[i][j] := i個目の風船をj個集めた時の時間の最小値
+</script></p>
+
+<p>として， <script type="math/tex"> j \leq 3 </script>の時に風船を取りに行って間に合うならば <script type="math/tex"> dp[i+1][j+1] </script>に遷移可能， 今ある風船を家に置きに行って，次の風船を取りに言って間に合うならば <script type="math/tex"> dp[i+1][1] </script>に遷移可能．<br/>
+間に合うかどうかは，そのまま次のを取る<script type="math/tex">\to abs (p[i+1] - p[i]) \cdot (j + 1) </script>，家に置きに行って風船を次の風船を取る<script type="math/tex"> \to p[i] \cdot (j+1) + p[i+1] </script>が， <script type="math/tex"> t[i+1] - t[i] </script>より小さければ良い．<br/>
+家に帰る，と次の風船を取りに行くを別々に考えていてどういう遷移か分からずめちゃくちゃ時間を溶かした．こういう考え方がすぐに出来るようになりたい．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int dp[50][4];
+
+int main() {
+    int n;
+    while(cin &gt;&gt; n &amp;&amp; n) {
+
+        vector&lt;int&gt; p(n + 1), t(n + 1);
+        rep(i, n) cin &gt;&gt; p[i + 1] &gt;&gt; t[i + 1];
+
+        rep(i, 50) rep(j, 4) dp[i][j] = INF;
+
+        int id = -1;
+        dp[0][0] = 0;
+        rep(i, n) {
+            int d = abs(p[i+1] - p[i]);
+            bool flag = true;
+
+            rep(j, 4) {
+                if(dp[i][j] == INF) continue;
+
+                if(j &lt; 3 &amp;&amp; d * (j + 1) &lt;= t[i+1] - t[i]) {
+                    flag = false;
+                    dp[i+1][j+1] = min(dp[i+1][j+1], dp[i][j] + d);
+                }
+
+                if(p[i] * (j + 1) + p[i+1] &lt;= t[i+1] - t[i]) {
+                    flag = false;
+                    dp[i+1][1] = min(dp[i+1][1], dp[i][j] + p[i] + p[i+1]);
+                }
+            }
+
+            if(flag) {
+                id = i+1;
+                break;
+            }
+        }
+
+        if(id != -1) cout &lt;&lt; "NG " &lt;&lt; id &lt;&lt; endl;
+        else {
+            int ans = INF;
+            rep(j, 4) {
+                ans = min(ans, dp[n][j] + p[n]);
+            }
+            cout &lt;&lt; "OK " &lt;&lt; ans &lt;&lt; endl;
+        }
+    }
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ1296 Repeated Substitution with Sed]]></title>
+    <link href="http://ry0u.github.io/blog/2016/03/23/aoj1296-repeated-substitution-with-sed/"/>
+    <updated>2016-03-23T20:48:42+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/03/23/aoj1296-repeated-substitution-with-sed</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1296">Repeated Substitution with Sed</a></h4><p>Do you know "sed," a tool provided with Unix? Its most popular use is to substitute every occurrence of a string contained in the input string (actually each input line) with another string β. More precisely, it proceeds as follows. Within the input string, every non-overlapping (but possibly adjacent) occurrences of α are marked.</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>文字列から <script type="math/tex"> \alpha_i </script>の文字列を探して置換を繰り返す．探すのはstring::find, 置換はstring::replaceを使用して楽をした．幅優先で文字列が <script type="math/tex"> \delta </script>になったら変更回数を答える．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+#include &lt;queue&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int main() {
+    int n;
+    while(cin &gt;&gt; n &amp;&amp; n) {
+        vector&lt;string&gt; v(n), v2(n);
+        rep(i, n) cin &gt;&gt; v[i] &gt;&gt; v2[i];
+
+        string s, t;
+        cin &gt;&gt; s &gt;&gt; t;
+
+        queue&lt;pair&lt;string, int&gt; &gt; que;
+        que.push(mp(s, 0));
+        int ans = -1;
+
+        while(que.size()) {
+            pair&lt;string, int&gt; p = que.front();
+            que.pop();
+
+            if(p.first == t) {
+                ans = p.second;
+                break;
+            }
+
+            rep(i, n) {
+                bool flag = false;
+                string s2 = p.first;
+                string::size_type id = s2.find(v[i]);
+                while(id != string::npos) {
+                    flag = true;
+                    s2.replace(id, v[i].size(), v2[i]);
+                    id = s2.find(v[i], id + v2[i].size());
+                }
+
+                if(flag &amp;&amp; s2.size() &lt;= t.size()) {
+                    que.push(mp(s2, p.second + 1));
+                }
+            }
+        }
+
+        cout &lt;&lt; ans &lt;&lt; endl;
+    }
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[AOJ2369 CatChecker]]></title>
@@ -327,258 +514,6 @@ int main() {
         if(ans == INF) cout &lt;&lt; "Help!" &lt;&lt; endl;
         else cout &lt;&lt; ans &lt;&lt; endl;
     }
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[AOJ2002 X-Ray Screening System]]></title>
-    <link href="http://ry0u.github.io/blog/2016/03/23/aoj2002-x-ray-screening-system/"/>
-    <updated>2016-03-23T19:25:35+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/03/23/aoj2002-x-ray-screening-system</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2002">X-Ray Screening System | Aizu Online Judge</a></h4><p>上記の調査結果をふまえて，以下のような手荷物検査のためのモデルを考案した．それぞれの手荷物は X 線に対して透明である直方体の容器だとみなす．その中には X 線に対して不透明である複数の品物が入っている．ここで，直方体の 3 辺を x 軸，y 軸，z 軸とする座標系を考え，x 軸と平行な方向に X 線を照射して，y-z 平面に投影された画像を撮影する．撮影された画像は適当な大きさの格子に分割され，画像解析によって，それぞれの格子領域に映っている品物の材質が推定される．この会社には非常に高度の解析技術があり，材質の詳細な違いすらも解析することが可能であることから，品物の材質は互いに異なると考えることができる．なお，複数の品物が x 軸方向に関して重なっているときは，それぞれの格子領域について最も手前にある，すなわち x 座標が最小である品物の材質が得られる．また，2 つ以上の品物の x 座標が等しいことはないと仮定する．</p></blockquote>
-
-
-<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
-
-
-
-
-<!-- more -->
-
-
-<p>もっとも手前にある品物から順番に処理していく．長方形なので，一番左上<script type="math/tex"> (sx, sy) </script>と右下 <script type="math/tex"> (gx, gy) </script>を持っておき， <script type="math/tex"> (sx, sy) </script>， <script type="math/tex"> (gx, sy) </script>， <script type="math/tex"> (sx, gy) </script>， <script type="math/tex"> (gx, gy) </script>の4角形全てに同じ品物の材質，または前面に他の品物がある時に埋めた．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-int w, h;
-int sy, sx, gy, gx;
-int dx[4] = {1,0,-1,0};
-int dy[4] = {0,1,0,-1};
-
-bool can(int y,int x) {
-    if(0 &lt;= y &amp;&amp; y &lt; h &amp;&amp; 0 &lt;= x &amp;&amp; x &lt; w) return true;
-    return false;
-}
-
-vector&lt;string&gt; s;
-char c;
-bool used[55][55], visited[55][55];
-
-bool check() {
-    REP(i, sy, gy+1){
-        REP(j, sx, gx+1) {
-            if(s[i][j] == c || used[i][j]) continue;
-            return false;
-        }
-    }
-    return true;
-}
-
-void f() {
-    REP(i, sy, gy+1) {
-        REP(j, sx, gx+1) {
-            used[i][j] = true;
-        }
-    }
-}
-
-int main() {
-    int n;
-    cin &gt;&gt; n;
-
-    rep(q, n) {
-        cin &gt;&gt; h &gt;&gt; w;
-        s.resize(h);
-        rep(i, h) cin &gt;&gt; s[i];
-
-        memset(used, 0, sizeof(used));
-        set&lt;char&gt; S;
-
-        bool flag = true, update = true;
-        while(update) {
-            update = false;
-            rep(i, h) {
-                rep(j, w) {
-                    if(s[i][j] == '.') continue;
-
-                    if(used[i][j]) continue;
-
-                    sy = i;
-                    sx = j;
-                    gy = i;
-                    gx = j;
-                    c = s[i][j];
-                    memset(visited, 0, sizeof(visited));
-
-                    rep(k, h) {
-                        rep(l, w) {
-                            if(s[k][l] == c) {
-                                sy = min(sy, k);
-                                sx = min(sx, l);
-                                gy = max(gy, k);
-                                gx = max(gx, l);
-                            }
-                        }
-                    }
-
-                    if(S.find(c) == S.end() &amp;&amp; check()) {
-                        f();
-                        S.insert(c);
-                        update = true;
-                    }
-                }
-            }
-        }
-
-        rep(i, h) {
-            rep(j, w) {
-                if(used[i][j]) continue;
-                if(s[i][j] == '.') continue;
-                flag = false;
-            }
-        }
-
-        if(flag) cout &lt;&lt; "SAFE" &lt;&lt; endl;
-        else cout &lt;&lt; "SUSPICIOUS" &lt;&lt; endl;
-
-    }
-
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[AOJ1188 Hierarchical Democracy]]></title>
-    <link href="http://ry0u.github.io/blog/2016/03/23/aoj1188-hierarchical-democracy/"/>
-    <updated>2016-03-23T18:25:06+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/03/23/aoj1188-hierarchical-democracy</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1188">Hierarchical Democracy</a></h4><p>The presidential election in Republic of Democratia is carried out through multiple stages as follows. There are exactly two presidential candidates. At the first stage, eligible voters go to the polls of his/her electoral district. The winner of the district is the candidate who takes a majority of the votes.</p></blockquote>
-
-
-<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
-
-
-
-
-<!-- more -->
-
-
-<p>木として考える．葉にその区画に勝つための最小の値， <script type="math/tex"> \frac{値}{2} + 1 </script>を入れる．子の数の半分，小さい順に取っていく．最後に根の値が最小値になっているはず．</p>
-
-<p><img src="/images/AOJ/1188-1.png">
-<img src="/images/AOJ/1188-2.png"></p>
-
-<p><img src="/images/AOJ/1188-3.png"></p>
-
-<p>子の階層から小さい順に取りたいので，priority_queueを利用した．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-#include &lt;queue&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-priority_queue&lt;ll, vector&lt;ll&gt;, greater&lt;ll&gt; &gt; que[100005];
-
-int main() {
-    int n;
-    cin &gt;&gt; n;
-
-    rep(q, n) {
-        rep(i, 100005) {
-            while(que[i].size()) que[i].pop();
-        }
-
-        string s;
-        cin &gt;&gt; s;
-
-        int dep = 0;
-        rep(i, s.size()) {
-
-            if(s[i] == '[') {
-                if(s[i+1] == '[') {
-                    dep++;
-                } else {
-                    stringstream ss;
-                    REP(j, i+1, s.size()) {
-                        if('0' &lt;= s[j] &amp;&amp; s[j] &lt;= '9') {
-                            ss &lt;&lt; s[j];
-                            i++;
-                        } else {
-                            i++;
-                            break;
-                        }
-                    }
-
-                    ll x;
-                    ss &gt;&gt; x;
-
-                    x = x / 2 + 1;
-                    que[dep].push(x);
-                }
-            } else if(s[i] == ']') {
-                int m = que[dep].size();
-                ll sum = 0;
-
-                rep(j, m/2 + 1) {
-                    sum += que[dep].top();
-                    que[dep].pop();
-                }
-
-                que[dep-1].push(sum);
-
-                while(que[dep].size()) {
-                    que[dep].pop();
-                }
-
-                dep--;
-            }
-
-        }
-
-        cout &lt;&lt; que[0].top() &lt;&lt; endl;
-    }
-
     return 0;
 }
 </code></pre>
