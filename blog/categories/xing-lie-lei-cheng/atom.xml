@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: 行列累乗 | ry0u_ydのblog]]></title>
+  <link href="http://ry0u.github.io/blog/categories/xing-lie-lei-cheng/atom.xml" rel="self"/>
+  <link href="http://ry0u.github.io/"/>
+  <updated>2016-03-24T01:59:00+09:00</updated>
+  <id>http://ry0u.github.io/</id>
+  <author>
+    <name><![CDATA[ry0u_yd]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ1327 One-Dimensional Cellular Automaton]]></title>
+    <link href="http://ry0u.github.io/blog/2016/03/24/aoj1327-one-dimensional-cellular-automaton/"/>
+    <updated>2016-03-24T01:32:29+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/03/24/aoj1327-one-dimensional-cellular-automaton</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1327">One-Dimensional Cellular Automaton</a></h4><p>There is a one-dimensional cellular automaton consisting of cells. Cells are numbered from 0 to N − 1. Each cell has a state represented as a non-negative integer less than M. The states of cells evolve through discrete time steps. We denote the state of the i-th cell at time t as S( i, t).</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>{% math %}
+    S(i, t+1) = A \cdot S(i-1, t) + B \cdot S(i, t) + C \cdots S(i+1, t) {\rm mod} M
+{% endmath %}
+をそのままやると {% m %} O(NT) {% em %}となり間に合わない．変換行列を</p>
+
+<p>{% math %}
+    \left(
+        \begin{array}{ccccc}
+            b &amp; c &amp; 0 &amp; 0 &amp; 0 \
+            a &amp; b &amp; c &amp; 0 &amp; 0 \
+            0 &amp; a &amp; b &amp; c &amp; 0 \
+            0 &amp; 0 &amp; a &amp; b &amp; c \
+            0 &amp; 0 &amp; 0 &amp; a &amp; b \
+        \end{array}
+    \right)
+{% endmath %}</p>
+
+<p>とする．これの行列の{% m %} (i, j) {% em %}が{% m %} S(j, 0) {% em %}の係数となる．よって</p>
+
+<p>{% math %}
+    \left(
+        \begin{array}{ccccc}
+            b &amp; c &amp; 0 &amp; 0 &amp; 0 \
+            a &amp; b &amp; c &amp; 0 &amp; 0 \
+            0 &amp; a &amp; b &amp; c &amp; 0 \
+            0 &amp; 0 &amp; a &amp; b &amp; c \
+            0 &amp; 0 &amp; 0 &amp; a &amp; b \
+        \end{array}
+    \right) ^T
+    \left(
+        \begin{array}{c}
+            S(0, 0) \
+            S(1, 0) \
+            S(2, 0) \
+            S(3, 0) \
+            S(4, 0)
+        \end{array}
+    \right)</p>
+
+<p>{% endmath %}</p>
+
+<p>この変換行列の {% m %} T {% em %}乗は {% m %} logT {% em %}で出来るので {% m %} O(N logT) {% em %}となり間に合う．<br/>
+行列累乗の問題を初めて解けた(文字のまま展開していたら気付いた)．非常に嬉しい．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int MOD;
+
+struct Mat {
+    vector&lt;vector&lt;ll&gt; &gt; dat;
+    int n;
+
+    Mat(int n) : n(n), dat(n, vector&lt;ll&gt;(n)) {}
+
+    Mat(vector&lt;vector&lt;ll&gt; &gt; dat) : n(dat.size()), dat(dat) {}
+
+    Mat I(int n) {
+        Mat ret(n);
+        rep(i, n) ret.dat[i][i] = 1;
+        return ret;
+    }
+
+    Mat mul(Mat &amp;b) {
+        Mat ret(n);
+        rep(i, n) rep(j, n) rep(k, n) (ret.dat[i][j] += dat[i][k] * b.dat[k][j]) %= MOD;
+        return ret;
+    }
+
+    Mat pow(ll b) {
+        Mat ret = I(n);
+        for (Mat A = *this; b &gt; 0; A = A.mul(A) , b /= 2) if (b &amp; 1) ret = A.mul(ret);
+        return ret;
+    }
+};
+
+int main() {
+    int n, m, a, b, c, t;
+    while(cin &gt;&gt; n &gt;&gt; m &gt;&gt; a &gt;&gt; b &gt;&gt; c &gt;&gt; t) {
+        if(n == 0 &amp;&amp; m == 0 &amp;&amp; a == 0 &amp;&amp; b == 0 &amp;&amp; c == 0 &amp;&amp; t == 0) break;
+
+        MOD = m;
+
+        vector&lt;int&gt; s(n);
+        rep(i, n) cin &gt;&gt; s[i];
+
+        int s1 = -1, s2 = 0, s3 = 1;
+        Mat mat(n);
+        rep(i, n) {
+            if(s1 &gt;= 0) {
+                mat.dat[i][s1] = a;
+            }
+            mat.dat[i][s2] = b;
+            if(s3 &lt; n) {
+                mat.dat[i][s3] = c;
+            }
+
+            s1++; s2++; s3++;
+        }
+
+        Mat ret = mat.pow(t);
+
+        rep(i, n) {
+            ll sum = 0;
+            rep(j, n) {
+                sum += s[j] * ret.dat[i][j];
+                sum %= MOD;
+            }
+
+            cout &lt;&lt; sum;
+
+            if(i == n-1) cout &lt;&lt; endl;
+            else cout &lt;&lt; " ";
+        }
+    }
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+</feed>
