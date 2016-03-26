@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 300 | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/300/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-03-24T02:26:22+09:00</updated>
+  <updated>2016-03-26T22:18:32+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,416 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ1251 Pathological Paths]]></title>
+    <link href="http://ry0u.github.io/blog/2016/03/26/aoj1251-pathological-paths/"/>
+    <updated>2016-03-26T22:12:52+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/03/26/aoj1251-pathological-paths</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1251">Pathological Paths</a></h4><p>Professor Pathfinder is a distinguished authority on the structure of hyperlinks in the World Wide Web. For establishing his hypotheses, he has been developing software agents, which automatically traverse hyperlinks and analyze the structure of the Web. Today, he has gotten an intriguing idea to improve his software agents.</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>木構造でディレクトリ構造を表す．探すパスが両方葉の場合，ノードの番号が一致するかを見る．葉ではなくディレクトリの場合は，自分の子に文字列が"index.html"であり葉であるノードがあるかを見る．ない場合は"not found"で，ある場合はそのノード番号を比較する．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int cnt = 0;
+
+struct Tree {
+    string s;
+    int id;
+    Tree* par;
+    vector&lt;Tree*&gt; v;
+
+    Tree(Tree* par, string s, int id) : par(par), s(s), id(id) {}
+
+    void add(int i, vector&lt;string&gt; res) {
+        if(i == res.size()) return;
+
+        bool flag = true;
+        rep(j, v.size()) {
+            if(v[j]-&gt;s == res[i]) flag = false;
+        }
+
+        if(flag) {
+            cnt++;
+            Tree *node = new Tree(this, res[i], cnt);
+            v.push_back(node);
+        }
+
+        rep(j, v.size()) {
+            if(v[j]-&gt;s == res[i]) {
+                v[j]-&gt;add(i+1, res);
+            }
+        }
+    }
+
+    Tree* find(int i, vector&lt;string&gt; res) {
+        // cout &lt;&lt; " -- in find :" &lt;&lt; s &lt;&lt; endl;
+        if(i == res.size()) {
+            return this;
+        }
+
+        if(res[i] == ".") {
+            if(v.size() == 0) return NULL;
+            return find(i+1, res);
+        } else if(res[i] == "..") {
+            if(v.size() == 0) return NULL;
+            if(par == NULL) return NULL;
+            return par-&gt;find(i+1, res);
+        } else if(res[i] == "") {
+            if(v.size() == 0) return NULL;
+            return find(i+1, res);
+        } else {
+            rep(j, v.size()) {
+                if(v[j]-&gt;s == res[i]) {
+                    return v[j]-&gt;find(i+1, res);
+                }
+            }
+            return NULL;
+        }
+    }
+
+};
+
+vector&lt;string&gt; split(const string &amp;str, char delim) {
+    vector&lt;string&gt; res;
+    size_t current = 0, found;
+    while((found = str.find_first_of(delim, current)) != string::npos) {
+        res.push_back(string(str, current, found - current));
+        current = found + 1;
+    }
+    res.push_back(string(str, current, str.size() - current));
+    return res;
+}
+
+int main() {
+    int n, m;
+    while(cin &gt;&gt; n &gt;&gt; m) {
+        if(n == 0 &amp;&amp; m == 0) break;
+
+        cnt = 0;
+        Tree *root = new Tree(NULL, "root", cnt);
+
+        rep(i, n) {
+            string s;
+            cin &gt;&gt; s;
+
+            vector&lt;string&gt; ret = split(s, '/');
+
+            root-&gt;add(0, vector&lt;string&gt;(ret.begin()+1, ret.end()));
+        }
+
+        rep(q, m) {
+            string s, t;
+            cin &gt;&gt; s &gt;&gt; t;
+
+            vector&lt;string&gt; r = split(s, '/');
+            vector&lt;string&gt; r2 = split(t, '/');
+
+            Tree *node = root-&gt;find(0, r);
+            Tree *node2 = root-&gt;find(0, r2);
+
+            // if(node == NULL) cout &lt;&lt; " node 1 : null" &lt;&lt; endl;
+            // if(node2 == NULL) cout &lt;&lt; " node 2 : null" &lt;&lt; endl;
+
+            if(node == NULL || node2 == NULL) {
+                cout &lt;&lt; "not found" &lt;&lt; endl;
+            } else {
+
+                Tree *res = NULL;
+                if(node-&gt;v.size() == 0) {
+                    res = node;
+                } else {
+                    rep(i, node-&gt;v.size()) {
+                        if(node-&gt;v[i]-&gt;v.size() == 0 &amp;&amp; node-&gt;v[i]-&gt;s == "index.html") {
+                            res = node-&gt;v[i];
+                        }
+                    }
+                }
+
+                Tree *res2 = NULL;
+                if(node2-&gt;v.size() == 0) {
+                    res2 = node2;
+                } else {
+                    rep(i, node2-&gt;v.size()) {
+                        if(node2-&gt;v[i]-&gt;v.size() == 0 &amp;&amp; node2-&gt;v[i]-&gt;s == "index.html") {
+                            res2 = node2-&gt;v[i];
+                        }
+                    }
+                }
+
+                // if(res == NULL) cout &lt;&lt; "NULL";
+                // else cout &lt;&lt; res-&gt;s &lt;&lt; ", " &lt;&lt; res-&gt;id;
+                //
+                // cout &lt;&lt; " ";
+                //
+                // if(res2 == NULL) cout &lt;&lt; "NULL";
+                // else cout &lt;&lt; res2-&gt;s &lt;&lt; ", " &lt;&lt; res2-&gt;id;
+                //
+                // cout &lt;&lt; endl;
+
+                if(res == NULL || res2 == NULL) {
+                    cout &lt;&lt; "not found" &lt;&lt; endl;
+                } else if(res-&gt;id == res2-&gt;id &amp;&amp; res-&gt;s == res2-&gt;s) {
+                    cout &lt;&lt; "yes" &lt;&lt; endl;
+                } else {
+                    cout &lt;&lt; "no" &lt;&lt; endl;
+                }
+            }
+        }
+    }
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ1347 Shopping]]></title>
+    <link href="http://ry0u.github.io/blog/2016/03/26/aoj1347-shopping/"/>
+    <updated>2016-03-26T21:44:41+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/03/26/aoj1347-shopping</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1347">Shopping | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>まず最初に，全ての場所に行って帰ってを行うグラフを考える．</p>
+
+<p><img src="/images/AOJ/1347-1.png"></p>
+
+<p>ここから実際に戻らなければいけない区間を出して</p>
+
+<p><img src="/images/AOJ/1347-2.png"></p>
+
+<p>その区間でない場所は <script type="math/tex"> 1 </script>本あればいいので <script type="math/tex"> -2 </script>する．</p>
+
+<p><img src="/images/AOJ/1347-3.png"></p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int main() {
+    int n, m;
+    cin &gt;&gt; n &gt;&gt; m;
+
+    vector&lt;int&gt; c(m), d(m);
+    rep(i, m) cin &gt;&gt; c[i] &gt;&gt; d[i];
+
+    int cnt[1005];
+    memset(cnt, 0, sizeof(cnt));
+
+    rep(i, m) {
+        REP(j, c[i], d[i]) {
+            cnt[j]++;
+        }
+    }
+
+    int ans = 3 * (n + 1);
+    rep(i, n + 1) {
+        if(cnt[i] == 0) {
+            ans -= 2;
+        }
+    }
+
+    cout &lt;&lt; ans &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ1326 Stylish]]></title>
+    <link href="http://ry0u.github.io/blog/2016/03/26/aoj1326-stylish/"/>
+    <updated>2016-03-26T21:21:31+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/03/26/aoj1326-stylish</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1326">Stylish</a></h4><p>Stylish is a programming language whose syntax comprises names, that are sequences of Latin alphabet letters, three types of grouping symbols, periods ('.'), and newlines. Grouping symbols, namely round brackets ('(' and ')'), curly brackets ('{' and '}'), and square brackets ('[' and ']'), must match and be nested properly.</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>i番目までの括弧の量を先に計算しておく．<script type="math/tex"> R </script>, <script type="math/tex"> C </script>, <script type="math/tex"> S </script>を総当りしてインデントが合う組み合わせを見つける． <script type="math/tex"> 2 </script>つ以上ある場合は <script type="math/tex"> -1 </script>にする．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int main() {
+    int n, m;
+    while(cin &gt;&gt; n &gt;&gt; m) {
+        if(n == 0 &amp;&amp; m == 0) break;
+
+        vector&lt;string&gt; v(n), v2(m);
+        rep(i, n) cin &gt;&gt; v[i];
+        rep(i, m) cin &gt;&gt; v2[i];
+
+        int r[105], c[105], s[105];
+        memset(r, 0, sizeof(r));
+        memset(c, 0, sizeof(c));
+        memset(s, 0, sizeof(s));
+
+        REP(i, 1, n) {
+            r[i] = r[i-1];
+            c[i] = c[i-1];
+            s[i] = s[i-1];
+            rep(j, v[i-1].size()) {
+                char ch = v[i-1][j];
+                if(ch == '(') r[i]++;
+                if(ch == ')') r[i]--;
+                if(ch == '{') c[i]++;
+                if(ch == '}') c[i]--;
+                if(ch == '[') s[i]++;
+                if(ch == ']') s[i]--;
+            }
+        }
+
+        int r2[105], c2[105], s2[105];
+        memset(r2, 0, sizeof(r2));
+        memset(c2, 0, sizeof(c2));
+        memset(s2, 0, sizeof(s2));
+
+        REP(i, 1, m) {
+            r2[i] = r2[i-1];
+            c2[i] = c2[i-1];
+            s2[i] = s2[i-1];
+            rep(j, v2[i-1].size()) {
+                char ch = v2[i-1][j];
+                if(ch == '(') r2[i]++;
+                if(ch == ')') r2[i]--;
+                if(ch == '{') c2[i]++;
+                if(ch == '}') c2[i]--;
+                if(ch == '[') s2[i]++;
+                if(ch == ']') s2[i]--;
+            }
+        }
+
+        int d[105];
+        memset(d, 0, sizeof(d));
+
+        rep(i, n) {
+            rep(j, v[i].size()) {
+                if(v[i][j] != '.') {
+                    d[i] = j;
+                    break;
+                }
+            }
+        }
+
+        vector&lt;int&gt; ans(m);
+        rep(i, m) ans[i] = INF;
+
+        REP(i, 1, 21) {
+            REP(j, 1, 21) {
+                REP(k, 1, 21) {
+                    bool flag = true;
+
+                    rep(l, n) {
+                        if(d[l] == i * r[l] + j * c[l] + k * s[l]) continue;
+                        flag = false;
+                    }
+
+                    if(flag) {
+                        rep(l, m) {
+                            int d = i * r2[l] + j * c2[l] + k * s2[l];
+
+                            if(ans[l] == INF) ans[l] = d;
+                            else if(ans[l] != d) ans[l] = -1;
+                        }
+                    }
+                }
+            }
+        }
+
+        rep(i, m) {
+            cout &lt;&lt; ans[i];
+            if(i == m-1) cout &lt;&lt; endl;
+            else cout &lt;&lt; " ";
+        }
+    }
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[AOJ2166 Erratic Sleep Habits]]></title>
@@ -29,11 +439,11 @@
 <!-- more -->
 
 
-<p>睡眠周期 {% m %} T_i {% em %}が与えられる．カフェインを取ることでこの睡眠周期を最初に戻すことが出来るとき，全ての予定をこなせるカフェインの量の最大値を求める．<br/>
-{% math %}
+<p>睡眠周期 <script type="math/tex"> T_i </script>が与えられる．カフェインを取ることでこの睡眠周期を最初に戻すことが出来るとき，全ての予定をこなせるカフェインの量の最大値を求める．<br/>
+<script type="math/tex; mode=display">
     dp[i][j] := i日目に睡眠周期jの時のカフェインの最小値
-{% endmath %}
-とした． {% m %} j = 0 {% em %}の場合は {% m %} i-1 {% em %}のどこからでも {% m %} +1 {% em %}(カフェインを取ること)で遷移できて，他の場合は {% m %} T_j {% em %}が {% m %} i {% em %}日目の一番最初の予定より早ければ， {% m %} dp[i-1][j-1] {% em %}より遷移できる．</p>
+</script>
+とした． <script type="math/tex"> j = 0 </script>の場合は <script type="math/tex"> i-1 </script>のどこからでも <script type="math/tex"> +1 </script>(カフェインを取ること)で遷移できて，他の場合は <script type="math/tex"> T_j </script>が <script type="math/tex"> i </script>日目の一番最初の予定より早ければ， <script type="math/tex"> dp[i-1][j-1] </script>より遷移できる．</p>
 
 <h1>Code</h1>
 
@@ -126,12 +536,12 @@ int main() {
 <!-- more -->
 
 
-<p>{% math %}
+<p><script type="math/tex; mode=display">
     S(i, t+1) = A \cdot S(i-1, t) + B \cdot S(i, t) + C \cdots S(i+1, t) {\rm mod} M
-{% endmath %}
-をそのままやると {% m %} O(NT) {% em %}となり間に合わない．変換行列を</p>
+</script>
+をそのままやると <script type="math/tex"> O(NT) </script>となり間に合わない．変換行列を</p>
 
-<p>{% math %}
+<p><script type="math/tex; mode=display">
     \left(
         \begin{array}{ccccc}
             b &amp; c &amp; 0 &amp; 0 &amp; 0 \
@@ -141,11 +551,11 @@ int main() {
             0 &amp; 0 &amp; 0 &amp; a &amp; b \
         \end{array}
     \right)
-{% endmath %}</p>
+</script></p>
 
-<p>とする．これの行列の{% m %} (i, j) {% em %}が{% m %} S(j, 0) {% em %}の係数となる．よって</p>
+<p>とする．これの行列の<script type="math/tex"> (i, j) </script>が<script type="math/tex"> S(j, 0) </script>の係数となる．よって</p>
 
-<p>{% math %}
+<p><script type="math/tex; mode=display">
     \left(
         \begin{array}{ccccc}
             b &amp; c &amp; 0 &amp; 0 &amp; 0 \
@@ -165,9 +575,9 @@ int main() {
         \end{array}
     \right)</p>
 
-<p>{% endmath %}</p>
+<p></script></p>
 
-<p>この変換行列の {% m %} T {% em %}乗は {% m %} logT {% em %}で出来るので {% m %} O(N logT) {% em %}となり間に合う．<br/>
+<p>この変換行列の <script type="math/tex"> T </script>乗は <script type="math/tex"> logT </script>で出来るので <script type="math/tex"> O(N logT) </script>となり間に合う．<br/>
 行列累乗の問題を初めて解けた(文字のまま展開していたら気付いた)．非常に嬉しい．</p>
 
 <h1>Code</h1>
@@ -258,306 +668,6 @@ int main() {
             if(i == n-1) cout &lt;&lt; endl;
             else cout &lt;&lt; " ";
         }
-    }
-
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[AOJ1248 The Balance]]></title>
-    <link href="http://ry0u.github.io/blog/2016/03/24/aoj1248-the-balance/"/>
-    <updated>2016-03-24T01:23:32+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/03/24/aoj1248-the-balance</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1248">The Balance</a></h4><p>Ms. Iyo Kiffa-Australis has a balance and only two kinds of weights to measure a dose of medicine. For example, to measure 200mg of aspirin using 300mg weights and 700mg weights, she can put one 700mg weight on the side of the medicine and three 300mg weights on the opposite side (Figure 1).</p></blockquote>
-
-
-<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
-
-
-
-
-<!-- more -->
-
-
-<p>重り {% m %} a {% em %}を使う量を決めると重り{% m %} b {% em %}を使う量が決まる．また重り {% m %} b {% em %}を決めると重り{% m %} a {% em %}を使う量が決まる．それぞれ使う量を全探索してどちらも使う量が非負整数の時に量の和，重さの和の最小を答える．上限を何も考えずに {% m %} 500000 {% em %}まで回したらオーバーフローで死んだ(完)． {% m %} \max{d} {% em %}までで良かった．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-int main() {
-    int a, b, d;
-    while(cin &gt;&gt; a &gt;&gt; b &gt;&gt; d) {
-        if(a == 0 &amp;&amp; b == 0 &amp;&amp; d == 0) break;
-
-        int g = __gcd(a, b);
-        a /= g;
-        b /= g;
-        d /= g;
-
-        int x = INF, y = INF, sum = INF, prod = INF;
-
-        for(int i = 0; i &lt; 50000; i++ ) { 
-            int c = d - a * i;
-            if(abs(c) % b == 0) {
-                int j = abs(c / b);
-
-                if(i + j &lt; sum) {
-                    sum = i + j;
-                    prod = a*i + b*j;
-                    x = i;
-                    y = j;
-                } else if(i + j == sum &amp;&amp; a*i + b*j &lt; prod) {
-                    sum = i + j;
-                    prod = a*i + b*j;
-                    x = i;
-                    y = j;
-                }
-            }
-        }
-
-        for(int j = 0; j &lt; 50000; j++) {
-            int c = d - b * j;
-            if(abs(c) % a == 0) {
-                int i = abs(c / a);
-                if(i + j &lt; sum) {
-                    sum = i + j;
-                    prod = a*i + b*j;
-                    x = i;
-                    y = j;
-                } else if(i + j == sum &amp;&amp; a*i + b*j &lt; prod) {
-                    sum = i + j;
-                    prod = a*i + b*j;
-                    x = i;
-                    y = j;
-                }
-            }
-        }
-
-        cout &lt;&lt; x &lt;&lt; " " &lt;&lt; y &lt;&lt; endl;
-    }
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[AOJ1194 Vampire]]></title>
-    <link href="http://ry0u.github.io/blog/2016/03/24/aoj1194-vampire/"/>
-    <updated>2016-03-24T00:28:29+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/03/24/aoj1194-vampire</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1194">Vampire</a></h4><p>Mr. C is a vampire. If he is exposed to the sunlight directly, he turns into ash. Nevertheless, last night, he attended to the meeting of Immortal and Corpse Programmers Circle, and he has to go home in the near dawn.</p></blockquote>
-
-
-<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
-
-
-
-
-<!-- more -->
-
-
-<p>ある点 {% m %} (x, y) {% em %}を端として決めると距離が決まる．Sample Input3を考えると下図のケースが最大である．<br/>
-{% img /images/AOJ/1194.png %}</p>
-
-<p>緑の線の長さは {% m %} {\rm sqrt} (r ^2 - x ^2) {% em %}になるので，求めたい赤の線の長さが {% m %} r + y - {\rm sqrt}(r ^2 - x ^2) {% em %}となる．建物が重なっている場所は一番大きい所を見て， {% m %} {\rm min}(H[i-1], H[i]) {% em %}が建物の角となり，その点を端として決めて一番短いものを答える．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-#include &lt;cmath&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-int main() {
-    int r, n;
-    while(cin &gt;&gt; r &gt;&gt; n) {
-
-        if(r == 0 &amp;&amp; n == 0) break;
-
-        vector&lt;pair&lt;int, P&gt; &gt; v(n);
-        rep(i, n) cin &gt;&gt; v[i].second.first &gt;&gt; v[i].second.second &gt;&gt; v[i].first;
-
-        int H[60], GETA = 30;
-        memset(H, 0, sizeof(H));
-
-        rep(i, n) {
-            int h = v[i].first, x1 = v[i].second.first, x2 = v[i].second.second;
-
-            REP(j, x1, x2) {
-                H[j + GETA] = max(H[j + GETA], h);
-            }
-        }
-
-        double ans = INF;
-        REP(i, -r+1, r) {
-            double res = r + min(H[i + GETA], H[i - 1 + GETA]);
-            ans = min(ans, res - sqrt(r*r - i*i));
-        }
-
-        cout &lt;&lt; fixed;
-        cout.precision(4);
-        cout &lt;&lt; ans &lt;&lt; endl;
-    }
-
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[AOJ1315 Gift from the Goddess of Programming]]></title>
-    <link href="http://ry0u.github.io/blog/2016/03/23/aoj1315-gift-from-the-goddess-of-programming/"/>
-    <updated>2016-03-23T21:21:54+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/03/23/aoj1315-gift-from-the-goddess-of-programming</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1315">Gift from the Goddess of Programming</a></h4><p>The goddess of programming is reviewing a thick logbook, which is a yearly record of visitors to her holy altar of programming. The logbook also records her visits at the altar. The altar attracts programmers from all over the world because one visitor is chosen every year and endowed with a gift of miracle programming power by the goddess.</p></blockquote>
-
-
-<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
-
-
-
-
-<!-- more -->
-
-
-<p>女神と被っている時間をそれぞれ出して，最大値を出力する．同じ日にちかどうか，時間がどう被っているかを注意しながらやったがバグを何個もしまった．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-vector&lt;string&gt; split(const string &amp;str, char delim) {
-    vector&lt;string&gt; res;
-    size_t current = 0, found;
-    while((found = str.find_first_of(delim, current)) != string::npos) {
-        res.push_back(string(str, current, found - current));
-        current = found + 1;
-    }
-    res.push_back(string(str, current, str.size() - current));
-    return res;
-}
-
-
-// s1 - s2
-int f(string s1, string s2) {
-    int a = (s1[0] - '0') * 10 + (s1[1] - '0');
-    int b = (s1[3] - '0') * 10 + (s1[4] - '0');
-    int c = (s2[0] - '0') * 10 + (s2[1] - '0');
-    int d = (s2[3] - '0') * 10 + (s2[4] - '0');
-
-    if(a == c) {
-        return b - d;
-    } else {
-        return (a - (c + 1)) * 60 + (60 - d) + b;
-    }
-}
-
-int main() {
-    int n;
-    while(cin &gt;&gt; n &amp;&amp; n) {
-
-        map&lt;string, vector&lt;pair&lt;string, string&gt; &gt; &gt; IN, OUT;
-
-        rep(i, n) {
-            string a, b, c, d;
-            cin &gt;&gt; a &gt;&gt; b &gt;&gt; c &gt;&gt; d;
-
-            if(c == "I") {
-                IN[d].push_back(mp(a, b));
-            } else {
-                OUT[d].push_back(mp(a, b));
-            }
-        }
-
-        int ans = 0;
-        vector&lt;pair&lt;string, string&gt; &gt; gin = IN["000"];
-        vector&lt;pair&lt;string, string&gt; &gt; gout = OUT["000"];
-
-
-        map&lt;string, vector&lt;pair&lt;string, string&gt; &gt; &gt;::iterator in, out;
-        for(in = IN.begin(), out = OUT.begin(); in != IN.end() &amp;&amp; out != OUT.end(); in++, out++) {
-            if(in-&gt;first == "000") continue;
-
-            vector&lt;pair&lt;string, string &gt; &gt; v = in-&gt;second;
-            vector&lt;pair&lt;string, string &gt; &gt; v2 = out-&gt;second;
-
-            int res = 0;
-            rep(i, v.size()) {
-                rep(j, gin.size()) {
-                    if(v[i].first != gin[j].first) continue;
-
-                    string a = v[i].second, b = v2[i].second, c = gin[j].second, d = gout[j].second;
-                    if(c &lt;= a &amp;&amp; b &lt;= d) {
-                        res += f(b, a);
-                    } else if(a &lt;= c &amp;&amp; d &lt;= b) {
-                        res += f(d, c);
-                    } else if(c &lt;= a &amp;&amp; a &lt;= d &amp;&amp; d &lt;= b) {
-                        res += f(d, a);
-                    } else if(a &lt;= c &amp;&amp; c &lt;= b &amp;&amp; b &lt;= d) {
-                        res += f(b, c);
-                    }
-                }
-            }
-
-            ans = max(ans, res);
-        }
-
-        cout &lt;&lt; ans &lt;&lt; endl;
     }
 
     return 0;

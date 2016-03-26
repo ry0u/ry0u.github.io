@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 木 | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/mu/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-03-24T02:26:22+09:00</updated>
+  <updated>2016-03-26T22:18:32+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,198 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ1251 Pathological Paths]]></title>
+    <link href="http://ry0u.github.io/blog/2016/03/26/aoj1251-pathological-paths/"/>
+    <updated>2016-03-26T22:12:52+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/03/26/aoj1251-pathological-paths</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1251">Pathological Paths</a></h4><p>Professor Pathfinder is a distinguished authority on the structure of hyperlinks in the World Wide Web. For establishing his hypotheses, he has been developing software agents, which automatically traverse hyperlinks and analyze the structure of the Web. Today, he has gotten an intriguing idea to improve his software agents.</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>木構造でディレクトリ構造を表す．探すパスが両方葉の場合，ノードの番号が一致するかを見る．葉ではなくディレクトリの場合は，自分の子に文字列が"index.html"であり葉であるノードがあるかを見る．ない場合は"not found"で，ある場合はそのノード番号を比較する．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int cnt = 0;
+
+struct Tree {
+    string s;
+    int id;
+    Tree* par;
+    vector&lt;Tree*&gt; v;
+
+    Tree(Tree* par, string s, int id) : par(par), s(s), id(id) {}
+
+    void add(int i, vector&lt;string&gt; res) {
+        if(i == res.size()) return;
+
+        bool flag = true;
+        rep(j, v.size()) {
+            if(v[j]-&gt;s == res[i]) flag = false;
+        }
+
+        if(flag) {
+            cnt++;
+            Tree *node = new Tree(this, res[i], cnt);
+            v.push_back(node);
+        }
+
+        rep(j, v.size()) {
+            if(v[j]-&gt;s == res[i]) {
+                v[j]-&gt;add(i+1, res);
+            }
+        }
+    }
+
+    Tree* find(int i, vector&lt;string&gt; res) {
+        // cout &lt;&lt; " -- in find :" &lt;&lt; s &lt;&lt; endl;
+        if(i == res.size()) {
+            return this;
+        }
+
+        if(res[i] == ".") {
+            if(v.size() == 0) return NULL;
+            return find(i+1, res);
+        } else if(res[i] == "..") {
+            if(v.size() == 0) return NULL;
+            if(par == NULL) return NULL;
+            return par-&gt;find(i+1, res);
+        } else if(res[i] == "") {
+            if(v.size() == 0) return NULL;
+            return find(i+1, res);
+        } else {
+            rep(j, v.size()) {
+                if(v[j]-&gt;s == res[i]) {
+                    return v[j]-&gt;find(i+1, res);
+                }
+            }
+            return NULL;
+        }
+    }
+
+};
+
+vector&lt;string&gt; split(const string &amp;str, char delim) {
+    vector&lt;string&gt; res;
+    size_t current = 0, found;
+    while((found = str.find_first_of(delim, current)) != string::npos) {
+        res.push_back(string(str, current, found - current));
+        current = found + 1;
+    }
+    res.push_back(string(str, current, str.size() - current));
+    return res;
+}
+
+int main() {
+    int n, m;
+    while(cin &gt;&gt; n &gt;&gt; m) {
+        if(n == 0 &amp;&amp; m == 0) break;
+
+        cnt = 0;
+        Tree *root = new Tree(NULL, "root", cnt);
+
+        rep(i, n) {
+            string s;
+            cin &gt;&gt; s;
+
+            vector&lt;string&gt; ret = split(s, '/');
+
+            root-&gt;add(0, vector&lt;string&gt;(ret.begin()+1, ret.end()));
+        }
+
+        rep(q, m) {
+            string s, t;
+            cin &gt;&gt; s &gt;&gt; t;
+
+            vector&lt;string&gt; r = split(s, '/');
+            vector&lt;string&gt; r2 = split(t, '/');
+
+            Tree *node = root-&gt;find(0, r);
+            Tree *node2 = root-&gt;find(0, r2);
+
+            // if(node == NULL) cout &lt;&lt; " node 1 : null" &lt;&lt; endl;
+            // if(node2 == NULL) cout &lt;&lt; " node 2 : null" &lt;&lt; endl;
+
+            if(node == NULL || node2 == NULL) {
+                cout &lt;&lt; "not found" &lt;&lt; endl;
+            } else {
+
+                Tree *res = NULL;
+                if(node-&gt;v.size() == 0) {
+                    res = node;
+                } else {
+                    rep(i, node-&gt;v.size()) {
+                        if(node-&gt;v[i]-&gt;v.size() == 0 &amp;&amp; node-&gt;v[i]-&gt;s == "index.html") {
+                            res = node-&gt;v[i];
+                        }
+                    }
+                }
+
+                Tree *res2 = NULL;
+                if(node2-&gt;v.size() == 0) {
+                    res2 = node2;
+                } else {
+                    rep(i, node2-&gt;v.size()) {
+                        if(node2-&gt;v[i]-&gt;v.size() == 0 &amp;&amp; node2-&gt;v[i]-&gt;s == "index.html") {
+                            res2 = node2-&gt;v[i];
+                        }
+                    }
+                }
+
+                // if(res == NULL) cout &lt;&lt; "NULL";
+                // else cout &lt;&lt; res-&gt;s &lt;&lt; ", " &lt;&lt; res-&gt;id;
+                //
+                // cout &lt;&lt; " ";
+                //
+                // if(res2 == NULL) cout &lt;&lt; "NULL";
+                // else cout &lt;&lt; res2-&gt;s &lt;&lt; ", " &lt;&lt; res2-&gt;id;
+                //
+                // cout &lt;&lt; endl;
+
+                if(res == NULL || res2 == NULL) {
+                    cout &lt;&lt; "not found" &lt;&lt; endl;
+                } else if(res-&gt;id == res2-&gt;id &amp;&amp; res-&gt;s == res2-&gt;s) {
+                    cout &lt;&lt; "yes" &lt;&lt; endl;
+                } else {
+                    cout &lt;&lt; "no" &lt;&lt; endl;
+                }
+            }
+        }
+    }
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[SRM683 D2H SubtreesCounting]]></title>
@@ -32,59 +224,59 @@
 <h3>Sample1</h3>
 
 <p>Sample1で構成される木は
-{% img /images/SRM/683d2h-0.png %}
+<img src="/images/SRM/683d2h-0.png">
 である．この木の全ての部分木の頂点数は</p>
 
-<p>頂点数 {% m %} 1 \to {% em %}
-{% img /images/SRM/683d2h-1.png %}
-{% img /images/SRM/683d2h-2.png %}
-{% img /images/SRM/683d2h-3.png %}</p>
+<p>頂点数 <script type="math/tex"> 1 \to </script>
+<img src="/images/SRM/683d2h-1.png">
+<img src="/images/SRM/683d2h-2.png">
+<img src="/images/SRM/683d2h-3.png"></p>
 
-<p>頂点数 {% m %} 2 \to {% em %}
-{% img /images/SRM/683d2h-4.png %}
-{% img /images/SRM/683d2h-5.png %}</p>
+<p>頂点数 <script type="math/tex"> 2 \to </script>
+<img src="/images/SRM/683d2h-4.png">
+<img src="/images/SRM/683d2h-5.png"></p>
 
-<p>頂点数 {% m %} 3 \to {% em %}
-{% img /images/SRM/683d2h-6.png %}</p>
+<p>頂点数 <script type="math/tex"> 3 \to </script>
+<img src="/images/SRM/683d2h-6.png"></p>
 
-<p>よって{% m %} 1 + 1 + 1 + 2 + 2 + 3 = 10 {% em %}である．</p>
+<p>よって<script type="math/tex"> 1 + 1 + 1 + 2 + 2 + 3 = 10 </script>である．</p>
 
 <hr />
 
-<p>頂点{% m %} i {% em %}を根とする木に頂点{% m %} j {% em %}を根とする木を付け加える場合を考える．<br/>
-{% img /images/SRM/683d2h-7.png %}
+<p>頂点<script type="math/tex"> i </script>を根とする木に頂点<script type="math/tex"> j </script>を根とする木を付け加える場合を考える．<br/>
+<img src="/images/SRM/683d2h-7.png">
 を
-{% img /images/SRM/683d2h-8.png %}
+<img src="/images/SRM/683d2h-8.png">
 としたい．<br/>
 この時，
-{% math %}
+<script type="math/tex; mode=display">
 \begin{eqnarray}
     dp[i] &amp;:=&amp; iを根とする全ての部分木の頂点数の和 \
     num[i] &amp;:=&amp; iを根とする部分木の個数
 \end{eqnarray}
-{% endmath %}
-とすると，頂点数{% m %}dp[i]はdp[j] * num[i] + dp[i] * num[j] {% em %}だけ増加する．</p>
+</script>
+とすると，頂点数<script type="math/tex">dp[i]はdp[j] * num[i] + dp[i] * num[j] </script>だけ増加する．</p>
 
 <ul>
-<li>{% m %} dp[j] * num[i] {% em %}<br/>
-  {% img /images/SRM/683d2h-9.png %}
-  {% img /images/SRM/683d2h-10.png %}
-  {% img /images/SRM/683d2h-11.png %}
-  {% img /images/SRM/683d2h-12.png %}</li>
-<li>{% m %} dp[i] * num[j] {% em %}<br/>
-  {% img /images/SRM/683d2h-12.png %}
-  {% img /images/SRM/683d2h-13.png %}
-  {% img /images/SRM/683d2h-14.png %}
-  {% img /images/SRM/683d2h-15.png %}
-  {% img /images/SRM/683d2h-16.png %}
-  {% img /images/SRM/683d2h-17.png %}
-  {% img /images/SRM/683d2h-18.png %}
-  {% img /images/SRM/683d2h-19.png %}
-  {% img /images/SRM/683d2h-20.png %}</li>
+<li><script type="math/tex"> dp[j] * num[i] </script><br/>
+  <img src="/images/SRM/683d2h-9.png">
+  <img src="/images/SRM/683d2h-10.png">
+  <img src="/images/SRM/683d2h-11.png">
+  <img src="/images/SRM/683d2h-12.png"></li>
+<li><script type="math/tex"> dp[i] * num[j] </script><br/>
+  <img src="/images/SRM/683d2h-12.png">
+  <img src="/images/SRM/683d2h-13.png">
+  <img src="/images/SRM/683d2h-14.png">
+  <img src="/images/SRM/683d2h-15.png">
+  <img src="/images/SRM/683d2h-16.png">
+  <img src="/images/SRM/683d2h-17.png">
+  <img src="/images/SRM/683d2h-18.png">
+  <img src="/images/SRM/683d2h-19.png">
+  <img src="/images/SRM/683d2h-20.png"></li>
 </ul>
 
 
-<p>同様に部分木の個数{% m %} num[i]はnum[i] * num[j] {% em %}だけ増加する．適当に根を決め，潜って元の頂点に戻る時に足していく．自分の全ての子を潜り終わったらそれ以上変更があることはないので数える．</p>
+<p>同様に部分木の個数<script type="math/tex"> num[i]はnum[i] * num[j] </script>だけ増加する．適当に根を決め，潜って元の頂点に戻る時に足していく．自分の全ての子を潜り終わったらそれ以上変更があることはないので数える．</p>
 
 <h1>Code</h1>
 
