@@ -4,7 +4,7 @@
   <title><![CDATA[Category: atcoder | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/atcoder/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-03-29T23:14:22+09:00</updated>
+  <updated>2016-03-29T23:29:24+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,131 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[ABC005D おいしいたこ焼きの焼き方]]></title>
+    <link href="http://ry0u.github.io/blog/2016/03/29/abc005d-oisiitakoshao-kifalseshao-kifang/"/>
+    <updated>2016-03-29T23:17:17+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/03/29/abc005d-oisiitakoshao-kifalseshao-kifang</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://abc005.contest.atcoder.jp/tasks/abc005_4">D: おいしいたこ焼きの焼き方 - AtCoder Beginner Contest 005 | AtCoder</a></h4><p>(null)</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>たこ焼きの美味しさの累積和を取っておく．
+<script type="math/tex; mode=display">
+    cnt[i][j] := (0, 0) 〜 (i, j)までのたこ焼きの美味しさの和
+</script>
+とすると，範囲 <script type="math/tex"> (i, j) 〜 (i+k, j+l)</script>は</p>
+
+<ul>
+<li>個数 : <script type="math/tex"> (k + 1) \cdot (l + 1) </script></li>
+<li>美味しさ : <script type="math/tex"> cnt[i+k][j+l] - cnt[i-1][j+l] - cnt[i+k][j-1] + cnt[i-1][j-1] </script></li>
+</ul>
+
+
+<p>となるので，後はこれを <script type="math/tex"> map(個数,美味しさ) </script>に突っ込む．後は たこ焼きの個数<script type="math/tex"> p_i </script>以下の最大の美味しさを求める． <script type="math/tex"> O(N ^4 log N ^2) </script>．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int main() {
+    int n;
+    cin &gt;&gt; n;
+
+    ll cnt[55][55];
+    memset(cnt, 0, sizeof(cnt));
+
+    rep(i, n) {
+        rep(j, n) {
+            cin &gt;&gt; cnt[i][j];
+        }
+    }
+
+    rep(i, n) {
+        REP(j, 1, n) {
+            cnt[i][j] += cnt[i][j-1];
+        }
+    }
+
+    REP(i, 1, n) {
+        rep(j, n) {
+            cnt[i][j] += cnt[i-1][j];
+        }
+    }
+
+    map&lt;int, int&gt; m;
+    rep(i, n) {
+        rep(j, n) {
+            rep(k, n) {
+                if(i + k &gt;= n) continue;
+                rep(l, n) {
+                    if(j + l &gt;= n) continue;
+
+                    int res = cnt[i+k][j+l];
+
+                    if(i - 1 &gt;= 0) {
+                        res -= cnt[i-1][j+l];
+                    }
+
+                    if(j - 1 &gt;= 0) {
+                        res -= cnt[i+k][j-1];
+                    }
+
+                    if(i - 1 &gt;= 0 &amp;&amp; j - 1 &gt;= 0) {
+                        res += cnt[i-1][j-1];
+                    }
+
+                    m[(k + 1) * (l + 1)] = max(m[(k + 1) * (l + 1)] , res);
+                }
+            }
+        }
+    }
+
+    int Q;
+    cin &gt;&gt; Q;
+
+    rep(q, Q) {
+        int p;
+        cin &gt;&gt; p;
+
+        int ans = 0;
+        rep(i, p + 1) {
+            ans = max(ans, m[i]);
+        }
+
+        cout &lt;&lt; ans &lt;&lt; endl;
+    }
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[ABC008C コイン]]></title>
@@ -29,19 +154,19 @@
 <!-- more -->
 
 
-<p>コインが{% m %} N {% em %}枚与えられる．{% m %} \frac{表になる枚数}{N!} {% em %}を求める．ある数{% m %} i {% em %}枚目が表になるか，裏になるかは{% m %} N {% em %}枚の内，{% m %} C_{i} {% em %}の約数であるものの個数によって変わる．{% m %} i {% em %}枚目が表になる枚数は，表になる確率{% m %} a_{i} {% em %}が分かれば{% m %} N! \cdot a_{i} {% em %}で求まる．よって
-{% math %}
+<p>コインが<script type="math/tex"> N </script>枚与えられる．<script type="math/tex"> \frac{表になる枚数}{N!} </script>を求める．ある数<script type="math/tex"> i </script>枚目が表になるか，裏になるかは<script type="math/tex"> N </script>枚の内，<script type="math/tex"> C_{i} </script>の約数であるものの個数によって変わる．<script type="math/tex"> i </script>枚目が表になる枚数は，表になる確率<script type="math/tex"> a_{i} </script>が分かれば<script type="math/tex"> N! \cdot a_{i} </script>で求まる．よって
+<script type="math/tex; mode=display">
 \begin{eqnarray}
     \frac{表になる枚数}{N!} &amp;=&amp; \frac{N! \cdot a<em>{1} + N! \cdot a</em>{2} + &hellip; + N! \cdot a<em>{N}}{N!} \
                             &amp;=&amp; \sum</em>{i=1} ^{N} a_{i}
 \end{eqnarray}
-{% endmath %}
-となり， {% m %} a_i {% em %}が求まれば良くなった．{% m %} C_i {% em %}の約数の個数を {% m %} s {% em %}と置き，コインの中で約数と自身のみ( {% m %} s+1個 {% em %})で考える．<br/>
-例えば約数をo, 自身をx，約数の個数を{% m %} 3 {% em %}とすると x o o o, o x o o, o o x o, o o o xの {% m %} 4 {% em %}パターンで表になるのは x o o oとo o x oの {% m %} 2 {% em %}パターンである．</p>
+</script>
+となり， <script type="math/tex"> a_i </script>が求まれば良くなった．<script type="math/tex"> C_i </script>の約数の個数を <script type="math/tex"> s </script>と置き，コインの中で約数と自身のみ( <script type="math/tex"> s+1個 </script>)で考える．<br/>
+例えば約数をo, 自身をx，約数の個数を<script type="math/tex"> 3 </script>とすると x o o o, o x o o, o o x o, o o o xの <script type="math/tex"> 4 </script>パターンで表になるのは x o o oとo o x oの <script type="math/tex"> 2 </script>パターンである．</p>
 
 <ul>
-<li>{% m %} sが奇数の時，表になる確率は\frac{\frac{1}{2}(s + 1)}{(s + 1)} = \frac{1}{2} {% em %}</li>
-<li>{% m %} sが偶数の時，表になる確率は\frac{\frac{1}{2}(s + 2)}{(s + 1)} {% em %}</li>
+<li><script type="math/tex"> sが奇数の時，表になる確率は\frac{\frac{1}{2}(s + 1)}{(s + 1)} = \frac{1}{2} </script></li>
+<li><script type="math/tex"> sが偶数の時，表になる確率は\frac{\frac{1}{2}(s + 2)}{(s + 1)} </script></li>
 </ul>
 
 
@@ -126,8 +251,8 @@ int main() {
 まずは，難易度でソート．<br/>
 今見ている問題数をiとすると，i+1問目でその問題を選ぶことが出来る場所に足していく．</p>
 
-<p>{% img /images/Atcoder/001/g.png %}<br/>
-縦を問題，横を問題数と見て，遷移出来る場所を見つけたい．これを愚直に探すと，探索に{% m %} n {% em %}かかってしまう．しかし，難易度でソートされているので，lower_boundで{% m %} log(n) {% em %}で見つけることが出来る．最初に見つけた場所に足していって，累積和を取った．全体で{% m %} O(nlog(n)) {% em %}で間に合う．</p>
+<p><img src="/images/Atcoder/001/g.png"><br/>
+縦を問題，横を問題数と見て，遷移出来る場所を見つけたい．これを愚直に探すと，探索に<script type="math/tex"> n </script>かかってしまう．しかし，難易度でソートされているので，lower_boundで<script type="math/tex"> log(n) </script>で見つけることが出来る．最初に見つけた場所に足していって，累積和を取った．全体で<script type="math/tex"> O(nlog(n)) </script>で間に合う．</p>
 
 <h1>Code</h1>
 
