@@ -4,7 +4,7 @@
   <title><![CDATA[Category: abc | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/abc/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-04-03T17:23:22+09:00</updated>
+  <updated>2016-04-03T17:40:56+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,328 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[ABC013C 節制]]></title>
+    <link href="http://ry0u.github.io/blog/2016/04/03/abc013c-jie-zhi/"/>
+    <updated>2016-04-03T17:31:07+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/04/03/abc013c-jie-zhi</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://abc013.contest.atcoder.jp/tasks/abc013_3">C: 節制 - AtCoder Beginner Contest 013 | AtCoder</a></h4><p>(null)</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<h3>部分点 1</h3>
+
+<p><script type="math/tex; mode=display">
+    dp[i][j] := i日目に満足度jの時の食費の最小値
+</script>
+として動的計画法．</p>
+
+<ul>
+<li>普通の食事 : <script type="math/tex"> dp[i+1][j+b] = {\rm max} (dp[i+1][j+b], dp[i][j] + a) </script></li>
+<li>質素の食事 : <script type="math/tex"> dp[i+1][j+d] = {\rm max} (dp[i+1][j+d], dp[i][j] + c) </script></li>
+<li>食事抜き : <script type="math/tex"> dp[i+1][j-e] = {\rm max} (dp[i+1][j-e], dp[i][j]) </script></li>
+</ul>
+
+
+<p>この <script type="math/tex"> 3 </script>つの遷移がある．食事抜きの場合に<script type="math/tex"> j-e </script>が <script type="math/tex"> 0 </script>より大きい場合に限ることに注意する．</p>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+ll dp[55][100005];
+
+int main() {
+    ll n, h;
+    cin &gt;&gt; n &gt;&gt; h;
+
+    ll a, b, c, d, e;
+    cin &gt;&gt; a &gt;&gt; b &gt;&gt; c &gt;&gt; d &gt;&gt; e;
+
+    rep(i, 55) {
+        rep(j, 100005) {
+            dp[i][j] = INF;
+        }
+    }
+    dp[0][h] = 0;
+
+    rep(i, n) {
+        rep(j, 100005) {
+            if(dp[i][j] == INF) continue;
+
+            if(dp[i+1][j+b] == -1) {
+                dp[i+1][j+b] = dp[i][j] + a;
+            } else {
+                dp[i+1][j+b] = min(dp[i+1][j+b], dp[i][j] + a);
+            }
+
+            if(dp[i+1][j+d] == -1) {
+                dp[i+1][j+d] = dp[i][j] + c;
+            } else {
+                dp[i+1][j+d] = min(dp[i+1][j+d], dp[i][j] + c);
+            }
+
+            if(j - e &gt; 0) {
+                if(dp[i+1][j-e] == -1) {
+                    dp[i+1][j-e] = dp[i][j];
+                } else {
+                    dp[i+1][j-e] = min(dp[i+1][j-e], dp[i][j]);
+                }
+            }
+        }
+    }
+
+    ll ans = INF;
+    rep(i, 100005) {
+        ans = min(ans, dp[n][i]);
+    }
+
+    cout &lt;&lt; ans &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
+
+<h3>部分点2</h3>
+
+<p>普通の食事の回数と，質素な食事の回数を決めれば，残りの日にちが食事抜きとなる．これが <script type="math/tex"> 0 </script>より大きければ，そのペアは存在する．その中で<script type="math/tex"> 普通の食事の回数 * a + 質素な食事の回数 * b </script>の最小を取る．</p>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int main() {
+    ll n, h;
+    cin &gt;&gt; n &gt;&gt; h;
+
+    ll a, b, c, d, e;
+    cin &gt;&gt; a &gt;&gt; b &gt;&gt; c &gt;&gt; d &gt;&gt; e;
+
+    ll ans = INF;
+    rep(i, n + 1) {
+        rep(j, n + 1) {
+            if(i + j &gt; n) continue;
+            int k = n - i - j;
+
+            // cout &lt;&lt; h &lt;&lt; " " &lt;&lt; i * b &lt;&lt; " " &lt;&lt; j * d &lt;&lt; " " &lt;&lt; k * e &lt;&lt; "  -&gt;  " &lt;&lt; h + i * b + j * d - k * e &lt;&lt; endl;
+            if(h + i * b + j * d - k * e &gt; 0) {
+                ans = min(ans, i * a + j * c);
+            }
+        }
+    }
+
+    cout &lt;&lt; ans &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
+
+<h3>満点解法</h3>
+
+<p>普通の食事の回数を決めれば，後は満足度は単調増加数列になる．この数列の中で初めて <script type="math/tex"> 0 </script>を超える時が，その普通の食事の回数の場合の最小金額である． <script type="math/tex"> O(N logN) </script>．</p>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1LL&lt;&lt;60
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int main() {
+    int n;
+    ll h;
+    cin &gt;&gt; n &gt;&gt; h;
+
+    ll a, b, c, d, e;
+    cin &gt;&gt; a &gt;&gt; b &gt;&gt; c &gt;&gt; d &gt;&gt; e;
+
+    ll ans = INF;
+    for(ll i = 0; i &lt; n + 1; i++) {
+        ll l = -1, r = n - i;
+        while(r - l &gt; 1) {
+            ll j = (l + r) / 2;
+            ll k = n - i - j;
+
+            if(h + i * b + j * d - k * e &gt; 0) {
+                r = j;
+            } else {
+                l = j;
+            }
+        }
+
+        ll res = i * a + (l + 1) * c;
+        ans = min(ans, res);
+    }
+
+    cout &lt;&lt; ans &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[ABC012D バスと割けられない運命]]></title>
+    <link href="http://ry0u.github.io/blog/2016/04/03/abc012d-basutoge-kerarenaiyun-ming/"/>
+    <updated>2016-04-03T17:27:51+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/04/03/abc012d-basutoge-kerarenaiyun-ming</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article-full"><h4><a href="http://abc012.contest.atcoder.jp/tasks/abc012_4">D: バスと避けられない運命 - AtCoder Beginner Contest 012 | AtCoder</a></h4><p>(null)</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>バス停の数<script type="math/tex"> N </script>が <script type="math/tex"> 1 \leq N \leq 300 </script>と小さいので，愚直にそこを始点とした最短経路を求め，最大値の最小値を取った． <script type="math/tex"> O(N ^2) </script>．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+#include &lt;queue&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1LL&lt;&lt;60
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+struct edge {
+    int from,to;
+    ll cost;
+
+    edge(int t, ll c) : to(t),cost(c) {}
+    edge(int f, int t, ll c) : from(f),to(t),cost(c) {}
+
+    bool operator&lt;(const edge &amp;e) const {
+        return cost &lt; e.cost;
+    }
+};
+
+vector&lt;edge&gt; G[305];
+ll d[305];
+
+void dijkstra(int s, int n) {
+    priority_queue&lt;P, vector&lt;P&gt;, greater&lt;P&gt; &gt; que;
+    fill(d, d+n, INF);
+
+    d[s] = 0;
+    que.push(P(0,s));
+
+    while(que.size()) {
+        P p = que.top();
+        que.pop();
+
+        int v = p.second;
+        if(d[v] &lt; p.first) continue;
+
+        rep(i, G[v].size()) {
+            edge e = G[v][i];
+            if(d[e.to] &gt; d[v] + e.cost) {
+                d[e.to] = d[v] + e.cost;
+                que.push(P(d[e.to],e.to));
+            }
+        }
+    }
+}
+
+
+int main() {
+    int n, m;
+    cin &gt;&gt; n &gt;&gt; m;
+
+    rep(i, m) {
+        ll s, t, c;
+        cin &gt;&gt; s &gt;&gt; t &gt;&gt; c;
+        s--; t--;
+
+        G[s].push_back(edge(t, c));
+        G[t].push_back(edge(s, c));
+    }
+
+    ll ans = INF;
+    rep(i, n) {
+        dijkstra(i, n);
+        ll res = 0;
+        rep(j, n) {
+            res = max(res, d[j]);
+        }
+
+        ans = min(ans, res);
+    }
+
+    cout &lt;&lt; ans &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[ABC010D 浮気予防]]></title>
@@ -371,195 +693,6 @@ int main() {
         ll ans = 0;
         rep(i, n) {
             ans ^= (ret.dat[0][i] &amp; a[n-1-i]);
-        }
-
-        cout &lt;&lt; ans &lt;&lt; endl;
-    }
-
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[ABC006D トランプ挿入ソート]]></title>
-    <link href="http://ry0u.github.io/blog/2016/04/03/abc006d-toranpucha-ru-soto/"/>
-    <updated>2016-04-03T14:38:50+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/04/03/abc006d-toranpucha-ru-soto</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://abc006.contest.atcoder.jp/tasks/abc006_4">D: トランプ挿入ソート - AtCoder Beginner Contest 006 | AtCoder</a></h4><p>(null)</p></blockquote>
-
-
-<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
-
-
-
-
-<!-- more -->
-
-
-<p>カードを任意の場所に挿入することが出来るので，最長増加部分列でないカードをそれぞれ操作するのが最小になる．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-int LIS(vector&lt;int&gt; v) {
-    vector&lt;int&gt; ret(v.size() + 1);
-    rep(i, v.size()+1) ret[i] = INF;
-    rep(i, v.size()) {
-        *lower_bound(ret.begin(), ret.end(), v[i]) = v[i];
-    }
-
-    return lower_bound(ret.begin(), ret.end(), INF) - ret.begin();
-}
-
-int main() {
-    int n;
-    cin &gt;&gt; n;
-
-    vector&lt;int&gt; v(n);
-    rep(i, n) cin &gt;&gt; v[i];
-
-    cout &lt;&lt; n - LIS(v) &lt;&lt; endl;
-
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[ABC005D おいしいたこ焼きの焼き方]]></title>
-    <link href="http://ry0u.github.io/blog/2016/03/29/abc005d-oisiitakoshao-kifalseshao-kifang/"/>
-    <updated>2016-03-29T23:17:17+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/03/29/abc005d-oisiitakoshao-kifalseshao-kifang</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://abc005.contest.atcoder.jp/tasks/abc005_4">D: おいしいたこ焼きの焼き方 - AtCoder Beginner Contest 005 | AtCoder</a></h4><p>(null)</p></blockquote>
-
-
-<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
-
-
-
-
-<!-- more -->
-
-
-<p>たこ焼きの美味しさの累積和を取っておく．
-<script type="math/tex; mode=display">
-    cnt[i][j] := (0, 0) 〜 (i, j)までのたこ焼きの美味しさの和
-</script>
-とすると，範囲 <script type="math/tex"> (i, j) 〜 (i+k, j+l)</script>は</p>
-
-<ul>
-<li>個数 : <script type="math/tex"> (k + 1) \cdot (l + 1) </script></li>
-<li>美味しさ : <script type="math/tex"> cnt[i+k][j+l] - cnt[i-1][j+l] - cnt[i+k][j-1] + cnt[i-1][j-1] </script></li>
-</ul>
-
-
-<p>となるので，後はこれを <script type="math/tex"> map(個数,美味しさ) </script>に突っ込む．後は たこ焼きの個数<script type="math/tex"> p_i </script>以下の最大の美味しさを求める． <script type="math/tex"> O(N ^4 log N ^2) </script>．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-int main() {
-    int n;
-    cin &gt;&gt; n;
-
-    ll cnt[55][55];
-    memset(cnt, 0, sizeof(cnt));
-
-    rep(i, n) {
-        rep(j, n) {
-            cin &gt;&gt; cnt[i][j];
-        }
-    }
-
-    rep(i, n) {
-        REP(j, 1, n) {
-            cnt[i][j] += cnt[i][j-1];
-        }
-    }
-
-    REP(i, 1, n) {
-        rep(j, n) {
-            cnt[i][j] += cnt[i-1][j];
-        }
-    }
-
-    map&lt;int, int&gt; m;
-    rep(i, n) {
-        rep(j, n) {
-            rep(k, n) {
-                if(i + k &gt;= n) continue;
-                rep(l, n) {
-                    if(j + l &gt;= n) continue;
-
-                    int res = cnt[i+k][j+l];
-
-                    if(i - 1 &gt;= 0) {
-                        res -= cnt[i-1][j+l];
-                    }
-
-                    if(j - 1 &gt;= 0) {
-                        res -= cnt[i+k][j-1];
-                    }
-
-                    if(i - 1 &gt;= 0 &amp;&amp; j - 1 &gt;= 0) {
-                        res += cnt[i-1][j-1];
-                    }
-
-                    m[(k + 1) * (l + 1)] = max(m[(k + 1) * (l + 1)] , res);
-                }
-            }
-        }
-    }
-
-    int Q;
-    cin &gt;&gt; Q;
-
-    rep(q, Q) {
-        int p;
-        cin &gt;&gt; p;
-
-        int ans = 0;
-        rep(i, p + 1) {
-            ans = max(ans, m[i]);
         }
 
         cout &lt;&lt; ans &lt;&lt; endl;

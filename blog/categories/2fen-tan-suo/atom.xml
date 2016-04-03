@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 2分探索 | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/2fen-tan-suo/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-04-03T17:23:22+09:00</updated>
+  <updated>2016-04-03T17:40:56+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,216 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[ABC013C 節制]]></title>
+    <link href="http://ry0u.github.io/blog/2016/04/03/abc013c-jie-zhi/"/>
+    <updated>2016-04-03T17:31:07+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/04/03/abc013c-jie-zhi</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://abc013.contest.atcoder.jp/tasks/abc013_3">C: 節制 - AtCoder Beginner Contest 013 | AtCoder</a></h4><p>(null)</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<h3>部分点 1</h3>
+
+<p><script type="math/tex; mode=display">
+    dp[i][j] := i日目に満足度jの時の食費の最小値
+</script>
+として動的計画法．</p>
+
+<ul>
+<li>普通の食事 : <script type="math/tex"> dp[i+1][j+b] = {\rm max} (dp[i+1][j+b], dp[i][j] + a) </script></li>
+<li>質素の食事 : <script type="math/tex"> dp[i+1][j+d] = {\rm max} (dp[i+1][j+d], dp[i][j] + c) </script></li>
+<li>食事抜き : <script type="math/tex"> dp[i+1][j-e] = {\rm max} (dp[i+1][j-e], dp[i][j]) </script></li>
+</ul>
+
+
+<p>この <script type="math/tex"> 3 </script>つの遷移がある．食事抜きの場合に<script type="math/tex"> j-e </script>が <script type="math/tex"> 0 </script>より大きい場合に限ることに注意する．</p>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+ll dp[55][100005];
+
+int main() {
+    ll n, h;
+    cin &gt;&gt; n &gt;&gt; h;
+
+    ll a, b, c, d, e;
+    cin &gt;&gt; a &gt;&gt; b &gt;&gt; c &gt;&gt; d &gt;&gt; e;
+
+    rep(i, 55) {
+        rep(j, 100005) {
+            dp[i][j] = INF;
+        }
+    }
+    dp[0][h] = 0;
+
+    rep(i, n) {
+        rep(j, 100005) {
+            if(dp[i][j] == INF) continue;
+
+            if(dp[i+1][j+b] == -1) {
+                dp[i+1][j+b] = dp[i][j] + a;
+            } else {
+                dp[i+1][j+b] = min(dp[i+1][j+b], dp[i][j] + a);
+            }
+
+            if(dp[i+1][j+d] == -1) {
+                dp[i+1][j+d] = dp[i][j] + c;
+            } else {
+                dp[i+1][j+d] = min(dp[i+1][j+d], dp[i][j] + c);
+            }
+
+            if(j - e &gt; 0) {
+                if(dp[i+1][j-e] == -1) {
+                    dp[i+1][j-e] = dp[i][j];
+                } else {
+                    dp[i+1][j-e] = min(dp[i+1][j-e], dp[i][j]);
+                }
+            }
+        }
+    }
+
+    ll ans = INF;
+    rep(i, 100005) {
+        ans = min(ans, dp[n][i]);
+    }
+
+    cout &lt;&lt; ans &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
+
+<h3>部分点2</h3>
+
+<p>普通の食事の回数と，質素な食事の回数を決めれば，残りの日にちが食事抜きとなる．これが <script type="math/tex"> 0 </script>より大きければ，そのペアは存在する．その中で<script type="math/tex"> 普通の食事の回数 * a + 質素な食事の回数 * b </script>の最小を取る．</p>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int main() {
+    ll n, h;
+    cin &gt;&gt; n &gt;&gt; h;
+
+    ll a, b, c, d, e;
+    cin &gt;&gt; a &gt;&gt; b &gt;&gt; c &gt;&gt; d &gt;&gt; e;
+
+    ll ans = INF;
+    rep(i, n + 1) {
+        rep(j, n + 1) {
+            if(i + j &gt; n) continue;
+            int k = n - i - j;
+
+            // cout &lt;&lt; h &lt;&lt; " " &lt;&lt; i * b &lt;&lt; " " &lt;&lt; j * d &lt;&lt; " " &lt;&lt; k * e &lt;&lt; "  -&gt;  " &lt;&lt; h + i * b + j * d - k * e &lt;&lt; endl;
+            if(h + i * b + j * d - k * e &gt; 0) {
+                ans = min(ans, i * a + j * c);
+            }
+        }
+    }
+
+    cout &lt;&lt; ans &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
+
+<h3>満点解法</h3>
+
+<p>普通の食事の回数を決めれば，後は満足度は単調増加数列になる．この数列の中で初めて <script type="math/tex"> 0 </script>を超える時が，その普通の食事の回数の場合の最小金額である． <script type="math/tex"> O(N logN) </script>．</p>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1LL&lt;&lt;60
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int main() {
+    int n;
+    ll h;
+    cin &gt;&gt; n &gt;&gt; h;
+
+    ll a, b, c, d, e;
+    cin &gt;&gt; a &gt;&gt; b &gt;&gt; c &gt;&gt; d &gt;&gt; e;
+
+    ll ans = INF;
+    for(ll i = 0; i &lt; n + 1; i++) {
+        ll l = -1, r = n - i;
+        while(r - l &gt; 1) {
+            ll j = (l + r) / 2;
+            ll k = n - i - j;
+
+            if(h + i * b + j * d - k * e &gt; 0) {
+                r = j;
+            } else {
+                l = j;
+            }
+        }
+
+        ll res = i * a + (l + 1) * c;
+        ans = min(ans, res);
+    }
+
+    cout &lt;&lt; ans &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Codeforces314-div2D One-Dimensional Battle Ships]]></title>
