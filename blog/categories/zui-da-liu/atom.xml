@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: 最大流 | ry0u_ydのblog]]></title>
+  <link href="http://ry0u.github.io/blog/categories/zui-da-liu/atom.xml" rel="self"/>
+  <link href="http://ry0u.github.io/"/>
+  <updated>2016-04-03T17:23:22+09:00</updated>
+  <id>http://ry0u.github.io/</id>
+  <author>
+    <name><![CDATA[ry0u_yd]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[ABC010D 浮気予防]]></title>
+    <link href="http://ry0u.github.io/blog/2016/04/03/abc010d-fu-qi-yu-fang/"/>
+    <updated>2016-04-03T17:10:50+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/04/03/abc010d-fu-qi-yu-fang</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://abc010.contest.atcoder.jp/tasks/abc010_4">D: 浮気予防 - AtCoder Beginner Contest 010 | AtCoder</a></h4><p>(null)</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>二重辺連結成分分解をしてrootを<script type="math/tex"> 0 </script>の木にした後に， <script type="math/tex"> 0 </script>から伸びるパスの後に対称が入ればその辺を切る，で出来ると思い実装してみたがサンプルが全然合わない．<br/>
+rootを含む閉路があった場合に，そこはrootにまとまってしまうのでそのグループの中での最小が分からないし，そこの切り方によってはrootから出る枝を切る必要が無いかもしれない．</p>
+
+<p>ギブアップして解説を見た．<br/>
+<a href="http://www.slideshare.net/chokudai/abc010-35598499">http://www.slideshare.net/chokudai/abc010-35598499</a></p>
+
+<p>最大流・最小カット問題になるのか&hellip;<br/>
+処理を追加後のグラフでは，辺を切るのはそのままで，ログイン出来なくするのは，追加したパスを切れば良いとなる．この考え方は非常に勉強になった．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+#include &lt;stack&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+struct edge {
+    int to, cap, rev;
+
+    edge(int t, int c, int r) {
+        to = t; cap = c; rev = r;
+    }
+};
+
+vector&lt;edge&gt; G[105];
+bool used[105];
+
+void add_edge(int from,int to,int cap) {
+    G[from].push_back(edge(to,cap,G[to].size()));
+    G[to].push_back(edge(from,0,G[from].size()-1));
+}
+
+int dfs(int v,int t,int f) {
+    if(v == t) return f;
+    used[v] = true;
+
+    rep(i,G[v].size()) {
+        edge &amp;e = G[v][i];
+        if(!used[e.to] &amp;&amp; e.cap &gt; 0) {
+            int d = dfs(e.to,t,min(f,e.cap));
+            if(d &gt; 0) {
+                e.cap -= d;   
+                G[e.to][e.rev].cap += d; 
+                return d;
+            }
+        }
+    }
+    return 0;
+}
+
+int max_flow(int s,int t) {
+    int flow = 0;
+    for(;;) {
+        memset(used,0,sizeof(used));
+        int f = dfs(s,t,INF);
+        if(f == 0) return flow;
+        flow += f;
+    }
+}
+
+int main() {
+    int n, g, e;
+    cin &gt;&gt; n &gt;&gt; g &gt;&gt; e;
+
+    vector&lt;int&gt; p(g);
+    rep(i, g) cin &gt;&gt; p[i];
+
+    rep(i, e) {
+        int a, b;
+        cin &gt;&gt; a &gt;&gt; b;
+
+        add_edge(a, b, 1);
+        add_edge(b, a, 1);
+    }
+
+    rep(i, g) {
+        add_edge(p[i], n+1, 1);
+    }
+
+    int s = 0, t = n + 1;
+
+    cout &lt;&lt; max_flow(s, t) &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+</feed>

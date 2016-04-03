@@ -4,7 +4,7 @@
   <title><![CDATA[Category: abc | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/abc/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-04-03T15:52:14+09:00</updated>
+  <updated>2016-04-03T17:23:22+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,229 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[ABC010D 浮気予防]]></title>
+    <link href="http://ry0u.github.io/blog/2016/04/03/abc010d-fu-qi-yu-fang/"/>
+    <updated>2016-04-03T17:10:50+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/04/03/abc010d-fu-qi-yu-fang</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://abc010.contest.atcoder.jp/tasks/abc010_4">D: 浮気予防 - AtCoder Beginner Contest 010 | AtCoder</a></h4><p>(null)</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>二重辺連結成分分解をしてrootを<script type="math/tex"> 0 </script>の木にした後に， <script type="math/tex"> 0 </script>から伸びるパスの後に対称が入ればその辺を切る，で出来ると思い実装してみたがサンプルが全然合わない．<br/>
+rootを含む閉路があった場合に，そこはrootにまとまってしまうのでそのグループの中での最小が分からないし，そこの切り方によってはrootから出る枝を切る必要が無いかもしれない．</p>
+
+<p>ギブアップして解説を見た．<br/>
+<a href="http://www.slideshare.net/chokudai/abc010-35598499">http://www.slideshare.net/chokudai/abc010-35598499</a></p>
+
+<p>最大流・最小カット問題になるのか&hellip;<br/>
+処理を追加後のグラフでは，辺を切るのはそのままで，ログイン出来なくするのは，追加したパスを切れば良いとなる．この考え方は非常に勉強になった．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+#include &lt;stack&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+struct edge {
+    int to, cap, rev;
+
+    edge(int t, int c, int r) {
+        to = t; cap = c; rev = r;
+    }
+};
+
+vector&lt;edge&gt; G[105];
+bool used[105];
+
+void add_edge(int from,int to,int cap) {
+    G[from].push_back(edge(to,cap,G[to].size()));
+    G[to].push_back(edge(from,0,G[from].size()-1));
+}
+
+int dfs(int v,int t,int f) {
+    if(v == t) return f;
+    used[v] = true;
+
+    rep(i,G[v].size()) {
+        edge &amp;e = G[v][i];
+        if(!used[e.to] &amp;&amp; e.cap &gt; 0) {
+            int d = dfs(e.to,t,min(f,e.cap));
+            if(d &gt; 0) {
+                e.cap -= d;   
+                G[e.to][e.rev].cap += d; 
+                return d;
+            }
+        }
+    }
+    return 0;
+}
+
+int max_flow(int s,int t) {
+    int flow = 0;
+    for(;;) {
+        memset(used,0,sizeof(used));
+        int f = dfs(s,t,INF);
+        if(f == 0) return flow;
+        flow += f;
+    }
+}
+
+int main() {
+    int n, g, e;
+    cin &gt;&gt; n &gt;&gt; g &gt;&gt; e;
+
+    vector&lt;int&gt; p(g);
+    rep(i, g) cin &gt;&gt; p[i];
+
+    rep(i, e) {
+        int a, b;
+        cin &gt;&gt; a &gt;&gt; b;
+
+        add_edge(a, b, 1);
+        add_edge(b, a, 1);
+    }
+
+    rep(i, g) {
+        add_edge(p[i], n+1, 1);
+    }
+
+    int s = 0, t = n + 1;
+
+    cout &lt;&lt; max_flow(s, t) &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[ABC010C 浮気調査]]></title>
+    <link href="http://ry0u.github.io/blog/2016/04/03/abc010c-fu-qi-diao-cha/"/>
+    <updated>2016-04-03T17:05:27+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/04/03/abc010c-fu-qi-diao-cha</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-branding="0" data-card-type="article-full"><h4><a href="http://abc010.contest.atcoder.jp/tasks/abc010_3">C: 浮気調査 - AtCoder Beginner Contest 010 | AtCoder</a></h4><p>(null)</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>一人ひとり，その場所に行って電話に出た場所まで <script type="math/tex"> T </script>以内にいけるを試す．移動した距離が <script type="math/tex"> T * V </script>より小さければ可能である．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+#include &lt;cmath&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+#define EPS 1e-8
+#define equals(a,b) fabs((a) - (b)) &lt; EPS
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+struct Point {
+    double x, y;
+
+    Point(double x=0, double y=0) : x(x), y(y) {}
+
+    Point operator+(const Point &amp;o) const { return Point(x+o.x, y+o.y); }
+
+    Point operator-(const Point &amp;o) const { return Point(x-o.x, y-o.y); }
+
+    Point operator*(const double m) const { return Point(x*m, y*m); }
+
+    Point operator/(const double d) const { return Point(x/d, y/d); }
+
+    bool operator&lt;(const Point &amp;o) const { return x != o.x ? x &lt; o.x : y &lt; o.y; }
+
+    bool operator==(const Point &amp;o) const { return fabs(x-o.x) &lt; EPS &amp;&amp; fabs(y-o.y) &lt; EPS; }
+};
+
+ostream&amp; operator &lt;&lt; (ostream&amp; os, const Point&amp; p) {
+    os &lt;&lt; "(" &lt;&lt; p.x &lt;&lt; ", " &lt;&lt; p.y &lt;&lt; ")";
+    return os;
+}
+
+double dot(Point a, Point b) { return a.x * b.x + a.y * b.y; }
+double cross(Point a, Point b) { return a.x * b.y - a.y * b.x; }
+double atan(Point p) { return atan2(p.y, p.x); }
+double norm(Point p) { return p.x * p.x + p.y * p.y; }
+double abs(Point p) { return sqrt(norm(p)); }
+double distancePP(Point p, Point o) { return sqrt(norm(o - p)); }
+
+int main() {
+    Point s, t;
+    int T, V;
+    cin &gt;&gt; s.x &gt;&gt; s.y &gt;&gt; t.x &gt;&gt; t.y &gt;&gt; T &gt;&gt; V;
+
+    bool flag = false;
+
+    int n;
+    cin &gt;&gt; n;
+
+    rep(i, n) {
+        Point p;
+        cin &gt;&gt; p.x &gt;&gt; p.y;
+
+        if(distancePP(s, p) + distancePP(p, t)  &lt;= T * V) {
+            flag = true;
+        }
+    }
+
+    if(flag) {
+        cout &lt;&lt; "YES" &lt;&lt; endl;
+    } else {
+        cout &lt;&lt; "NO" &lt;&lt; endl;
+    }
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[ABC009D 漸化式]]></title>
@@ -341,110 +564,6 @@ int main() {
 
         cout &lt;&lt; ans &lt;&lt; endl;
     }
-
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[ABC008C コイン]]></title>
-    <link href="http://ry0u.github.io/blog/2016/03/29/abc008c-koin/"/>
-    <updated>2016-03-29T22:16:02+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/03/29/abc008c-koin</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://abc008.contest.atcoder.jp/tasks/abc008_3">C: コイン - AtCoder Beginner Contest 008 | AtCoder</a></h4><p>(null)</p></blockquote>
-
-
-<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
-
-
-
-
-<!-- more -->
-
-
-<p>コインが<script type="math/tex"> N </script>枚与えられる．<script type="math/tex"> \frac{表になる枚数}{N!} </script>を求める．ある数<script type="math/tex"> i </script>枚目が表になるか，裏になるかは<script type="math/tex"> N </script>枚の内，<script type="math/tex"> C_{i} </script>の約数であるものの個数によって変わる．<script type="math/tex"> i </script>枚目が表になる枚数は，表になる確率<script type="math/tex"> a_{i} </script>が分かれば<script type="math/tex"> N! \cdot a_{i} </script>で求まる．よって
-<script type="math/tex; mode=display">
-\begin{eqnarray}
-    \frac{表になる枚数}{N!} &amp;=&amp; \frac{N! \cdot a<em>{1} + N! \cdot a</em>{2} + &hellip; + N! \cdot a<em>{N}}{N!} \
-                            &amp;=&amp; \sum</em>{i=1} ^{N} a_{i}
-\end{eqnarray}
-</script>
-となり， <script type="math/tex"> a_i </script>が求まれば良くなった．<script type="math/tex"> C_i </script>の約数の個数を <script type="math/tex"> s </script>と置き，コインの中で約数と自身のみ( <script type="math/tex"> s+1個 </script>)で考える．<br/>
-例えば約数をo, 自身をx，約数の個数を<script type="math/tex"> 3 </script>とすると x o o o, o x o o, o o x o, o o o xの <script type="math/tex"> 4 </script>パターンで表になるのは x o o oとo o x oの <script type="math/tex"> 2 </script>パターンである．</p>
-
-<ul>
-<li><script type="math/tex"> sが奇数の時，表になる確率は\frac{\frac{1}{2}(s + 1)}{(s + 1)} = \frac{1}{2} </script></li>
-<li><script type="math/tex"> sが偶数の時，表になる確率は\frac{\frac{1}{2}(s + 2)}{(s + 1)} </script></li>
-</ul>
-
-
-<p>後はこれをそれぞれ計算した．</p>
-
-<hr />
-
-<p>色々書いてることが怪しい．後で見直す．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-int main() {
-    int n;
-    cin &gt;&gt; n;
-
-    vector&lt;int&gt; v(n);
-    rep(i, n) cin &gt;&gt; v[i];
-
-    sort(v.begin(), v.end());
-
-    int cnt[105];
-    memset(cnt, 0, sizeof(cnt));
-
-    rep(i, n) {
-        rep(j, n) {
-            if(i == j) continue;
-            if(v[i] % v[j] == 0) {
-                cnt[i]++;
-            }
-        }
-    }
-
-    double ans = 0;
-    rep(i, n) {
-        double d = cnt[i];
-
-        if(cnt[i] % 2 == 1) {
-            double a = 1 / 2.0;
-            ans += a;
-        } else {
-            double a = ((d + 2) / 2.0) / (d + 1);
-            ans += a;
-        }
-
-    }
-
-    cout &lt;&lt; fixed;
-    cout.precision(20);
-    cout &lt;&lt; ans &lt;&lt; endl;
 
     return 0;
 }
