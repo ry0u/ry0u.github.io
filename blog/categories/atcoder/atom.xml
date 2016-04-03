@@ -4,7 +4,7 @@
   <title><![CDATA[Category: atcoder | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/atcoder/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-04-03T14:42:29+09:00</updated>
+  <updated>2016-04-03T15:52:14+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,152 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[ABC009D 漸化式]]></title>
+    <link href="http://ry0u.github.io/blog/2016/04/03/abc009d-jian-hua-shi/"/>
+    <updated>2016-04-03T14:48:07+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/04/03/abc009d-jian-hua-shi</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article-full"><h4><a href="http://abc009.contest.atcoder.jp/tasks/abc009_4">D: 漸化式 - AtCoder Beginner Contest 009 | AtCoder</a></h4><p>(null)</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>はじめに決まっている項数<script type="math/tex"> K </script>が小さく，数列の求める項の番号<script type="math/tex"> M </script>が大きいので，上手く遷移行列を作れれば行列累乗で行けそうと思った．どういう遷移になるかイマイチよく分からず行列を自分で作ることが出来なかった．解説を見た．</p>
+
+<p><a href="http://www.slideshare.net/chokudai/abc009">http://www.slideshare.net/chokudai/abc009</a></p>
+
+<p>解説通りに遷移行列を
+<script type="math/tex; mode=display">
+    \left(
+        \begin{array}{ccccc}
+            C_1 &amp; C_2 &amp; &hellip;&amp; C<em>{K-1} &amp; C_K \
+            1 &amp; 0 &amp; &hellip; &amp; 0 &amp; 0 \
+            0 &amp; 1 &amp; &hellip; &amp; 0 &amp; 0 \
+            &hellip; &amp; &hellip; &amp; &hellip; &amp; &hellip; &amp; &hellip; \
+            0 &amp; &hellip; &amp; 0 &amp; 1 &amp; 0 \
+        \end{array}
+    \right)
+</script>
+として
+<script type="math/tex; mode=display">
+    \left(
+        \begin{array}{ccccc}
+            C_1 &amp; C_2 &amp; &hellip;&amp; C</em>{K-1} &amp; C_K \
+            1 &amp; 0 &amp; &hellip; &amp; 0 &amp; 0 \
+            0 &amp; 1 &amp; &hellip; &amp; 0 &amp; 0 \
+            &hellip; &amp; &hellip; &amp; &hellip; &amp; &hellip; &amp; &hellip; \
+            0 &amp; &hellip; &amp; 0 &amp; 1 &amp; 0 \
+        \end{array}
+    \right) ^{M-K} \cdot \left(
+                        \begin{array}{c}
+                            A<em>{K} \
+                            A</em>{K-1} \
+                            A<em>{K-2} \
+                            &hellip; \
+                            A</em>{1} \
+                        \end{array}
+                    \right)
+</script>
+を計算する．単位元の <script type="math/tex"> 1 </script>は <script type="math/tex"> 32ビットの11\cdots1 </script>である(単位行列と <script type="math/tex"> A  </script>が <script type="math/tex"> A </script>にならずに気付いた)．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+ll S = 0;
+
+struct Mat {
+    vector&lt;vector&lt;ll&gt; &gt; dat;
+    int n;
+
+    Mat(int n) : n(n), dat(n, vector&lt;ll&gt;(n)) {}
+
+    Mat(vector&lt;vector&lt;ll&gt; &gt; dat) : n(dat.size()), dat(dat) {}
+
+    Mat I(int n) {
+        Mat ret(n);
+        rep(i, n) ret.dat[i][i] = S;
+        return ret;
+    }
+
+    Mat mul(Mat &amp;b) {
+        Mat ret(n);
+        rep(i, n) rep(j, n) rep(k, n) (ret.dat[i][j] ^= (dat[i][k] &amp; b.dat[k][j]));
+        return ret;
+    }
+
+    Mat pow(ll b) {
+        Mat ret = I(n);
+        for (Mat A = *this; b &gt; 0; A = A.mul(A) , b /= 2) if (b &amp; 1) ret = A.mul(ret);
+        return ret;
+    }
+};
+
+int main() {
+    int n, m;
+    cin &gt;&gt; n &gt;&gt; m;
+
+    vector&lt;ll&gt; a(n), c(n);
+    rep(i, n) cin &gt;&gt; a[i];
+    rep(i, n) cin &gt;&gt; c[i];
+
+    rep(i, 32) {
+        S += (1LL &lt;&lt; i);
+    }
+
+    if(m &lt;= n) {
+        cout &lt;&lt; a[m-1] &lt;&lt; endl;
+    } else {
+
+        Mat mat(n);
+        rep(i, n) mat.dat[0][i] = c[i];
+        REP(i, 1, n) mat.dat[i][i-1] = S;
+
+        Mat ret = mat.pow(m - n);
+        // rep(i, n) {
+        //  rep(j, n) {
+        //      cout &lt;&lt; ret.dat[i][j] &lt;&lt; " ";
+        //  }
+        //  cout &lt;&lt; endl;
+        // }
+
+        ll ans = 0;
+        rep(i, n) {
+            ans ^= (ret.dat[0][i] &amp; a[n-1-i]);
+        }
+
+        cout &lt;&lt; ans &lt;&lt; endl;
+    }
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[ABC006D トランプ挿入ソート]]></title>
