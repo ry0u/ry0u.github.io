@@ -4,7 +4,7 @@
   <title><![CDATA[Category: atcoder | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/atcoder/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-04-03T17:40:56+09:00</updated>
+  <updated>2016-04-18T23:46:17+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,207 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[ABC014D 閉路]]></title>
+    <link href="http://ry0u.github.io/blog/2016/04/03/abc014d-bi-lu/"/>
+    <updated>2016-04-03T18:09:24+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/04/03/abc014d-bi-lu</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://abc014.contest.atcoder.jp/tasks/abc014_4">D: 閉路 - AtCoder Beginner Contest 014 | AtCoder</a></h4><p>(null)</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>木に <script type="math/tex"> 1 </script>本付け加えて出来る閉路は，つなげる <script type="math/tex"> 2 </script>点とその <script type="math/tex"> 2 </script>点の最小共通祖先で出来る三角形になるはずである．よって， <script type="math/tex"> LCA(a, b) </script>を求めた後に，その三角形の長さを出力した．長さは <script type="math/tex"> LCA </script>を求める際に深さが出ているので，そこから出せる．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+#include &lt;cmath&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+vector&lt;int&gt; G[100005];
+int root;
+
+int parent[20][100005];
+int depth[100005];
+
+void dfs(int v, int p, int d) {
+    parent[0][v] = p;
+    depth[v] = d;
+    rep(i, G[v].size()) {
+        if(G[v][i] != p) dfs(G[v][i], v, d+1);
+    }
+}
+
+void init(int V) {
+    dfs(root, -1, 0);
+    for(int k = 0; k + 1 &lt; 20; k++) {
+        rep(v, V) {
+            if(parent[k][v] &lt; 0) parent[k + 1][v] = -1;
+            else parent[k + 1][v]= parent[k][parent[k][v]];
+        }
+    }
+}
+
+int lca(int u, int v) {
+    if(depth[u] &gt; depth[v]) swap(u, v);
+    rep(k, 20) {
+        if((depth[v] - depth[u]) &gt;&gt; k &amp; 1) {
+            v = parent[k][v];
+        }
+    }
+    if(u == v) return u;
+    for(int k = 20 - 1; k &gt;= 0; k--) {
+        if(parent[k][u] != parent[k][v]) {
+            u = parent[k][u];
+            v = parent[k][v];
+        }
+    }
+    return parent[0][u];
+}
+
+int main() {
+    int n;
+    cin &gt;&gt; n;
+
+    rep(i, n-1) {
+        int x, y;
+        cin &gt;&gt; x &gt;&gt; y;
+
+        x--; y--;
+        G[x].push_back(y);
+        G[y].push_back(x);
+    }
+
+    root = 0;
+    init(n);
+
+    int Q;
+    cin &gt;&gt; Q;
+
+    rep(q, Q) {
+        int a, b;
+        cin &gt;&gt; a &gt;&gt; b;
+
+        a--; b--;
+
+        int par = lca(a, b);
+
+        cout &lt;&lt; (depth[a] - depth[par]) + (depth[b] - depth[par]) + 1 &lt;&lt; endl;
+    }
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[ABC013D 阿弥陀]]></title>
+    <link href="http://ry0u.github.io/blog/2016/04/03/abc013d-a-mi-tuo/"/>
+    <updated>2016-04-03T17:49:54+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/04/03/abc013d-a-mi-tuo</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://abc013.contest.atcoder.jp/tasks/abc013_4">D: 阿弥陀 - AtCoder Beginner Contest 013 | AtCoder</a></h4><p>(null)</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>まず一回アミダをシュミレーションする．すると，ゴールする場所 <script type="math/tex"> iをj </script>に変える関数が作れる．これを遷移行列にして行列類乗だ！と思ったが， <script type="math/tex"> N \leq 10 ^5 </script>で <script type="math/tex"> D </script>は <script type="math/tex"> logD </script>に落ちるが結果<script type="math/tex"> N ^3 logD </script>となってしまい意味が無い．<br/>
+そもそも行列で持つ必要がない．ダブリングで <script type="math/tex"> D </script>を <script type="math/tex"> logD </script>に落として， <script type="math/tex"> O(N logN logD) </script>．<br/>
+resをmapで作ってしまい <script type="math/tex"> logN </script>が余計にかかる．変に <script type="math/tex"> log </script>をつけて落ちることがあるので気をつけたい．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int main() {
+    int n, m, d;
+    cin &gt;&gt; n &gt;&gt; m &gt;&gt; d;
+
+    vector&lt;int&gt; a(m);
+    rep(i, m) cin &gt;&gt; a[i];
+
+    vector&lt;int&gt; v(n);
+    rep(i, n) v[i] = i;
+
+    rep(i, m) {
+        swap(v[a[i]-1], v[a[i]]);
+    }
+
+    map&lt;int, int&gt; res;
+    rep(i, n) {
+        res[v[i]] = i;
+    }
+
+    vector&lt;int&gt; next(n), cur(n);
+    rep(i, n) cur[i] = i;
+    while(d) {
+        if(d &amp; 1) {
+            rep(i, n) next[i] = res[cur[i]];
+            rep(i, n) cur[i] = next[i];
+        }
+
+        rep(i, n) next[i] = res[res[i]];
+        rep(i, n) res[i] = next[i];
+
+        d /= 2;
+    }
+
+    rep(i, n) {
+        cout &lt;&lt; cur[i] + 1 &lt;&lt; endl;
+    }
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[ABC013C 節制]]></title>
@@ -448,255 +649,6 @@ int main() {
     int s = 0, t = n + 1;
 
     cout &lt;&lt; max_flow(s, t) &lt;&lt; endl;
-
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[ABC010C 浮気調査]]></title>
-    <link href="http://ry0u.github.io/blog/2016/04/03/abc010c-fu-qi-diao-cha/"/>
-    <updated>2016-04-03T17:05:27+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/04/03/abc010c-fu-qi-diao-cha</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-branding="0" data-card-type="article-full"><h4><a href="http://abc010.contest.atcoder.jp/tasks/abc010_3">C: 浮気調査 - AtCoder Beginner Contest 010 | AtCoder</a></h4><p>(null)</p></blockquote>
-
-
-<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
-
-
-
-
-<!-- more -->
-
-
-<p>一人ひとり，その場所に行って電話に出た場所まで <script type="math/tex"> T </script>以内にいけるを試す．移動した距離が <script type="math/tex"> T * V </script>より小さければ可能である．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-#include &lt;cmath&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-#define EPS 1e-8
-#define equals(a,b) fabs((a) - (b)) &lt; EPS
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-struct Point {
-    double x, y;
-
-    Point(double x=0, double y=0) : x(x), y(y) {}
-
-    Point operator+(const Point &amp;o) const { return Point(x+o.x, y+o.y); }
-
-    Point operator-(const Point &amp;o) const { return Point(x-o.x, y-o.y); }
-
-    Point operator*(const double m) const { return Point(x*m, y*m); }
-
-    Point operator/(const double d) const { return Point(x/d, y/d); }
-
-    bool operator&lt;(const Point &amp;o) const { return x != o.x ? x &lt; o.x : y &lt; o.y; }
-
-    bool operator==(const Point &amp;o) const { return fabs(x-o.x) &lt; EPS &amp;&amp; fabs(y-o.y) &lt; EPS; }
-};
-
-ostream&amp; operator &lt;&lt; (ostream&amp; os, const Point&amp; p) {
-    os &lt;&lt; "(" &lt;&lt; p.x &lt;&lt; ", " &lt;&lt; p.y &lt;&lt; ")";
-    return os;
-}
-
-double dot(Point a, Point b) { return a.x * b.x + a.y * b.y; }
-double cross(Point a, Point b) { return a.x * b.y - a.y * b.x; }
-double atan(Point p) { return atan2(p.y, p.x); }
-double norm(Point p) { return p.x * p.x + p.y * p.y; }
-double abs(Point p) { return sqrt(norm(p)); }
-double distancePP(Point p, Point o) { return sqrt(norm(o - p)); }
-
-int main() {
-    Point s, t;
-    int T, V;
-    cin &gt;&gt; s.x &gt;&gt; s.y &gt;&gt; t.x &gt;&gt; t.y &gt;&gt; T &gt;&gt; V;
-
-    bool flag = false;
-
-    int n;
-    cin &gt;&gt; n;
-
-    rep(i, n) {
-        Point p;
-        cin &gt;&gt; p.x &gt;&gt; p.y;
-
-        if(distancePP(s, p) + distancePP(p, t)  &lt;= T * V) {
-            flag = true;
-        }
-    }
-
-    if(flag) {
-        cout &lt;&lt; "YES" &lt;&lt; endl;
-    } else {
-        cout &lt;&lt; "NO" &lt;&lt; endl;
-    }
-
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[ABC009D 漸化式]]></title>
-    <link href="http://ry0u.github.io/blog/2016/04/03/abc009d-jian-hua-shi/"/>
-    <updated>2016-04-03T14:48:07+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/04/03/abc009d-jian-hua-shi</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article-full"><h4><a href="http://abc009.contest.atcoder.jp/tasks/abc009_4">D: 漸化式 - AtCoder Beginner Contest 009 | AtCoder</a></h4><p>(null)</p></blockquote>
-
-
-<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
-
-
-
-
-<!-- more -->
-
-
-<p>はじめに決まっている項数<script type="math/tex"> K </script>が小さく，数列の求める項の番号<script type="math/tex"> M </script>が大きいので，上手く遷移行列を作れれば行列累乗で行けそうと思った．どういう遷移になるかイマイチよく分からず行列を自分で作ることが出来なかった．解説を見た．</p>
-
-<p><a href="http://www.slideshare.net/chokudai/abc009">http://www.slideshare.net/chokudai/abc009</a></p>
-
-<p>解説通りに遷移行列を
-<script type="math/tex; mode=display">
-    \left(
-        \begin{array}{ccccc}
-            C_1 &amp; C_2 &amp; &hellip;&amp; C<em>{K-1} &amp; C_K \
-            1 &amp; 0 &amp; &hellip; &amp; 0 &amp; 0 \
-            0 &amp; 1 &amp; &hellip; &amp; 0 &amp; 0 \
-            &hellip; &amp; &hellip; &amp; &hellip; &amp; &hellip; &amp; &hellip; \
-            0 &amp; &hellip; &amp; 0 &amp; 1 &amp; 0 \
-        \end{array}
-    \right)
-</script>
-として
-<script type="math/tex; mode=display">
-    \left(
-        \begin{array}{ccccc}
-            C_1 &amp; C_2 &amp; &hellip;&amp; C</em>{K-1} &amp; C_K \
-            1 &amp; 0 &amp; &hellip; &amp; 0 &amp; 0 \
-            0 &amp; 1 &amp; &hellip; &amp; 0 &amp; 0 \
-            &hellip; &amp; &hellip; &amp; &hellip; &amp; &hellip; &amp; &hellip; \
-            0 &amp; &hellip; &amp; 0 &amp; 1 &amp; 0 \
-        \end{array}
-    \right) ^{M-K} \cdot \left(
-                        \begin{array}{c}
-                            A<em>{K} \
-                            A</em>{K-1} \
-                            A<em>{K-2} \
-                            &hellip; \
-                            A</em>{1} \
-                        \end{array}
-                    \right)
-</script>
-を計算する．単位元の <script type="math/tex"> 1 </script>は <script type="math/tex"> 32ビットの11\cdots1 </script>である(単位行列と <script type="math/tex"> A  </script>が <script type="math/tex"> A </script>にならずに気付いた)．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-ll S = 0;
-
-struct Mat {
-    vector&lt;vector&lt;ll&gt; &gt; dat;
-    int n;
-
-    Mat(int n) : n(n), dat(n, vector&lt;ll&gt;(n)) {}
-
-    Mat(vector&lt;vector&lt;ll&gt; &gt; dat) : n(dat.size()), dat(dat) {}
-
-    Mat I(int n) {
-        Mat ret(n);
-        rep(i, n) ret.dat[i][i] = S;
-        return ret;
-    }
-
-    Mat mul(Mat &amp;b) {
-        Mat ret(n);
-        rep(i, n) rep(j, n) rep(k, n) (ret.dat[i][j] ^= (dat[i][k] &amp; b.dat[k][j]));
-        return ret;
-    }
-
-    Mat pow(ll b) {
-        Mat ret = I(n);
-        for (Mat A = *this; b &gt; 0; A = A.mul(A) , b /= 2) if (b &amp; 1) ret = A.mul(ret);
-        return ret;
-    }
-};
-
-int main() {
-    int n, m;
-    cin &gt;&gt; n &gt;&gt; m;
-
-    vector&lt;ll&gt; a(n), c(n);
-    rep(i, n) cin &gt;&gt; a[i];
-    rep(i, n) cin &gt;&gt; c[i];
-
-    rep(i, 32) {
-        S += (1LL &lt;&lt; i);
-    }
-
-    if(m &lt;= n) {
-        cout &lt;&lt; a[m-1] &lt;&lt; endl;
-    } else {
-
-        Mat mat(n);
-        rep(i, n) mat.dat[0][i] = c[i];
-        REP(i, 1, n) mat.dat[i][i-1] = S;
-
-        Mat ret = mat.pow(m - n);
-        // rep(i, n) {
-        //  rep(j, n) {
-        //      cout &lt;&lt; ret.dat[i][j] &lt;&lt; " ";
-        //  }
-        //  cout &lt;&lt; endl;
-        // }
-
-        ll ans = 0;
-        rep(i, n) {
-            ans ^= (ret.dat[0][i] &amp; a[n-1-i]);
-        }
-
-        cout &lt;&lt; ans &lt;&lt; endl;
-    }
 
     return 0;
 }

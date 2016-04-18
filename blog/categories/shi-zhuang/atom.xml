@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 実装 | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/shi-zhuang/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-04-03T17:40:56+09:00</updated>
+  <updated>2016-04-18T23:46:17+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,149 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ1174 Identically Colored Panels Connection]]></title>
+    <link href="http://ry0u.github.io/blog/2016/04/18/aoj1174-identically-colored-panels-connection/"/>
+    <updated>2016-04-18T23:00:29+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/04/18/aoj1174-identically-colored-panels-connection</id>
+    <content type="html"><![CDATA[<p><a class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article" href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1174">Identically Colored Panels Connection</a></p>
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>塗る色を決めて順番に塗っていく． それぞれ</p>
+
+<ul>
+<li><script type="math/tex"> rec </script> : 始点から探索して<script type="math/tex"> c </script>と同じパネルが何色あるか</li>
+<li><script type="math/tex"> dfs </script> : 始点から探索して<script type="math/tex"> target </script>の色を <script type="math/tex"> change </script>にする．</li>
+<li><script type="math/tex"> func </script> : <script type="math/tex"> i </script>回塗った状態． 最終的に<script type="math/tex"> 5 </script>回塗った回数を答えるが，最後に <script type="math/tex"> c </script>に塗り替えた場合なので，<script type="math/tex"> 4 </script>回塗った後に <script type="math/tex"> c </script>に塗って <script type="math/tex"> rec </script>を呼ぶ．</li>
+</ul>
+
+
+<blockquote><p>ただし，電極は左上角のパネルに固定されていることとする．</p></blockquote>
+
+<p>の文を見逃していて，塗り始める場所を全探索していてSampleがずっと合わなかった&hellip;<br/>
+全体的に辛い</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int h, w, c;
+int dx[4] = {1,0,-1,0};
+int dy[4] = {0,1,0,-1};
+
+bool can(int y,int x) {
+    if(0 &lt;= y &amp;&amp; y &lt; h &amp;&amp; 0 &lt;= x &amp;&amp; x &lt; w) return true;
+    return false;
+}
+
+int cnt = 0, sy = 0, sx = 0;
+bool used[10][10];
+vector&lt; vector&lt;int&gt; &gt; v;
+
+void rec(int y, int x) {
+    used[y][x] = true;
+    cnt++;
+
+    rep(i, 4) {
+        int ny = y + dy[i];
+        int nx = x + dx[i];
+
+        if(can(ny, nx) &amp;&amp; !used[ny][nx] &amp;&amp; v[ny][nx] == c) {
+            rec(ny, nx);
+        }
+    }
+}
+
+int target, change;
+
+void dfs(int y, int x) {
+    v[y][x] = change;
+    rep(i, 4) {
+        int ny = y + dy[i];
+        int nx = x + dx[i];
+
+        if(can(ny, nx) &amp;&amp; v[ny][nx] == target) {
+            dfs(ny, nx);
+        }
+    }
+}
+
+int ans = 0;
+void func(vector&lt; vector&lt;int&gt; &gt; t, int id) {
+    // cout &lt;&lt; " ------ func ---- :" &lt;&lt; id &lt;&lt; endl;
+    // rep(i, h) {
+    //  rep(j, w) cout &lt;&lt; t[i][j] &lt;&lt; " ";
+    //  cout &lt;&lt; endl;
+    // }
+    if(id == 4) {
+        v = t;
+        target = t[sy][sx];
+
+        if(target == c) return;
+        change = c;
+        dfs(sy, sx);
+
+        cnt = 0;
+        memset(used, 0, sizeof(used));
+        rec(sy, sx);
+        ans = max(ans, cnt);
+        return;
+    }
+
+    REP(i, 1, 7) {
+        if(i == t[sy][sx]) continue;
+        v = t;
+        target = t[sy][sx]; change = i;
+        dfs(sy, sx);
+        func(v, id + 1);
+    }
+}
+
+int main() {
+    while(cin &gt;&gt; h &gt;&gt; w &gt;&gt; c) {
+        if(h == 0 &amp;&amp; w == 0 &amp;&amp; c == 0) break;
+
+        v.resize(h);
+        rep(i, h) {
+            v[i].resize(w);
+            rep(j, w) cin &gt;&gt; v[i][j];
+        }
+
+        ans = 0;
+        func(v, 0);
+
+        cout &lt;&lt; ans &lt;&lt; endl;
+    }
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[AOJ1326 Stylish]]></title>
@@ -606,121 +749,6 @@ int main() {
     if(flag) cout &lt;&lt; "YES" &lt;&lt; endl;
     else cout &lt;&lt; "NO" &lt;&lt; endl;
 
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[AOJ2243 Step Step Evolution]]></title>
-    <link href="http://ry0u.github.io/blog/2016/03/20/aoj2243-step-step-evolution/"/>
-    <updated>2016-03-20T22:50:10+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/03/20/aoj2243-step-step-evolution</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2243">Step Step Evolution</a></h4><p>Japanese video game company has developed the music video game called Step Step Evolution. The gameplay of Step Step Evolution is very simple. Players stand on the dance platform, and step on panels on it according to a sequence of arrows shown in the front screen.</p></blockquote>
-
-
-<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
-
-
-
-
-<!-- more -->
-
-
-<p>左右交互に踏めなくなった回数を数える．最初に左足，右足の <script type="math/tex"> 2 </script>パターンの<script type="math/tex"> min </script>を取る． <script type="math/tex"> \rm{mod} 3</script> で場合分けをしたが， <script type="math/tex"> \rm{mod} 2 </script>になっている箇所があることにずっと気づかずに時間を溶かした．気をつけたい．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-bool can(bool f, int cur, int to) {
-    if(f) {
-        if(cur % 3 == 1 &amp;&amp; to % 3 != 1) return false;
-        if(cur % 3 == 2 &amp;&amp; to % 3 == 0) return false;
-        return true;
-    } else {
-        if(cur % 3 == 0 &amp;&amp; to % 3 != 0) return false;
-        if(cur % 3 == 2 &amp;&amp; to % 3 == 1) return false;
-        return true;
-    }
-}
-
-int main() {
-    string s;
-    while(cin &gt;&gt; s) {
-        if(s == "#") break;
-
-        vector&lt;int&gt; v(s.size());
-        rep(i, s.size()) v[i] = s[i] - '0';
-
-        int ans = INF, res = 0;
-        int left = v[0], right = 0, ord = 0;
-
-        REP(i, 1, v.size()) {
-            if(ord &amp; 1) {
-                if(can(1, right, v[i])) {
-                    left = v[i];
-                    ord++;
-                } else {
-                    right = v[i];
-                    res++;
-                }
-            } else {
-                if(can(0, left, v[i])) {
-                    right = v[i];
-                    ord++;
-                } else {
-                    left = v[i];
-                    res++;
-                }
-            }
-        }
-
-        ans = min(ans, res);
-
-        res = 0;
-        left = 0, right = v[0], ord = 1;
-        REP(i, 1, v.size()) {
-            if(ord &amp; 1) {
-                if(can(1, right, v[i])) {
-                    left = v[i];
-                    ord++;
-                } else {
-                    right = v[i];
-                    res++;
-                }
-            } else {
-                if(can(0, left, v[i])) {
-                    right = v[i];
-                    ord++;
-                } else {
-                    left = v[i];
-                    res++;
-                }
-            }
-        }
-
-        ans = min(ans, res);
-        cout &lt;&lt; ans &lt;&lt; endl;
-    }
     return 0;
 }
 </code></pre>
