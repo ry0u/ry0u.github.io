@@ -4,7 +4,7 @@
   <title><![CDATA[Category: aoj | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/aoj/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-04-18T23:46:17+09:00</updated>
+  <updated>2016-04-19T23:49:28+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,112 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ1500 ID]]></title>
+    <link href="http://ry0u.github.io/blog/2016/04/19/aoj1500-id/"/>
+    <updated>2016-04-19T23:41:11+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/04/19/aoj1500-id</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1500">ID | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>&lsquo;?'に入る<script type="math/tex"> a_i </script>を全探索．&rsquo;?&lsquo;の数が小さいので十分間に合う．stringstream最初使ってて，やっぱり遅い&hellip;となった．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int f(int x, bool f) {
+    int ret = 0;
+    if(f) x *= 2;
+    while(x) {
+        ret += (x % 10);
+        x /= 10;
+    }
+    return ret;
+}
+
+vector&lt;int&gt; id, a;
+int n, m;
+int cnt = 0;
+
+void dfs(int i, int res) {
+    if(i == id.size()) {
+        if(res % 10 == 0) {
+            cnt++;
+        }
+        return;
+    }
+
+    rep(j, m) {
+        if((n - id[i]) % 2 == 0) {
+            dfs(i + 1, res + f(a[j], true));
+        } else {
+            dfs(i + 1, res + f(a[j], false));
+        }
+    }
+}
+
+int main() {
+    cin &gt;&gt; n;
+
+    string s;
+    cin &gt;&gt; s;
+
+    cin &gt;&gt; m;
+
+    a.resize(m);
+    rep(i, m) cin &gt;&gt; a[i];
+    sort(a.begin(), a.end());
+
+    int sum = 0;
+    rep(i, n) {
+        if(s[i] =='*') {
+            id.push_back(i);
+        } else {
+            if((n - i) % 2 == 0) {
+                sum += f(s[i] - '0', true);
+            } else {
+                sum += f(s[i] - '0' , false);
+            }
+        }
+    }
+
+    cnt = 0;
+    dfs(0, sum);
+
+    cout &lt;&lt; cnt &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[AOJ0616 JOI Park]]></title>
@@ -451,132 +557,6 @@ int main() {
         }
 
         ans++;
-    }
-
-    cout &lt;&lt; ans &lt;&lt; endl;
-
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[AOJ0611 Silk Road]]></title>
-    <link href="http://ry0u.github.io/blog/2016/03/18/aoj0611-silk-road/"/>
-    <updated>2016-03-18T01:27:54+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/03/18/aoj0611-silk-road</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0611">Silk Road | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
-
-
-<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
-
-
-
-
-<!-- more -->
-
-
-<p><script type="math/tex; mode=display">
-    dp[i][j] := 都市iにj日目に到達した時に疲労度の最小値
-</script></p>
-
-<p>とする．<script type="math/tex"> 都市i-1 </script>に<script type="math/tex"> j日未満に </script>到達している時の最小値から移動するのが，都市<script type="math/tex"> i </script>に <script type="math/tex"> j </script>日目に到達する時の最小となる．これを繰り返す．<script type="math/tex"> O(nm log m) </script>．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-struct RMQ {
-    int n;
-    vector&lt;ll&gt; dat;
-
-    RMQ(int n_) {
-        n = 1;
-        while(n &lt; n_) n *= 2;
-
-        dat.resize(n*4);
-        rep(i,n*4) dat[i] = INF;
-    }
-
-    void update(int k,ll a) {
-        int i = k+n-1;
-        dat[i] = a;
-
-        while(i &gt; 0) {
-            i = (i-1) / 2;
-            dat[i] = min(dat[i*2+1],dat[i*2+2]);
-        }
-    }
-
-    //[a,b)
-    //query(a,b,0,0,n)
-    ll _query(int a,int b,int k,int l,int r) {
-        if(r &lt;= a || b &lt;= l) return INF;
-
-        if(a &lt;= l &amp;&amp; r &lt;= b) return dat[k];
-        else { 
-            ll vl = _query(a,b,k*2+1,l,(l+r)/2);
-            ll vr = _query(a,b,k*2+2,(l+r)/2,r);
-            return min(vl,vr);
-        }
-    }
-
-    //[a,b)
-    ll query(int a,int b) {
-        return _query(a,b,0,0,n);
-    }
-};
-
-ll dp[1005][1005], d[1005][1005];
-
-int main() {
-    int n, m;
-    cin &gt;&gt; n &gt;&gt; m;
-
-    vector&lt;ll&gt; D(n), C(m);
-    rep(i, n) cin &gt;&gt; D[i];
-    rep(i, m) cin &gt;&gt; C[i];
-
-    rep(i, n) {
-        rep(j, m) dp[i][j] = INF;
-    }
-
-    rep(i, n) {
-        rep(j, m) d[i][j] = D[i] * C[j];
-    }
-
-    rep(j, m) dp[0][j] = D[0] * C[j];
-
-    REP(i, 1, n) {
-        RMQ rmq(m);
-        rep(j, m) rmq.update(j, dp[i-1][j]);
-
-        rep(j, m) {
-            dp[i][j] = rmq.query(0, j) + d[i][j];
-        }
-    }
-
-    ll ans = INF;
-    rep(j, m) {
-        ans = min(ans, dp[n-1][j]);
     }
 
     cout &lt;&lt; ans &lt;&lt; endl;

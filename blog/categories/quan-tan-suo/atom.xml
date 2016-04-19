@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 全探索 | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/quan-tan-suo/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-04-18T23:46:17+09:00</updated>
+  <updated>2016-04-19T23:49:28+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,112 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ1500 ID]]></title>
+    <link href="http://ry0u.github.io/blog/2016/04/19/aoj1500-id/"/>
+    <updated>2016-04-19T23:41:11+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/04/19/aoj1500-id</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1500">ID | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>&lsquo;?'に入る<script type="math/tex"> a_i </script>を全探索．&rsquo;?&lsquo;の数が小さいので十分間に合う．stringstream最初使ってて，やっぱり遅い&hellip;となった．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int f(int x, bool f) {
+    int ret = 0;
+    if(f) x *= 2;
+    while(x) {
+        ret += (x % 10);
+        x /= 10;
+    }
+    return ret;
+}
+
+vector&lt;int&gt; id, a;
+int n, m;
+int cnt = 0;
+
+void dfs(int i, int res) {
+    if(i == id.size()) {
+        if(res % 10 == 0) {
+            cnt++;
+        }
+        return;
+    }
+
+    rep(j, m) {
+        if((n - id[i]) % 2 == 0) {
+            dfs(i + 1, res + f(a[j], true));
+        } else {
+            dfs(i + 1, res + f(a[j], false));
+        }
+    }
+}
+
+int main() {
+    cin &gt;&gt; n;
+
+    string s;
+    cin &gt;&gt; s;
+
+    cin &gt;&gt; m;
+
+    a.resize(m);
+    rep(i, m) cin &gt;&gt; a[i];
+    sort(a.begin(), a.end());
+
+    int sum = 0;
+    rep(i, n) {
+        if(s[i] =='*') {
+            id.push_back(i);
+        } else {
+            if((n - i) % 2 == 0) {
+                sum += f(s[i] - '0', true);
+            } else {
+                sum += f(s[i] - '0' , false);
+            }
+        }
+    }
+
+    cnt = 0;
+    dfs(0, sum);
+
+    cout &lt;&lt; cnt &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[AOJ1237 Shredding Company]]></title>
@@ -400,122 +506,6 @@ int main() {
     }
 
     cout &lt;&lt; ans + 1 &lt;&lt; endl;
-
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Codeforces315-div2C Prime or Palindromes?]]></title>
-    <link href="http://ry0u.github.io/blog/2015/08/11/codeforces315-div2c-prime-or-palindromes/"/>
-    <updated>2015-08-11T04:21:29+09:00</updated>
-    <id>http://ry0u.github.io/blog/2015/08/11/codeforces315-div2c-prime-or-palindromes</id>
-    <content type="html"><![CDATA[<p><a href="http://codeforces.com/contest/569/problem/C">http://codeforces.com/contest/569/problem/C</a><br/>
-<script type="math/tex; mode=display">
-\pi (n) := nをこえない素数の数 \
-rub (n) := nをこえない回分の数
-</script></p>
-
-<p>と定義する．比<script type="math/tex">A = \frac{p}{q}</script>が与えられるので，<script type="math/tex">\pi (n) \leq A \cdot rub(n)</script>を満たす最大のnを求めたい．</p>
-
-<h1>考察</h1>
-
-<p>まず，<script type="math/tex">\pi (n)</script>と，<script type="math/tex">rub (n)</script>を求める．これをどこまで必要かを自分で判断しなければならない．<script type="math/tex"> A \leq 42</script>とあるので，多くでも<script type="math/tex">\pi (n)</script>が<script type="math/tex">rub (n)</script>の42倍になっているnまででよいと分かる．実際に値を試した所，n = 1500000で十分だとわかった．後は，後ろから見ていき，条件を満たす最大のnを答えた．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-#include &lt;cmath&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-bool prime[10000000];
-void Eratosthenes(int n) {
-    rep(i,n) prime[i] = true;
-    prime[0] = false;
-    prime[1] = false;
-
-    REP(i,2,(int)sqrt(n)) {
-        if(prime[i]) {
-            for(int j=0;i*(j+2)&lt;n;j++) {
-                prime[i*(j+2)] = 0;
-            }
-        }
-    }
-}
-
-bool check(string s) {
-    rep(i,s.size()/2) {
-        if(s[i] != s[s.size()-1-i]) return false;
-    }
-
-    return true;
-}
-
-int main() {
-    double p,q;
-    cin &gt;&gt; p &gt;&gt; q;
-
-    int N = 1500000;
-
-    Eratosthenes(N);
-    vector&lt;int&gt; pi(N);
-    int cnt = 0;
-
-    rep(i,N+5) {
-        if(prime[i]) {
-            cnt++;
-        }
-
-        pi[i] = cnt;
-    }
-
-
-    vector&lt;int&gt; rub(N);
-    cnt = 0;
-    REP(i,1,N+5) {
-        stringstream ss;
-        ss &lt;&lt; i;
-
-        if(check(ss.str())) {
-            cnt++;
-        }
-
-        rub[i] = cnt;
-    }
-
-    double A = p/q;
-    int ans = 0;
-
-    for(int i=N;i&gt;=1;i--) {
-        ll a = pi[i];
-        ll b = rub[i];
-
-        if(a &lt;=  A * b) {
-            cout &lt;&lt; i &lt;&lt; endl;
-            break;
-        }
-        else {
-            continue;
-        }
-    }
 
     return 0;
 }
