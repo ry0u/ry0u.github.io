@@ -4,7 +4,7 @@
   <title><![CDATA[Category: vol15 | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/vol15/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-04-19T23:49:28+09:00</updated>
+  <updated>2016-04-20T22:12:46+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,118 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ1501 Grid]]></title>
+    <link href="http://ry0u.github.io/blog/2016/04/20/aoj1501-grid/"/>
+    <updated>2016-04-20T22:05:48+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/04/20/aoj1501-grid</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article-full"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1501">Grid | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>愚直に幅優先で見て行くが，誤読に続く誤読を繰り返しとても時間がかかった．端と端が繋がるのは</p>
+
+<pre><code class="cpp">int nx = (x + dx[i] + r) % r;
+int ny = (y + dy[i] + c) % c;
+</code></pre>
+
+<p>と表現出来る．後は同じ深さの所は足していく．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+#include &lt;queue&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+#define MOD 100000007
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+bool used[1005][1005];
+ll cnt[1005][1005];
+int depth[1005][1005];
+
+int r, c;
+int dx[4] = {1, 0, -1, 0};
+int dy[4] = {0, 1, 0, -1};
+
+bool can(int x, int y) {
+    if(0 &lt;= x &amp;&amp;  x &lt; r &amp;&amp; 0 &lt;= y &amp;&amp; y &lt; c) return true;
+    return false;
+}
+
+int main() {
+    int a1, a2, b1, b2;
+    cin &gt;&gt; r &gt;&gt; c &gt;&gt; a1 &gt;&gt; a2 &gt;&gt; b1 &gt;&gt; b2;
+
+
+    memset(used, 0, sizeof(used));
+    used[a1][a2] = true;
+
+    memset(cnt, 0, sizeof(cnt));
+    cnt[a1][a2] = 1;
+
+    memset(depth, 0, sizeof(depth));
+
+    queue&lt;P&gt; que;
+    que.push(mp(a1, a2));
+
+    int ans = INF;
+    while(que.size()) {
+        P p = que.front(); que.pop();
+        int x = p.first; int y = p.second;
+
+        if(x == b1 &amp;&amp; y == b2) {
+            break;
+        }
+
+        rep(i, 4) {
+            int nx = x + dx[i] + r;
+            int ny = y + dy[i] + c;
+
+            nx %= r; ny %= c;
+
+            if(!used[nx][ny]) {
+                cnt[nx][ny] += cnt[x][y];
+                cnt[nx][ny] %= MOD;
+                used[nx][ny] = true;
+                depth[nx][ny] = depth[x][y] + 1;
+                que.push(mp(nx, ny));
+            } else if(depth[nx][ny] == depth[x][y] + 1) {
+                cnt[nx][ny] += cnt[x][y];
+                cnt[nx][ny] %= MOD;
+            }
+        }
+    }
+
+    cout &lt;&lt; cnt[b1][b2] &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[AOJ1500 ID]]></title>
