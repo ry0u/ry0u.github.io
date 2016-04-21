@@ -4,7 +4,7 @@
   <title><![CDATA[Category: dijkstra | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/dijkstra/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-04-20T22:12:46+09:00</updated>
+  <updated>2016-04-21T15:37:20+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,288 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ1505 Dungeon]]></title>
+    <link href="http://ry0u.github.io/blog/2016/04/21/aoj1505-dungeon/"/>
+    <updated>2016-04-21T14:26:13+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/04/21/aoj1505-dungeon</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1505">Dungeon | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>まず最初dijkstraの始点を <script type="math/tex"> 0, n-1 </script>としてスタート地点からの最短経路と，ゴール地点からの最短経路を出しておく．これで各クエリに対して<script type="math/tex"> O(n) </script>で答えられるようになったが， <script type="math/tex">1 \leq n \leq 10 ^5, 1 \leq q \leq 10 ^5</script>なので間に合わない．<br/>
+(スタート地点からの最短コスト, 頂点番号)のpairで，(ゴール地点からの最短コスト, 頂点番号)のpairでsortする．また頂点番号がsort後の配列のどこのindexかを持っておく．</p>
+
+<p>スタート地点からのコスト</p>
+
+<table>
+<thead>
+<tr>
+<th style="text-align:center;">index</th>
+<th style="text-align:center;">0</th>
+<th style="text-align:center;">1</th>
+<th style="text-align:center;">2</th>
+<th style="text-align:center;">3</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">cost</td>
+<td style="text-align:center;">0</td>
+<td style="text-align:center;">2</td>
+<td style="text-align:center;">3</td>
+<td style="text-align:center;">3</td>
+</tr>
+<tr>
+<td style="text-align:center;">頂点</td>
+<td style="text-align:center;">0</td>
+<td style="text-align:center;">2</td>
+<td style="text-align:center;">1</td>
+<td style="text-align:center;">3</td>
+</tr>
+</tbody>
+</table>
+
+
+<p>ゴール地点からのコスト</p>
+
+<table>
+<thead>
+<tr>
+<th style="text-align:center;">index</th>
+<th style="text-align:center;">0</th>
+<th style="text-align:center;">1</th>
+<th style="text-align:center;">2</th>
+<th style="text-align:center;">3</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">cost</td>
+<td style="text-align:center;">0</td>
+<td style="text-align:center;">1</td>
+<td style="text-align:center;">3</td>
+<td style="text-align:center;">4</td>
+</tr>
+<tr>
+<td style="text-align:center;">頂点</td>
+<td style="text-align:center;">3</td>
+<td style="text-align:center;">2</td>
+<td style="text-align:center;">0</td>
+<td style="text-align:center;">1</td>
+</tr>
+</tbody>
+</table>
+
+
+<p>スタート地点に関して頂点番号 <script type="math/tex"> _i </script>のsort後の配列のindexの変換テーブル</p>
+
+<table>
+<thead>
+<tr>
+<th style="text-align:center;">頂点</th>
+<th style="text-align:center;">0</th>
+<th style="text-align:center;">1</th>
+<th style="text-align:center;">2</th>
+<th style="text-align:center;">3</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">index</td>
+<td style="text-align:center;">0</td>
+<td style="text-align:center;">2</td>
+<td style="text-align:center;">1</td>
+<td style="text-align:center;">3</td>
+</tr>
+</tbody>
+</table>
+
+
+<p>次にクエリ <script type="math/tex"> q_i </script>の <script type="math/tex"> (fg, fs, クエリ番号) </script>でsortする． 少なくとも<script type="math/tex"> fg </script>かかる，という制限なので<script type="math/tex"> fg </script>を優先してsortすれば，それ以前のものは候補に上がらないので，省いて良い．この省くというのを表現するのにBITを用いた．<script type="math/tex"> fg </script>より小さい所は変換テーブルを用いてそのindexに <script type="math/tex"> +1 </script>する．次に <script type="math/tex"> fs </script>以下を満たす最大のindex持ってきてBITを用いてその区間和を引く．</p>
+
+<p>説明が全く出来ている気がしない．後で見直し</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+#include &lt;queue&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1LL&lt;&lt;61
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+struct edge {
+    int from,to;
+    ll cost;
+
+    edge(int t,ll c) : to(t),cost(c) {}
+    edge(int f,int t,ll c) : from(f),to(t),cost(c) {}
+
+    bool operator&lt;(const edge &amp;e) const {
+        return cost &lt; e.cost;
+    }
+};
+
+vector&lt;edge&gt; G[100005];
+ll d[100005], d2[100005];
+
+void dijkstra(int s, int n) {
+    priority_queue&lt;pair&lt;ll, ll&gt; , vector&lt;pair&lt;ll, ll&gt; &gt;, greater&lt;pair&lt;ll, ll&gt; &gt; &gt; que;
+    fill(d, d+n, INF);
+
+    d[s] = 0;
+    que.push(P(0,s));
+
+    while(que.size()) {
+        P p = que.top();
+        que.pop();
+
+        int v = p.second;
+        if(d[v] &lt; p.first) continue;
+
+        rep(i, G[v].size()) {
+            edge e = G[v][i];
+            if(d[e.to] &gt; d[v] + e.cost) {
+                d[e.to] = d[v] + e.cost;
+                que.push(P(d[e.to],e.to));
+            }
+        }
+    }
+}
+
+struct BIT {
+    vector&lt;int&gt; bit;
+
+    BIT(int n) : bit(n+1) {}
+
+    int sum(int i) {
+        int s = 0;
+        while(i &gt; 0) {
+            s += bit[i];
+            i -= i &amp; -i;
+        }
+        return s;
+    }
+
+    void add(int i,int x) {
+        while(i &lt;= bit.size()) {
+            bit[i] += x;
+            i += i &amp; -i;
+        }
+    }
+};
+
+int main() {
+    int n, m;
+    cin &gt;&gt; n &gt;&gt; m;
+
+    rep(i, m) {
+        ll a, b, c;
+        cin &gt;&gt; a &gt;&gt; b &gt;&gt; c;
+
+        G[a].push_back(edge(b, c));
+        G[b].push_back(edge(a, c));
+    }
+
+    dijkstra(n-1, n);
+    memset(d2, 0, sizeof(d2));
+    rep(i, n) {
+        d2[i] = d[i];
+    }
+
+    dijkstra(0, n);
+
+    vector&lt;ll&gt; d3(n);
+    vector&lt;pair&lt;ll, int&gt; &gt; D, D2;
+    rep(i, n) {
+        d3[i] = d[i];
+        D.push_back(mp(d[i], i));
+        D2.push_back(mp(d2[i], i));
+    }
+
+    sort(d3.begin(), d3.end());
+    sort(D.begin(), D.end());
+    sort(D2.begin(), D2.end());
+
+    map&lt;int, int&gt; ma;
+    rep(i, n) {
+        ma[ D[i].second ] = i;
+    }
+
+    int q;
+    cin &gt;&gt; q;
+
+    vector&lt;pair&lt;pair&lt;ll, ll&gt; , int&gt; &gt; query(q);
+
+    rep(i, q) {
+        ll s, g;
+        cin &gt;&gt; s &gt;&gt; g;
+
+        query[i] = mp(mp(g, s), i);
+    }
+
+    sort(query.begin(), query.end());
+
+    BIT bit(n + 5);
+    vector&lt;P&gt; ans;
+    int start = 0;
+    rep(i, q) {
+        ll s = query[i].first.second;
+        ll g = query[i].first.first;
+        int id = query[i].second;
+
+        for(; start &lt; n; start++) {
+            if(g &gt; D2[start].first) {
+                int k = ma[ D2[start].second ];
+                bit.add(k + 1, 1);
+                continue;
+            } else break;
+        }
+
+        vector&lt;ll&gt;::iterator ite = upper_bound(d3.begin(), d3.end(), s);
+        int k = ite - d3.begin() - 1;
+        if(k &lt; 0) {
+            ans.push_back(mp( id, 0));
+        } else {
+            int res = k + 1;
+            res -= bit.sum(k + 1);
+            ans.push_back(mp( id, res));
+        }
+    }
+
+    sort(ans.begin(), ans.end());
+
+    rep(i, ans.size()) {
+        cout &lt;&lt; ans[i].second &lt;&lt; endl;
+    }
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[ABC012D バスと割けられない運命]]></title>
@@ -584,155 +866,6 @@ int main() {
     }
 
     cout &lt;&lt; ans &lt;&lt; endl;
-
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[AOJ0605 Modern Mansion]]></title>
-    <link href="http://ry0u.github.io/blog/2016/03/16/aoj0605-modern-mansion/"/>
-    <updated>2016-03-16T01:28:12+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/03/16/aoj0605-modern-mansion</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0605">Modern Mansion | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
-
-
-<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
-
-
-
-
-<!-- more -->
-
-
-<p>状態を <script type="math/tex"> (cost, id, state) </script>として，現在どちら方向の扉が空いているかを持ってdijkstra．扉が空いている方向で最小値を更新出来る場所に行く．TLEを連発した．時間制限が1secで0.94secでギリギリ通した．変にlogをつけて死んでいた．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-#include &lt;queue&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1LL&lt;&lt;60
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-typedef pair&lt;P, bool&gt; PI;
-
-int w, h, k;
-vector&lt;P&gt; X[200005], Y[200005];
-vector&lt;P&gt; xy;
-ll d[200005][2];
-
-// PI f(int a, int b, int c) {
-//  return mp(mp(a, b), c);
-// }
-
-void dijkstra() {
-    rep(i, 200005) {
-        d[i][0] = INF;
-        d[i][1] = INF;
-    }
-
-    // cost id (0 or 1)
-    priority_queue&lt;PI, vector&lt;PI&gt;, greater&lt;PI&gt; &gt; que;
-
-    rep(i, X[1].size()) {
-        int y = X[1][i].first;
-        int to = X[1][i].second;
-
-        d[to][1] = y;
-        // que.push(f(y, to, 1));
-        que.push(mp(mp(y, to), 1));
-    }
-
-    while(que.size()) {
-        PI p = que.top(); 
-        que.pop();
-
-        int c = p.first.first;
-        int v = p.first.second;
-        int state = p.second;
-
-        if(d[v][state] &lt; c) continue;
-
-        int y = xy[v].first;
-        int x = xy[v].second;
-
-        if(state == 0) {
-            rep(i, X[x].size()) {
-                int ny = X[x][i].first;
-                int to = X[x][i].second;
-
-                if(ny == y) continue;
-
-                if(d[to][1] &gt; d[v][state] + abs(ny - y) + 1) {
-                    d[to][1] = d[v][state] + abs(ny- y) + 1;
-                    // que.push(f(d[to][1], to, 1));
-                    que.push(mp(mp(d[to][1], to), 1));
-                }
-            }
-        } else {
-            rep(i, Y[y].size()) {
-                int nx = Y[y][i].first;
-                int to = Y[y][i].second;
-
-                if(nx == x) continue;
-
-                if(d[to][0] &gt; d[v][state] + abs(nx - x) + 1) {
-                    d[to][0] = d[v][state] + abs(nx - x) + 1;
-                    // que.push(f(d[to][0], to, 0));
-                    que.push(mp(mp(d[to][0], to), 0));
-                }
-            }
-        }
-    }
-}
-
-int main() {
-    cin &gt;&gt; w &gt;&gt; h &gt;&gt; k;
-
-    xy.resize(k);
-    rep(i, k) {
-        int x, y;
-        cin &gt;&gt; x &gt;&gt; y;
-
-        xy[i] = mp(y, x);
-        X[x].push_back(mp(y, i));
-        Y[y].push_back(mp(x, i));
-    }
-
-    dijkstra();
-
-    ll ans = INF;
-    rep(i, k) {
-        int y = xy[i].first;
-        int x = xy[i].second;
-
-        if(y == h) {
-            ans = min(ans, d[i][1] + abs(w - x));
-        }
-
-        if(x == w) {
-            ans = min(ans, d[i][0] + abs(h - y));
-        }
-    }
-
-    if(ans == INF) cout &lt;&lt; -1 &lt;&lt; endl;
-    else cout &lt;&lt; ans &lt;&lt; endl;
 
     return 0;
 }
