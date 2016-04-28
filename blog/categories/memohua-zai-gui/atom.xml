@@ -4,7 +4,7 @@
   <title><![CDATA[Category: メモ化再帰 | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/memohua-zai-gui/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-04-27T23:36:02+09:00</updated>
+  <updated>2016-04-27T23:49:48+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,139 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[JAG Contest 2016 Domestic D インビジブル]]></title>
+    <link href="http://ry0u.github.io/blog/2016/04/27/jag-contest-2016-domestic-d-inbiziburu/"/>
+    <updated>2016-04-27T23:39:09+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/04/27/jag-contest-2016-domestic-d-inbiziburu</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article"><h4><a href="http://jag2016-domestic.contest.atcoder.jp/tasks/jag2016secretspring_d">D: インビジブル - JAG Contest 2016 Domestic | AtCoder</a></h4><p>(null)</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>状態を(<script type="math/tex"> a </script>のデッキから何枚取ったか， <script type="math/tex"> b </script>のデッキから何枚取ったか，場のスタック，何ターン目，前回のスタックが空の状態でパスをしたかどうか)にしてメモ化再帰．minimaxみたいな感じでプレイヤー <script type="math/tex"> 1 </script>のターンでは <script type="math/tex"> c - d </script>の最大化，プレイヤー <script type="math/tex"> 2 </script>のターンでは <script type="math/tex"> c - d </script>の最小化をした．</p>
+
+<p>本番では，メモ化するときに，stackの状態を持たねばならないと思っていたが，スタックのサイズだけを持てば良いことに気付けなかった．スタックが空の状態で無くてもパスパスをした時点で終了だと思い込んでいた．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;sstream&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;vector&gt;
+#include &lt;algorithm&gt;
+#include &lt;map&gt;
+#include &lt;stack&gt;
+
+#define REP(i, k, n) for(int i = k; i &lt; n; i++) 
+#define rep(i, n) for(int i = 0; i &lt; n; i++) 
+#define INF 1&lt;&lt;30
+
+using namespace std;
+typedef pair&lt;int, int&gt; P;
+
+int n, m;
+vector&lt;int&gt; a, b;
+
+int f(stack&lt;P&gt; &amp;st) {
+    int c = 0, d = 0;
+    bool cf = true, df = true;
+    while(st.size()) {
+        P p = st.top(); st.pop();
+        if(p.first == 0) {
+            if(p.second == -1) {
+                df = false;
+            } else if(cf) {
+                c += p.second;
+            }
+        } else {
+            if(p.second == -1) {
+                cf = false;
+            } else if(df) {
+                d += p.second;
+            }
+        }
+    }
+    return c - d;
+}
+
+int memo[55][55][2][2][105];
+
+int dfs(int i, int j, stack&lt;P&gt; st, int turn, bool flag) {
+    if(memo[i][j][turn % 2][flag][st.size()] != INF) return memo[i][j][turn % 2][flag][st.size()];
+
+    int ret = 0, size = st.size();
+    if(flag) {
+        if(turn % 2 == 0) {
+            ret = 0;
+            if(i != n) {
+                st.push(P(0, a[i]));
+                ret = max(ret, dfs(i + 1, j, st, turn + 1, false));
+                st.pop();
+            }
+        } else {
+            ret = 0;
+            if(j != m) {
+                st.push(P(1, b[j]));
+                ret = min(ret, dfs(i, j + 1, st, turn + 1, false));
+                st.pop();
+            }
+        }
+    } else {
+        if(turn % 2 == 0) {
+            ret = -INF;
+            if(i != n) {
+                st.push(P(0, a[i]));
+                ret = max(ret, dfs(i + 1, j, st, turn + 1, false));
+                st.pop();
+            }
+
+            bool ch = (st.size() == 0);
+            int d = f(st);
+            ret = max(ret, dfs(i, j, st, turn + 1, ch) + d);
+        } else {
+            ret = INF;
+
+            if(j != m) {
+                st.push(P(1, b[j]));
+                ret = min(ret, dfs(i, j + 1, st, turn + 1, false));
+                st.pop();
+            }
+
+            bool ch = (st.size() == 0);
+            int d = f(st);
+            ret = min(ret, dfs(i, j, st, turn + 1, ch) + d);
+        }
+    }
+
+    return memo[i][j][turn % 2][flag][size] = ret;
+}
+
+int main() {
+    cin &gt;&gt; n &gt;&gt; m;
+
+    a.resize(n);
+    rep(i, n) cin &gt;&gt; a[i];
+
+    b.resize(m);
+    rep(i, m) cin &gt;&gt; b[i];
+
+    stack&lt;P&gt; st;
+    rep(i, 55) rep(j, 55) rep(k, 2) rep(l, 2) rep(o, 105) memo[i][j][k][l][o] = INF;
+    cout &lt;&lt; dfs(0, 0, st, 0, false) &lt;&lt; endl;
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[AOJ2369 CatChecker]]></title>
