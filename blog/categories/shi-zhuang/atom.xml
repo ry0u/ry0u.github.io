@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 実装 | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/shi-zhuang/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-04-27T23:49:48+09:00</updated>
+  <updated>2016-05-10T00:56:36+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,328 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ1512 Smartphone Game]]></title>
+    <link href="http://ry0u.github.io/blog/2016/05/10/aoj1512-smartphone-game/"/>
+    <updated>2016-05-10T00:50:38+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/05/10/aoj1512-smartphone-game</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1512">Smartphone Game | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<blockquote><p>ブロックを任意に1つだけ決めて、最大でn回まで上下左右に移動できる。移動先のブロックは移動元のブロックのあった場所に移動する。つまり、隣接したブロックを交換する事になる。</p></blockquote>
+
+<p>この部分が理解出来ていなかった．普通に <script type="math/tex"> n </script>回まで，隣接しているブロック同士をswapしていて <script type="math/tex"> 1 </script>つのブロックだけをswapしていくことが出来ていなかった．<br/>
+求めるのは<script type="math/tex"> 1 </script>回のプレイで得られる最大の点数なので，まずは <script type="math/tex"> n </script>回までswapしたブロックの状態をsetに突っ込む．その後，削除，移動で変化が無くなるまで続ける．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int cost[6];
+bool used[5][5], flag;
+int dx[4] = {1,0,-1,0};
+int dy[4] = {0,1,0,-1};
+
+bool can(int y,int x) {
+    if(0 &lt;= y &amp;&amp; y &lt; 5 &amp;&amp; 0 &lt;= x &amp;&amp; x &lt; 5) return true;
+    return false;
+}
+
+ll del(vector&lt;vector&lt;int&gt; &gt; &amp;v, ll bonus) {
+    memset(used, 0, sizeof(used));
+    rep(i, 5) {
+        rep(j, 5) {
+            if(v[i][j] == 0) continue;
+
+            int a = i;
+            while(a + 1 &lt;= 4 &amp;&amp; v[a+1][j] == v[i][j]) {
+                a++;
+            }
+
+            int b = i;
+            while(b - 1 &gt;= 0 &amp;&amp; v[b-1][j] == v[i][j]) {
+                b--;
+            }
+
+            int c = j;
+            while(c + 1 &lt;= 4 &amp;&amp; v[i][c+1] == v[i][j]) {
+                c++;
+            }
+
+            int d = j;
+            while(d - 1 &gt;= 0 &amp;&amp; v[i][d-1] == v[i][j]) {
+                d--;
+            }
+
+            if(a - b + 1 &gt;= 3 || c - d + 1 &gt;= 3) used[i][j] = true;
+        }
+    }
+
+    ll ret = 0;
+    rep(i, 5) {
+        rep(j, 5) {
+            if(used[i][j]) {
+                ret += bonus * cost[v[i][j]];
+                flag = true;
+                v[i][j] = 0;
+            }
+        }
+    }
+
+    return ret;
+}
+
+void mov(vector&lt;vector&lt;int&gt; &gt; &amp;v) {
+    for(int i = 4; i &gt;= 0; i--) {
+        rep(j, 5) {
+            int y = i;
+            while(y + 1 &lt;= 4 &amp;&amp; v[y + 1][j] == 0) {
+                swap(v[y][j], v[y+1][j]);
+                y++;
+            }
+        }
+    }
+}
+
+int n;
+ll ans = 0;
+
+set&lt;vector&lt;vector&lt;int&gt; &gt; &gt; res;
+
+void dfs(int cnt, int y, int x, vector&lt;vector&lt;int&gt; &gt; v) {
+    res.insert(v);
+
+    if(cnt == n) {
+        return;
+    }
+
+    rep(i, 4) {
+        int ny = y + dy[i];
+        int nx = x + dx[i];
+
+        if(can(ny, nx)) {
+            swap(v[y][x], v[ny][nx]);
+            dfs(cnt + 1, ny, nx, v);
+            swap(v[y][x], v[ny][nx]);
+        }
+    }
+}
+
+int main() {
+    while(cin &gt;&gt; n &amp;&amp; n != -1) {
+        ans = 0;
+        res.clear();
+
+        vector&lt;vector&lt;int&gt; &gt; v(5, vector&lt;int&gt;(5));
+        rep(i, 5) rep(j, 5) cin &gt;&gt; v[i][j];
+        rep(i, 5) cin &gt;&gt; cost[i+1];
+
+        rep(i, 5) {
+            rep(j, 5) {
+                dfs(0, i, j, v);
+            }
+        }
+
+        set&lt;vector&lt;vector&lt;int&gt; &gt; &gt;::iterator ite;
+        for(ite = res.begin(); ite != res.end(); ite++) {
+
+            ll bonus = 1, sum = 0;
+            vector&lt;vector&lt;int&gt; &gt; t = *ite;
+
+            while(true) {
+                flag = false;
+                sum += del(t, bonus);
+
+                if(flag) {
+                    mov(t);
+                    bonus++;
+
+                } else break;
+            }
+
+            // cout &lt;&lt; "----- : " &lt;&lt; sum &lt;&lt; endl;
+            // rep(i, 5) {
+            //  rep(j, 5) {
+            //      cout &lt;&lt; t[i][j] &lt;&lt; " ";
+            //  }
+            //  cout &lt;&lt; endl;
+            // }
+            ans = max(ans, sum);
+        }
+
+        cout &lt;&lt; ans &lt;&lt; endl;
+    }
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ1510 Independent Reserach]]></title>
+    <link href="http://ry0u.github.io/blog/2016/05/10/aoj1510-independent-reserach/"/>
+    <updated>2016-05-10T00:43:06+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/05/10/aoj1510-independent-reserach</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1510">Independent Research | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>グリッドが <script type="math/tex"> 5 \times 5 \times 5 </script>， <script type="math/tex"> N \leq 100 </script>なので，愚直にシュミレーション．そのマスの周り <script type="math/tex"> 26 </script>マスに生息している生物の数を数えて，そのマスの誕生と死滅を判断する．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int n, c = 0;
+int v[5][5][5], v2[5][5][5];
+bool a[30], b[30];
+
+int dx[26] = { 1,-1,     0, 0,     0, 0,     1, 1,-1,-1,     1, 1,-1,-1,     0, 0, 0, 0,     1, 1, 1, 1,    -1,-1,-1,-1};
+int dy[26] = { 0, 0,     1,-1,     0, 0,     1,-1, 1,-1,     0, 0, 0, 0,     1, 1,-1,-1,     1, 1,-1,-1,     1, 1,-1,-1};
+int dz[26] = { 0, 0,     0, 0,     1,-1,     0, 0, 0, 0,     1,-1, 1,-1,     1,-1, 1,-1,     1,-1, 1,-1,     1,-1, 1,-1};
+
+bool can(int x,int y,int z) {
+    if(0 &lt;= x &amp;&amp; x &lt; 5 &amp;&amp; 0 &lt;= y &amp;&amp; y &lt; 5 &amp;&amp; 0 &lt;= z &amp;&amp; z &lt; 5) return true;
+    return false;
+}
+
+int main() {
+    while(cin &gt;&gt; n &amp;&amp; n) {
+        memset(v, 0, sizeof(v));
+        memset(v2, 0, sizeof(v2));
+
+        rep(i, 5) {
+            rep(j, 5) {
+                string s;
+                cin &gt;&gt; s;
+
+                rep(k, 5) {
+                    v[i][j][k] = s[k] - '0';
+                }
+            }
+        }
+
+        int m1;
+        cin &gt;&gt; m1;
+
+        memset(a, 0, sizeof(a));
+        rep(i, m1) {
+            int x;
+            cin &gt;&gt; x;
+            a[x] = true;
+        }
+
+        int m2;
+        cin &gt;&gt; m2;
+        memset(b, 0, sizeof(b));
+        rep(i, m2) {
+            int x;
+            cin &gt;&gt; x;
+            b[x] = true;
+        }
+
+        rep(q, n) {
+            rep(i, 5) rep(j, 5) rep(k, 5) v2[i][j][k] = v[i][j][k];
+            rep(i, 5) {
+                rep(j, 5) {
+                    rep(k, 5) {
+                        int sum = 0;
+
+                        rep(l, 26) {
+                            int x = i + dx[l];
+                            int y = j + dy[l];
+                            int z = k + dz[l];
+
+                            if(can(x, y, z)) sum += v[x][y][z];
+                        }
+
+                        if(v[i][j][k] == 0) {
+                            if(a[sum]) {
+                                v2[i][j][k] = 1;
+                            }
+                        } else {
+                            if(!b[sum]) {
+                                v2[i][j][k] = 0;
+                            }
+                        }
+                    }
+                }
+            }
+
+            rep(i, 5) rep(j, 5) rep(k, 5) v[i][j][k] = v2[i][j][k];
+        }
+
+        if(c) cout &lt;&lt; endl;
+        cout &lt;&lt; "Case " &lt;&lt; c + 1 &lt;&lt; ":" &lt;&lt; endl;
+        c++;
+
+        rep(i, 5) {
+            if(i) cout &lt;&lt; endl;
+            rep(j, 5) {
+                rep(k, 5) {
+                    cout &lt;&lt; v[i][j][k];
+                }
+                cout &lt;&lt; endl;
+            }
+        }
+    }
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[AOJ1174 Identically Colored Panels Connection]]></title>
@@ -425,329 +747,6 @@ int main() {
         else cout &lt;&lt; "SUSPICIOUS" &lt;&lt; endl;
 
     }
-
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[AOJ1188 Hierarchical Democracy]]></title>
-    <link href="http://ry0u.github.io/blog/2016/03/23/aoj1188-hierarchical-democracy/"/>
-    <updated>2016-03-23T18:25:06+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/03/23/aoj1188-hierarchical-democracy</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1188">Hierarchical Democracy</a></h4><p>The presidential election in Republic of Democratia is carried out through multiple stages as follows. There are exactly two presidential candidates. At the first stage, eligible voters go to the polls of his/her electoral district. The winner of the district is the candidate who takes a majority of the votes.</p></blockquote>
-
-
-<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
-
-
-
-
-<!-- more -->
-
-
-<p>木として考える．葉にその区画に勝つための最小の値， <script type="math/tex"> \frac{値}{2} + 1 </script>を入れる．子の数の半分，小さい順に取っていく．最後に根の値が最小値になっているはず．</p>
-
-<p><img src="/images/AOJ/1188-1.png">
-<img src="/images/AOJ/1188-2.png"></p>
-
-<p><img src="/images/AOJ/1188-3.png"></p>
-
-<p>子の階層から小さい順に取りたいので，priority_queueを利用した．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-#include &lt;queue&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-priority_queue&lt;ll, vector&lt;ll&gt;, greater&lt;ll&gt; &gt; que[100005];
-
-int main() {
-    int n;
-    cin &gt;&gt; n;
-
-    rep(q, n) {
-        rep(i, 100005) {
-            while(que[i].size()) que[i].pop();
-        }
-
-        string s;
-        cin &gt;&gt; s;
-
-        int dep = 0;
-        rep(i, s.size()) {
-
-            if(s[i] == '[') {
-                if(s[i+1] == '[') {
-                    dep++;
-                } else {
-                    stringstream ss;
-                    REP(j, i+1, s.size()) {
-                        if('0' &lt;= s[j] &amp;&amp; s[j] &lt;= '9') {
-                            ss &lt;&lt; s[j];
-                            i++;
-                        } else {
-                            i++;
-                            break;
-                        }
-                    }
-
-                    ll x;
-                    ss &gt;&gt; x;
-
-                    x = x / 2 + 1;
-                    que[dep].push(x);
-                }
-            } else if(s[i] == ']') {
-                int m = que[dep].size();
-                ll sum = 0;
-
-                rep(j, m/2 + 1) {
-                    sum += que[dep].top();
-                    que[dep].pop();
-                }
-
-                que[dep-1].push(sum);
-
-                while(que[dep].size()) {
-                    que[dep].pop();
-                }
-
-                dep--;
-            }
-
-        }
-
-        cout &lt;&lt; que[0].top() &lt;&lt; endl;
-    }
-
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[AOJ2232 Ennichi]]></title>
-    <link href="http://ry0u.github.io/blog/2016/03/20/aoj2232-ennichi/"/>
-    <updated>2016-03-20T23:05:17+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/03/20/aoj2232-ennichi</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2232">Ennichi | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
-
-
-<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
-
-
-
-
-<!-- more -->
-
-
-<p>ぷよぷよ？みたいなやつ．横に隣り合うマスを実際に入れ替えてシュミレーションする．空きマスと交換すると，最初に落下処理をしなければならないことになかなか気付けなかった．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-int h, w, n;
-
-int sx,sy,gx,gy;
-int dx[4] = {1,-1, 0, 0};
-int dy[4] = {0, 0, 1,-1};
-vector&lt;string&gt; s;
-bool used[35][35], used2[35][35];
-
-bool can(int y,int x) {
-    if(0 &lt;= y &amp;&amp; y &lt; h &amp;&amp; 0 &lt;= x &amp;&amp; x &lt; w) return true;
-    return false;
-}
-
-bool func(vector&lt;string&gt; t) {
-
-    for(int i = h - 1; i &gt;= 0; i--) {
-        for(int j = w - 1; j &gt;= 0; j--) {
-            if(t[i][j] == '.') continue;
-
-            int k = i;
-            while(can(k+1, j) &amp;&amp; t[k+1][j] == '.') {
-                swap(t[k][j], t[k+1][j]);
-                k++;
-            }
-        }
-    }
-
-    while(true) {
-        bool flag = false;
-        memset(used, 0, sizeof(used));
-        memset(used2, 0, sizeof(used2));
-
-        for(int i = h-1; i &gt;= 0; i--) {
-            for(int j = w-1; j &gt;= 0; j--) {
-                if(t[i][j] == '.') continue;
-
-                if(!used[i][j]) {
-                    int len = 1;
-                    int k = j+1;
-                    while(can(i, k) &amp;&amp; t[i][k] == t[i][j]) {
-                        len++;
-                        k++;
-                    }
-
-                    k = j-1;
-                    while(can(i, k) &amp;&amp; t[i][k] == t[i][j]) {
-                        len++;
-                        k--;
-                    }
-
-                    if(len &gt;= n) {
-                        flag = true;
-                        used[i][j] = true;
-                        k = j + 1;
-                        while(can(i, k) &amp;&amp; t[i][k] == t[i][j]) {
-                            used[i][k] = true;
-                            k++;
-                        }
-
-                        k = j - 1;
-                        while(can(i, k) &amp;&amp; t[i][k] == t[i][j]) {
-                            used[i][k] = true;
-                            k--;
-                        }
-                    }
-                }
-
-                if(!used2[i][j]) {
-                    int len = 1;
-                    int k = i + 1;
-                    while(can(k, j) &amp;&amp; t[k][j] == t[i][j]) {
-                        len++;
-                        k++;
-                    }
-
-                    k = i - 1;
-                    while(can(k, j) &amp;&amp; t[k][j] == t[i][j]) {
-                        len++;
-                        k--;
-                    }
-
-                    if(len &gt;= n) {
-                        flag = true;
-                        used2[i][j] = true;
-                        k = i + 1;
-                        while(can(k, j) &amp;&amp; t[k][j] == t[i][j]) {
-                            used2[k][j] = true;
-                            k++;
-                        }
-
-                        k = i - 1;
-                        while(can(k, j) &amp;&amp; t[k][j] == t[i][j]) {
-                            used2[k][j];
-                            k++;
-                        }
-                    }
-                }
-            }
-        }
-
-        rep(i, h) {
-            rep(j, w) {
-                if(used[i][j] || used2[i][j]) t[i][j] = '.';
-            }
-        }
-
-        for(int i = h - 1; i &gt;= 0; i--) {
-            for(int j = w - 1; j &gt;= 0; j--) {
-                if(t[i][j] == '.') continue;
-
-                int k = i;
-                while(can(k+1, j) &amp;&amp; t[k+1][j] == '.') {
-                    swap(t[k][j], t[k+1][j]);
-                    k++;
-                }
-            }
-        }
-
-        if(flag) continue;
-        else break;
-    }
-
-    rep(i, h) {
-        rep(j, w) {
-            if(t[i][j] == '.') continue;
-            return false;
-        }
-    }
-    return true;
-}
-
-int main() {
-    cin &gt;&gt; h &gt;&gt; w &gt;&gt; n;
-
-    s.resize(h);
-    rep(i, h) cin &gt;&gt; s[i];
-
-    bool flag = false;
-    rep(i, h) {
-        rep(j, w) {
-            if(s[i][j] == '.') continue;
-
-            if(j == 0) {
-                swap(s[i][j], s[i][j+1]);
-                flag |= func(s);
-                swap(s[i][j], s[i][j+1]);
-            } else if(j == w-1) {
-                swap(s[i][j], s[i][j-1]);
-                flag |= func(s);
-                swap(s[i][j], s[i][j-1]);
-            } else {
-                swap(s[i][j], s[i][j+1]);
-                flag |= func(s);
-                swap(s[i][j], s[i][j+1]);
-                swap(s[i][j], s[i][j-1]);
-                flag |= func(s);
-                swap(s[i][j], s[i][j-1]);
-            }
-        }
-    }
-
-    if(flag) cout &lt;&lt; "YES" &lt;&lt; endl;
-    else cout &lt;&lt; "NO" &lt;&lt; endl;
 
     return 0;
 }
