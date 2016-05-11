@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 実装 | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/shi-zhuang/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-05-11T11:31:32+09:00</updated>
+  <updated>2016-05-12T01:24:24+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,190 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ1517 Challenge from Grandfather]]></title>
+    <link href="http://ry0u.github.io/blog/2016/05/11/aoj1517-challenge-from-grandfather/"/>
+    <updated>2016-05-11T11:35:39+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/05/11/aoj1517-challenge-from-grandfather</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1517">Challenge from Grandfather | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>部分行列の回転，反転，左シフト，右シフト，島反転を実装する．<br/>
+回転は90度回転を<script type="math/tex"> \frac{angle}{90} </script>回行う．<br/>
+反転，左シフト，右シフトはその通りにあって，島反転は幅優先で島を発見し反転していった．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+#include &lt;queue&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int n, m;
+int t[15][15];
+vector&lt;int&gt; v[15];
+
+void vrotate(int r, int c, int size, int angle) {
+    if(angle == 0 || angle == 360) return;
+
+    memset(t, 0, sizeof(t));
+
+    rep(i, angle/90) {
+        int col = c;
+        for(int i = r + size - 1; i &gt;= r; i--, col++) {
+            REP(j, c, c + size) {
+                t[r+j-c][col] = v[i][j];
+            }
+        }
+
+        REP(i, r, r + size) {
+            REP(j, c, c + size) {
+                v[i][j] = t[i][j];
+            }
+        }
+    }
+}
+
+void reversal(int r, int c, int size) {
+    REP(i, r, min(n, r + size)) {
+        REP(j, c, min(n, c + size)) {
+            v[i][j] = !v[i][j];
+        }
+    }
+}
+
+void leftshift(int r) {
+    int t = v[r][0];
+    rep(i, n) {
+        v[r][i] = v[r][i+1];
+    }
+    v[r][n-1] = t;
+}
+
+void rightshift(int r) {
+    int t = v[r][n-1];
+    for(int i = n-1; i &gt;= 1; i--) {
+        v[r][i] = v[r][i-1];
+    }
+    v[r][0] = t;
+}
+
+int dx[4] = {1,0,-1,0};
+int dy[4] = {0,1,0,-1};
+bool used[15][15];
+
+bool can(int y, int x) {
+    if(0 &lt;= y &amp;&amp; y &lt; n &amp;&amp; 0 &lt;= x &amp;&amp; x &lt; n) return true;
+    return false;
+}
+
+void islandreversal(int r, int c) {
+    queue&lt;P&gt; que;
+    que.push(mp(r, c));
+
+    memset(used, 0, sizeof(used));
+    used[r][c] = true;
+    int t = v[r][c];
+    while(que.size()) {
+        P p = que.front(); que.pop();
+        int y = p.first;
+        int x = p.second;
+
+        if(v[y][x] == t) {
+            v[y][x] = !v[y][x];
+        }
+
+        rep(i, 4) {
+            int ny = y + dy[i];
+            int nx = x + dx[i];
+
+            if(can(ny, nx) &amp;&amp; !used[ny][nx] &amp;&amp; v[ny][nx] == t) {
+                que.push(mp(ny, nx));
+                used[ny][nx] = true;
+            }
+        }
+    }
+}
+
+int main() {
+    cin &gt;&gt; n &gt;&gt; m;
+
+    memset(v, 0, sizeof(v));
+    rep(i, n) {
+        v[i].resize(n);
+        rep(j, n) cin &gt;&gt; v[i][j];
+    }
+
+    rep(i, m) {
+        int o;
+        cin &gt;&gt; o;
+
+        int r, c, size, angle;
+
+        if(o == 0) { // rotate
+            cin &gt;&gt; r &gt;&gt; c &gt;&gt; size &gt;&gt; angle;
+            r--; c--;
+
+            vrotate(r, c, size, angle);
+        } else if(o == 1) { // reversal
+            cin &gt;&gt; r &gt;&gt; c &gt;&gt; size;
+            r--; c--;
+
+            reversal(r, c, size);
+        } else if(o == 2) { // left shift
+            cin &gt;&gt; r;
+            r--;
+
+            leftshift(r);
+        } else if(o == 3) { // right shift
+            cin &gt;&gt; r;
+            r--;
+            rightshift(r);
+        } else if(o == 4) { // Island reversal
+            cin &gt;&gt; r &gt;&gt; c;
+            r--; c--;
+            islandreversal(r, c);
+        }
+    }
+
+    rep(i, n) {
+        rep(j, n) {
+            cout &lt;&lt; v[i][j];
+
+            if(j == n-1) cout &lt;&lt; endl;
+            else cout &lt;&lt; " ";
+        }
+    }
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[AOJ1512 Smartphone Game]]></title>
@@ -608,144 +792,6 @@ int main() {
             if(i == m-1) cout &lt;&lt; endl;
             else cout &lt;&lt; " ";
         }
-    }
-
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[AOJ2002 X-Ray Screening System]]></title>
-    <link href="http://ry0u.github.io/blog/2016/03/23/aoj2002-x-ray-screening-system/"/>
-    <updated>2016-03-23T19:25:35+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/03/23/aoj2002-x-ray-screening-system</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2002">X-Ray Screening System | Aizu Online Judge</a></h4><p>上記の調査結果をふまえて，以下のような手荷物検査のためのモデルを考案した．それぞれの手荷物は X 線に対して透明である直方体の容器だとみなす．その中には X 線に対して不透明である複数の品物が入っている．ここで，直方体の 3 辺を x 軸，y 軸，z 軸とする座標系を考え，x 軸と平行な方向に X 線を照射して，y-z 平面に投影された画像を撮影する．撮影された画像は適当な大きさの格子に分割され，画像解析によって，それぞれの格子領域に映っている品物の材質が推定される．この会社には非常に高度の解析技術があり，材質の詳細な違いすらも解析することが可能であることから，品物の材質は互いに異なると考えることができる．なお，複数の品物が x 軸方向に関して重なっているときは，それぞれの格子領域について最も手前にある，すなわち x 座標が最小である品物の材質が得られる．また，2 つ以上の品物の x 座標が等しいことはないと仮定する．</p></blockquote>
-
-
-<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
-
-
-
-
-<!-- more -->
-
-
-<p>もっとも手前にある品物から順番に処理していく．長方形なので，一番左上<script type="math/tex"> (sx, sy) </script>と右下 <script type="math/tex"> (gx, gy) </script>を持っておき， <script type="math/tex"> (sx, sy) </script>， <script type="math/tex"> (gx, sy) </script>， <script type="math/tex"> (sx, gy) </script>， <script type="math/tex"> (gx, gy) </script>の4角形全てに同じ品物の材質，または前面に他の品物がある時に埋めた．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-int w, h;
-int sy, sx, gy, gx;
-int dx[4] = {1,0,-1,0};
-int dy[4] = {0,1,0,-1};
-
-bool can(int y,int x) {
-    if(0 &lt;= y &amp;&amp; y &lt; h &amp;&amp; 0 &lt;= x &amp;&amp; x &lt; w) return true;
-    return false;
-}
-
-vector&lt;string&gt; s;
-char c;
-bool used[55][55], visited[55][55];
-
-bool check() {
-    REP(i, sy, gy+1){
-        REP(j, sx, gx+1) {
-            if(s[i][j] == c || used[i][j]) continue;
-            return false;
-        }
-    }
-    return true;
-}
-
-void f() {
-    REP(i, sy, gy+1) {
-        REP(j, sx, gx+1) {
-            used[i][j] = true;
-        }
-    }
-}
-
-int main() {
-    int n;
-    cin &gt;&gt; n;
-
-    rep(q, n) {
-        cin &gt;&gt; h &gt;&gt; w;
-        s.resize(h);
-        rep(i, h) cin &gt;&gt; s[i];
-
-        memset(used, 0, sizeof(used));
-        set&lt;char&gt; S;
-
-        bool flag = true, update = true;
-        while(update) {
-            update = false;
-            rep(i, h) {
-                rep(j, w) {
-                    if(s[i][j] == '.') continue;
-
-                    if(used[i][j]) continue;
-
-                    sy = i;
-                    sx = j;
-                    gy = i;
-                    gx = j;
-                    c = s[i][j];
-                    memset(visited, 0, sizeof(visited));
-
-                    rep(k, h) {
-                        rep(l, w) {
-                            if(s[k][l] == c) {
-                                sy = min(sy, k);
-                                sx = min(sx, l);
-                                gy = max(gy, k);
-                                gx = max(gx, l);
-                            }
-                        }
-                    }
-
-                    if(S.find(c) == S.end() &amp;&amp; check()) {
-                        f();
-                        S.insert(c);
-                        update = true;
-                    }
-                }
-            }
-        }
-
-        rep(i, h) {
-            rep(j, w) {
-                if(used[i][j]) continue;
-                if(s[i][j] == '.') continue;
-                flag = false;
-            }
-        }
-
-        if(flag) cout &lt;&lt; "SAFE" &lt;&lt; endl;
-        else cout &lt;&lt; "SUSPICIOUS" &lt;&lt; endl;
-
     }
 
     return 0;

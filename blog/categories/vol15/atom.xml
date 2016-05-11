@@ -4,7 +4,7 @@
   <title><![CDATA[Category: vol15 | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/vol15/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-05-11T11:31:32+09:00</updated>
+  <updated>2016-05-12T01:24:24+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,190 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ1517 Challenge from Grandfather]]></title>
+    <link href="http://ry0u.github.io/blog/2016/05/11/aoj1517-challenge-from-grandfather/"/>
+    <updated>2016-05-11T11:35:39+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/05/11/aoj1517-challenge-from-grandfather</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1517">Challenge from Grandfather | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>部分行列の回転，反転，左シフト，右シフト，島反転を実装する．<br/>
+回転は90度回転を<script type="math/tex"> \frac{angle}{90} </script>回行う．<br/>
+反転，左シフト，右シフトはその通りにあって，島反転は幅優先で島を発見し反転していった．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+#include &lt;queue&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int n, m;
+int t[15][15];
+vector&lt;int&gt; v[15];
+
+void vrotate(int r, int c, int size, int angle) {
+    if(angle == 0 || angle == 360) return;
+
+    memset(t, 0, sizeof(t));
+
+    rep(i, angle/90) {
+        int col = c;
+        for(int i = r + size - 1; i &gt;= r; i--, col++) {
+            REP(j, c, c + size) {
+                t[r+j-c][col] = v[i][j];
+            }
+        }
+
+        REP(i, r, r + size) {
+            REP(j, c, c + size) {
+                v[i][j] = t[i][j];
+            }
+        }
+    }
+}
+
+void reversal(int r, int c, int size) {
+    REP(i, r, min(n, r + size)) {
+        REP(j, c, min(n, c + size)) {
+            v[i][j] = !v[i][j];
+        }
+    }
+}
+
+void leftshift(int r) {
+    int t = v[r][0];
+    rep(i, n) {
+        v[r][i] = v[r][i+1];
+    }
+    v[r][n-1] = t;
+}
+
+void rightshift(int r) {
+    int t = v[r][n-1];
+    for(int i = n-1; i &gt;= 1; i--) {
+        v[r][i] = v[r][i-1];
+    }
+    v[r][0] = t;
+}
+
+int dx[4] = {1,0,-1,0};
+int dy[4] = {0,1,0,-1};
+bool used[15][15];
+
+bool can(int y, int x) {
+    if(0 &lt;= y &amp;&amp; y &lt; n &amp;&amp; 0 &lt;= x &amp;&amp; x &lt; n) return true;
+    return false;
+}
+
+void islandreversal(int r, int c) {
+    queue&lt;P&gt; que;
+    que.push(mp(r, c));
+
+    memset(used, 0, sizeof(used));
+    used[r][c] = true;
+    int t = v[r][c];
+    while(que.size()) {
+        P p = que.front(); que.pop();
+        int y = p.first;
+        int x = p.second;
+
+        if(v[y][x] == t) {
+            v[y][x] = !v[y][x];
+        }
+
+        rep(i, 4) {
+            int ny = y + dy[i];
+            int nx = x + dx[i];
+
+            if(can(ny, nx) &amp;&amp; !used[ny][nx] &amp;&amp; v[ny][nx] == t) {
+                que.push(mp(ny, nx));
+                used[ny][nx] = true;
+            }
+        }
+    }
+}
+
+int main() {
+    cin &gt;&gt; n &gt;&gt; m;
+
+    memset(v, 0, sizeof(v));
+    rep(i, n) {
+        v[i].resize(n);
+        rep(j, n) cin &gt;&gt; v[i][j];
+    }
+
+    rep(i, m) {
+        int o;
+        cin &gt;&gt; o;
+
+        int r, c, size, angle;
+
+        if(o == 0) { // rotate
+            cin &gt;&gt; r &gt;&gt; c &gt;&gt; size &gt;&gt; angle;
+            r--; c--;
+
+            vrotate(r, c, size, angle);
+        } else if(o == 1) { // reversal
+            cin &gt;&gt; r &gt;&gt; c &gt;&gt; size;
+            r--; c--;
+
+            reversal(r, c, size);
+        } else if(o == 2) { // left shift
+            cin &gt;&gt; r;
+            r--;
+
+            leftshift(r);
+        } else if(o == 3) { // right shift
+            cin &gt;&gt; r;
+            r--;
+            rightshift(r);
+        } else if(o == 4) { // Island reversal
+            cin &gt;&gt; r &gt;&gt; c;
+            r--; c--;
+            islandreversal(r, c);
+        }
+    }
+
+    rep(i, n) {
+        rep(j, n) {
+            cout &lt;&lt; v[i][j];
+
+            if(j == n-1) cout &lt;&lt; endl;
+            else cout &lt;&lt; " ";
+        }
+    }
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[AOJ1516 Nasty Boys]]></title>
@@ -504,288 +688,6 @@ int main() {
         }
 
         cout &lt;&lt; ans &lt;&lt; endl;
-    }
-
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[AOJ1505 Dungeon]]></title>
-    <link href="http://ry0u.github.io/blog/2016/04/21/aoj1505-dungeon/"/>
-    <updated>2016-04-21T14:26:13+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/04/21/aoj1505-dungeon</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1505">Dungeon | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
-
-
-<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
-
-
-
-
-<!-- more -->
-
-
-<p>まず最初dijkstraの始点を <script type="math/tex"> 0, n-1 </script>としてスタート地点からの最短経路と，ゴール地点からの最短経路を出しておく．これで各クエリに対して<script type="math/tex"> O(n) </script>で答えられるようになったが， <script type="math/tex">1 \leq n \leq 10 ^5, 1 \leq q \leq 10 ^5</script>なので間に合わない．<br/>
-(スタート地点からの最短コスト, 頂点番号)のpairで，(ゴール地点からの最短コスト, 頂点番号)のpairでsortする．また頂点番号がsort後の配列のどこのindexかを持っておく．</p>
-
-<p>スタート地点からのコスト</p>
-
-<table>
-<thead>
-<tr>
-<th style="text-align:center;">index</th>
-<th style="text-align:center;">0</th>
-<th style="text-align:center;">1</th>
-<th style="text-align:center;">2</th>
-<th style="text-align:center;">3</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:center;">cost</td>
-<td style="text-align:center;">0</td>
-<td style="text-align:center;">2</td>
-<td style="text-align:center;">3</td>
-<td style="text-align:center;">3</td>
-</tr>
-<tr>
-<td style="text-align:center;">頂点</td>
-<td style="text-align:center;">0</td>
-<td style="text-align:center;">2</td>
-<td style="text-align:center;">1</td>
-<td style="text-align:center;">3</td>
-</tr>
-</tbody>
-</table>
-
-
-<p>ゴール地点からのコスト</p>
-
-<table>
-<thead>
-<tr>
-<th style="text-align:center;">index</th>
-<th style="text-align:center;">0</th>
-<th style="text-align:center;">1</th>
-<th style="text-align:center;">2</th>
-<th style="text-align:center;">3</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:center;">cost</td>
-<td style="text-align:center;">0</td>
-<td style="text-align:center;">1</td>
-<td style="text-align:center;">3</td>
-<td style="text-align:center;">4</td>
-</tr>
-<tr>
-<td style="text-align:center;">頂点</td>
-<td style="text-align:center;">3</td>
-<td style="text-align:center;">2</td>
-<td style="text-align:center;">0</td>
-<td style="text-align:center;">1</td>
-</tr>
-</tbody>
-</table>
-
-
-<p>スタート地点に関して頂点番号 <script type="math/tex"> _i </script>のsort後の配列のindexの変換テーブル</p>
-
-<table>
-<thead>
-<tr>
-<th style="text-align:center;">頂点</th>
-<th style="text-align:center;">0</th>
-<th style="text-align:center;">1</th>
-<th style="text-align:center;">2</th>
-<th style="text-align:center;">3</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:center;">index</td>
-<td style="text-align:center;">0</td>
-<td style="text-align:center;">2</td>
-<td style="text-align:center;">1</td>
-<td style="text-align:center;">3</td>
-</tr>
-</tbody>
-</table>
-
-
-<p>次にクエリ <script type="math/tex"> q_i </script>の <script type="math/tex"> (fg, fs, クエリ番号) </script>でsortする． 少なくとも<script type="math/tex"> fg </script>かかる，という制限なので<script type="math/tex"> fg </script>を優先してsortすれば，それ以前のものは候補に上がらないので，省いて良い．この省くというのを表現するのにBITを用いた．<script type="math/tex"> fg </script>より小さい所は変換テーブルを用いてそのindexに <script type="math/tex"> +1 </script>する．次に <script type="math/tex"> fs </script>以下を満たす最大のindex持ってきてBITを用いてその区間和を引く．</p>
-
-<p>説明が全く出来ている気がしない．後で見直し</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-#include &lt;queue&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1LL&lt;&lt;61
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-struct edge {
-    int from,to;
-    ll cost;
-
-    edge(int t,ll c) : to(t),cost(c) {}
-    edge(int f,int t,ll c) : from(f),to(t),cost(c) {}
-
-    bool operator&lt;(const edge &amp;e) const {
-        return cost &lt; e.cost;
-    }
-};
-
-vector&lt;edge&gt; G[100005];
-ll d[100005], d2[100005];
-
-void dijkstra(int s, int n) {
-    priority_queue&lt;pair&lt;ll, ll&gt; , vector&lt;pair&lt;ll, ll&gt; &gt;, greater&lt;pair&lt;ll, ll&gt; &gt; &gt; que;
-    fill(d, d+n, INF);
-
-    d[s] = 0;
-    que.push(P(0,s));
-
-    while(que.size()) {
-        P p = que.top();
-        que.pop();
-
-        int v = p.second;
-        if(d[v] &lt; p.first) continue;
-
-        rep(i, G[v].size()) {
-            edge e = G[v][i];
-            if(d[e.to] &gt; d[v] + e.cost) {
-                d[e.to] = d[v] + e.cost;
-                que.push(P(d[e.to],e.to));
-            }
-        }
-    }
-}
-
-struct BIT {
-    vector&lt;int&gt; bit;
-
-    BIT(int n) : bit(n+1) {}
-
-    int sum(int i) {
-        int s = 0;
-        while(i &gt; 0) {
-            s += bit[i];
-            i -= i &amp; -i;
-        }
-        return s;
-    }
-
-    void add(int i,int x) {
-        while(i &lt;= bit.size()) {
-            bit[i] += x;
-            i += i &amp; -i;
-        }
-    }
-};
-
-int main() {
-    int n, m;
-    cin &gt;&gt; n &gt;&gt; m;
-
-    rep(i, m) {
-        ll a, b, c;
-        cin &gt;&gt; a &gt;&gt; b &gt;&gt; c;
-
-        G[a].push_back(edge(b, c));
-        G[b].push_back(edge(a, c));
-    }
-
-    dijkstra(n-1, n);
-    memset(d2, 0, sizeof(d2));
-    rep(i, n) {
-        d2[i] = d[i];
-    }
-
-    dijkstra(0, n);
-
-    vector&lt;ll&gt; d3(n);
-    vector&lt;pair&lt;ll, int&gt; &gt; D, D2;
-    rep(i, n) {
-        d3[i] = d[i];
-        D.push_back(mp(d[i], i));
-        D2.push_back(mp(d2[i], i));
-    }
-
-    sort(d3.begin(), d3.end());
-    sort(D.begin(), D.end());
-    sort(D2.begin(), D2.end());
-
-    map&lt;int, int&gt; ma;
-    rep(i, n) {
-        ma[ D[i].second ] = i;
-    }
-
-    int q;
-    cin &gt;&gt; q;
-
-    vector&lt;pair&lt;pair&lt;ll, ll&gt; , int&gt; &gt; query(q);
-
-    rep(i, q) {
-        ll s, g;
-        cin &gt;&gt; s &gt;&gt; g;
-
-        query[i] = mp(mp(g, s), i);
-    }
-
-    sort(query.begin(), query.end());
-
-    BIT bit(n + 5);
-    vector&lt;P&gt; ans;
-    int start = 0;
-    rep(i, q) {
-        ll s = query[i].first.second;
-        ll g = query[i].first.first;
-        int id = query[i].second;
-
-        for(; start &lt; n; start++) {
-            if(g &gt; D2[start].first) {
-                int k = ma[ D2[start].second ];
-                bit.add(k + 1, 1);
-                continue;
-            } else break;
-        }
-
-        vector&lt;ll&gt;::iterator ite = upper_bound(d3.begin(), d3.end(), s);
-        int k = ite - d3.begin() - 1;
-        if(k &lt; 0) {
-            ans.push_back(mp( id, 0));
-        } else {
-            int res = k + 1;
-            res -= bit.sum(k + 1);
-            ans.push_back(mp( id, res));
-        }
-    }
-
-    sort(ans.begin(), ans.end());
-
-    rep(i, ans.size()) {
-        cout &lt;&lt; ans[i].second &lt;&lt; endl;
     }
 
     return 0;

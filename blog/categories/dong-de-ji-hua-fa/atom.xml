@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 動的計画法 | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/dong-de-ji-hua-fa/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-05-11T11:31:32+09:00</updated>
+  <updated>2016-05-12T01:24:24+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,138 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ1086 Live Schedule]]></title>
+    <link href="http://ry0u.github.io/blog/2016/05/12/aoj1086-live-schedule/"/>
+    <updated>2016-05-12T00:53:50+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/05/12/aoj1086-live-schedule</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1086">Live Schedule | Aizu Online Judge</a></h4><p>YOKARI TAMURAは全国的に有名なアーティストである。今月YOKARIは D 日間にわたってライブツアーを行う。ツアーのスケジュールの決定においてこの国を C 種類の地域でわける。YOKARIがある地域でライブを行うことにより利益を得られ、これは正の整数で表される。YOKARIは原則として 1 日に最大 1 つまでライブを行う。ただし、ある地域でライブを行った後、隣接する地域でライブを行える場合はその地域で同じ日に再びライブを行うことができる。この条件を満たす限り、地域を移動しながら何度もライブを行うことができる。また、同じ日に同じ地域でライブを 2 度以上行うことはできない。さらに、同じ日に 2 回以上のライブを行う日の数はツアー期間中合計 X 以下でなければならない。</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p><script type="math/tex; mode=display">
+    dp[i][j][k] := i日目に疲労度jで2回以上ライブを行った回数がkの時の売上の最大値
+</script></p>
+
+<p>として，動的計画法．ライブをし終わった地域から，次の日は開始かと思っていて状態に"町<script type="math/tex"> i </script>&ldquo;にいる時，というのを追加していたがいらなかった．ライブを始める町と終わる町はどこでも良いので <script type="math/tex"> C ^2 </script>で区間を全探索し， その区間の疲労度を足した次の日に遷移可能とした．<script type="math/tex"> 2 </script>回以上続けてライブを続けない場合は制限がないので，別に分けた．<br/>
+WAが取れなかった原因は，ライブを行わない，というのを追加していないことだった．区間は同じだが後々にライブをした方が利益が高い場合があるので，この行動を追加しなければおかしかった．<br/>
+また <script type="math/tex"> E_{i, j} = 0 </script>の時にはライブを行うことが出来ない，という条件に気が付かず時間を溶かした．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+#include &lt;iomanip&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+// i日目に疲労度jで2回以上のライブ回数kの時の売上の最大値
+ll dp[35][55][10];
+ll E[20][35], F[20][35];
+
+int main() {
+    ll c, d, w, x;
+    while(cin &gt;&gt; c &gt;&gt; d &gt;&gt; w &gt;&gt; x) {
+        if(c == 0 &amp;&amp; d == 0 &amp;&amp; w == 0 &amp;&amp; x == 0) break;
+
+        memset(E, 0, sizeof(E));
+        rep(i, c) {
+            rep(j, d) cin &gt;&gt; E[i][j];
+        }
+
+        memset(F, 0, sizeof(F));
+        rep(i, c) {
+            rep(j, d) cin &gt;&gt; F[i][j];
+        }
+
+        // rep(i, c) {
+        //  rep(j, d) {
+        //      cout &lt;&lt; "(" &lt;&lt; E[i][j] &lt;&lt; ", " &lt;&lt; F[i][j] &lt;&lt; ") ";
+        //  }
+        //  cout &lt;&lt; endl;
+        // }
+
+        memset(dp, 0, sizeof(dp));
+
+        rep(i, d) {
+            rep(j, w + 1) {
+                rep(k, x + 1) {
+                    dp[i+1][j][k] = max(dp[i+1][j][k], dp[i][j][k]);
+
+                    rep(s, c) {
+                        if(E[s][i] == 0) continue;
+
+                        ll sum = E[s][i];
+                        ll res = F[s][i];
+
+                        if(j + res &lt;= w) {
+                            dp[i+1][j+res][k] = max(dp[i+1][j+res][k], dp[i][j][k] + sum);
+                        }
+
+                        REP(t, s + 1, c) {
+                            if(E[t][i] == 0) break;
+
+                            sum += E[t][i];
+                            res += F[t][i];
+
+                            if(j + res &lt;= w &amp;&amp; k + 1 &lt;= x) {
+                                dp[i+1][j+res][k+1] = max(dp[i+1][j+res][k+1], dp[i][j][k] + sum);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // rep(i, d + 1) {
+        //  cout &lt;&lt; " ----- day : " &lt;&lt; i &lt;&lt; endl;
+        //  rep(j, w + 1) {
+        //      rep(k, x + 1) {
+        //          cout &lt;&lt; setw(3) &lt;&lt; dp[i][j][k] &lt;&lt; " ";
+        //      }
+        //      cout &lt;&lt; endl;
+        //  }
+        // }
+
+        ll ans = 0;
+        // rep(i, d + 1) {
+            rep(j, w + 1) {
+                rep(k, x + 1) {
+                    ans = max(ans, dp[d][j][k]);
+                }
+            }
+        // }
+
+        cout &lt;&lt; ans &lt;&lt; endl;
+    }
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[ABC013C 節制]]></title>
@@ -509,95 +641,6 @@ int main() {
             }
         }
 
-        cout &lt;&lt; ans &lt;&lt; endl;
-    }
-
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[AOJ1286 Expected Allowance]]></title>
-    <link href="http://ry0u.github.io/blog/2016/03/18/aoj1286-expected-allowance/"/>
-    <updated>2016-03-18T22:54:03+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/03/18/aoj1286-expected-allowance</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1286">Expected Allowance | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
-
-
-<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
-
-
-
-
-<!-- more -->
-
-
-<p><script type="math/tex; mode=display">
-    dp[i][j] := i回，m面のサイコロを降った時にjが出る回数
-</script></p>
-
-<p>として，シュミレーション．サイコロを振るのは <script type="math/tex"> dp[i+1][j+k] += dp[i][j] </script>と書ける．配列を再利用するために，<script type="math/tex"> iとi+1 </script>の偶奇を見て遷移する．次に遷移する場所に値が残っているとおかしいことになるので，<script type="math/tex"> dp[i][j] </script>からサイコロを振ったらそこは初期化する．分母は全て <script type="math/tex"> m ^n </script>で， <script type="math/tex"> k </script>引いた時に最低でも <script type="math/tex"> 1 </script>になるようにして期待値を求める．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-int dp[2][100005];
-
-int main() {
-    int n, m, k;
-    while(cin &gt;&gt; n &gt;&gt; m &gt;&gt; k) {
-        if(n == 0 &amp;&amp; m == 0 &amp;&amp; k == 0) break;
-
-        memset(dp, 0, sizeof(dp));
-        REP(j, 1, m + 1) {
-            dp[1][j] = 1;
-        }
-
-        rep(i, n) {
-            rep(j, 100005) {
-                if(dp[i &amp; 1][j] == 0) continue;
-                REP(k, 1, m+1) {
-                    dp[(i+1)&amp;1][j+k] += dp[i&amp;1][j];
-                }
-                dp[i&amp;1][j] = 0;
-            }
-        }
-
-        double ans = 0, t = 1;
-        rep(i, n) {
-            t *= m;
-        }
-
-        rep(j, 100005) {
-            if(dp[n&amp;1][j] == 0) continue;
-
-            double l = j - k;
-            if(l &lt;= 0) l = 1;
-            ans += (dp[n &amp; 1][j] / t) * l;
-        }
-
-        cout &lt;&lt; fixed;
-        cout.precision(20);
         cout &lt;&lt; ans &lt;&lt; endl;
     }
 
