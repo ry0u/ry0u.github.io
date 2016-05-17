@@ -4,7 +4,7 @@
   <title><![CDATA[Category: codeforces | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/codeforces/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-05-17T18:34:34+09:00</updated>
+  <updated>2016-05-17T19:05:07+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,105 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Codeforces353-div2D Tree Construction]]></title>
+    <link href="http://ry0u.github.io/blog/2016/05/17/codeforces353-div2d-tree-construction/"/>
+    <updated>2016-05-17T18:36:48+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/05/17/codeforces353-div2d-tree-construction</id>
+    <content type="html"><![CDATA[<!-- more -->
+
+
+<p>　<script type="math/tex"> 2 </script>分木の挿入する順番が与えられる．挿入した時の親の番号を答える．<br/>
+愚直に木を構成すると線のような木の場合に <script type="math/tex"> O(n ^2) </script>となるので間に合わない．区間をsetで管理すると次に挿入する場所が <script type="math/tex"> logn </script>で持ってこれるので，全体で <script type="math/tex"> O(n logn) </script>となる．map(<script type="math/tex">l, r </script>)に区間 <script type="math/tex"> [l, r] </script>の親を持っておくようにした．</p>
+
+<p>sample2でどのように動くかをメモしておく．(書いておかないと絶対忘れる．．．)</p>
+
+<h1>Sample 2</h1>
+
+<blockquote><p><script type="math/tex"> 5 </script><br/>
+<script type="math/tex"> 4\ 2\ 3\ 1\ 6\ </script></p></blockquote>
+
+<p>手順，挿入する数，挿入する区間 <script type="math/tex"> \to </script> 挿入した結果と書いてみた．</p>
+
+<p><script type="math/tex; mode=display">
+\begin{eqnarray}
+insert \ \ (4) \ \ [-\infty, \infty] \ \ &amp;\to&amp; \ \ [-\infty, 4], [4, \infty] \
+insert \ \ (2) \ \ [-\infty,\ \ 4] \ \ &amp;\to&amp; \ \ [-\infty, 2], [2, 4], [4, \infty]  \
+insert \ \ (3) \ \ [\,\ \ \ \ 2,\ \ 4] \ \ &amp;\to&amp; \ \ [-\infty, 2], [2, 3], [3, 4], [4, \infty] \
+insert \ \ (1) \ \ [-\infty,\ \ 2] \ \ &amp;\to&amp; \ \ [-\infty, 1], [1, 2], [2, 3], [3, 4], [4, \infty] \
+insert \ \ (6) \ \ [\,\ \ \ \ 4,\infty] \ \ &amp;\to&amp; \ \ [-\infty, 1], [1, 2], [2, 3], [3, 4], [4, 6], [6, \infty] \
+\end{eqnarray}
+</script></p>
+
+<p>後は区間<script type="math/tex"> [l, r] </script>のmapに入っている値を答えて， <script type="math/tex"> [l, v[i]], [v[i], r] </script>に <script type="math/tex"> v[i] </script>を入れておく．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+map&lt;P, int&gt; m;
+
+int main() {
+    int n;
+    cin &gt;&gt; n;
+
+    vector&lt;int&gt; v(n);
+    rep(i, n) cin &gt;&gt; v[i];
+
+    vector&lt;int&gt; ans;
+
+    set&lt;int&gt; st;
+    st.insert(INF);
+    st.insert(-INF);
+    st.insert(v[0]);
+
+    m[mp(-INF, v[0])] = v[0];
+    m[mp(v[0], INF)] = v[0];
+
+    REP(i, 1, n) {
+        set&lt;int&gt;::iterator ite = st.upper_bound(v[i]);
+        int r = *ite;
+        ite--;
+        int l = *ite;
+
+        ans.push_back(m[mp(l, r)]);
+
+        m[mp(l, v[i])] = v[i];
+        m[mp(v[i], r)] = v[i];
+        st.insert(v[i]);
+    }
+
+    rep(i, ans.size()) {
+        cout &lt;&lt; ans[i];
+
+        if(i == ans.size()-1) cout &lt;&lt; endl;
+        else cout &lt;&lt; " ";
+    }
+
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Codeforces353-div2C Money Transfers]]></title>
@@ -456,108 +555,6 @@ int main() {
     cout &lt;&lt; fixed;
     cout.precision(20);
     cout &lt;&lt; min(A, B) &lt;&lt; endl;
-
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Manthan, Codefest 16D Fibonacci-ish]]></title>
-    <link href="http://ry0u.github.io/blog/2016/02/29/manthan-codefest-16d-fibonacci-ish/"/>
-    <updated>2016-02-29T15:59:40+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/02/29/manthan-codefest-16d-fibonacci-ish</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-chrome="0" data-card-controls="0"><h4><a href="http://codeforces.com/contest/633/problem/D">Problem - D - Codeforces</a></h4><p>Yash has recently learnt about the Fibonacci sequence and is very excited about it. He calls a sequence Fibonacci-ish if You are given some sequence of integers . Your task is rearrange elements of this sequence in such a way that its longest possible prefix is Fibonacci-ish sequence.</p></blockquote>
-
-
-<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
-
-
-
-
-<!-- more -->
-
-
-<p>やることは， <script type="math/tex"> f_0とf_1 </script>選び，シュミレーションする．本番中はpretest 3でTLEを出して，これじゃあ間に合わないと考えていたが，単純に<script type="math/tex"> 0 </script>を考慮していないためだった．<br/>
-最初に <script type="math/tex"> 0 </script>をはじいて，全て<script type="math/tex"> 0 </script>のみのパターンか最初に<script type="math/tex"> 0 </script>をつけるパターンのみでいいと思っていたが，途中で<script type="math/tex"> 0 </script>を経由するパターンも普通にあってそこに気づかなかった．<br/>
-またsetに突っ込んでその数があるかを確認していたけど，同じ数が出てくるパターンがあるので最初にどの数が何個あるかをmapで持たなければいけなかった．<br/>
-stackに積んでおけば後に続く項の個数が分かるので
-<script type="math/tex; mode=display">
-    memo[mp(a, b)] := (a, b)の時の後に続く項の個数
-</script>
-とかやるのかな思ったけど，(a, b)にいたるまでに使ってきた数が違えば後に続く項も違いダメだった．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-#include &lt;stack&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-int main() {
-    int n;
-    cin &gt;&gt; n;
-
-    vector&lt;ll&gt; v(n);
-    map&lt;ll, int&gt; m;
-    set&lt;int&gt; st;
-
-    rep(i, n) {
-        cin &gt;&gt; v[i];
-        m[v[i]]++;
-        st.insert(v[i]);
-    }
-
-    int ans = m[0];
-    rep(i, n) {
-        rep(j, n) {
-            ll a = v[i], b = v[j], c;
-
-            if(i == j) continue;
-            if(a == 0 &amp;&amp; b == 0) continue;
-
-            m[a]--;
-            m[b]--;
-
-            stack&lt;ll&gt; S;
-            S.push(a);
-            S.push(b);
-
-            while(st.find(a + b) != st.end() &amp;&amp; m[a + b] &gt; 0) {
-                    c = a + b;
-                    a = b;
-                    b = c;
-
-                    m[c]--;
-                    S.push(c);
-            }
-
-            ans = max(ans, (int)S.size());
-
-            while(S.size()) {
-                m[S.top()]++;
-                S.pop();
-            }
-        }
-    }
-
-    cout &lt;&lt; ans &lt;&lt; endl;
 
     return 0;
 }
