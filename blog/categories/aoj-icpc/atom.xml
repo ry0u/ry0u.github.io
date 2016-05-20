@@ -4,7 +4,7 @@
   <title><![CDATA[Category: aoj-icpc | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/aoj-icpc/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-05-17T19:05:07+09:00</updated>
+  <updated>2016-05-20T23:10:21+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,128 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[How can I satisfy thee? Let me count the ways...]]></title>
+    <link href="http://ry0u.github.io/blog/2016/05/20/how-can-i-satisfy-thee-let-me-count-the-ways-dot-dot-dot/"/>
+    <updated>2016-05-20T22:38:10+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/05/20/how-can-i-satisfy-thee-let-me-count-the-ways-dot-dot-dot</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-image="http://judge.u-aizu.ac.jp/onlinejudge/IMAGE1/2008C2.png" data-card-type="article"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1155&lang=jp">How can I satisfy thee? Let me count the ways... | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>構文解析．
+<script type="math/tex; mode=display">
+\begin{eqnarray}
+<formula>\ &amp;::=&amp;\ 0\ or\ 1\ or\ 2 \
+<formula>\ &amp;::=&amp;\ -<formula> \
+<formula>\ &amp;::=&amp;\ (<formula>\ +\ or\ * <formula>) \
+\end{eqnarray}
+</script>
+の場合に分けて考える．入れ子の括弧にどう対応させるかよく分からなかったが，自分なりに理解することができた．構文解析の関数が出来たら，<script type="math/tex"> (P, Q, R) </script>の組み合わせ(<script type="math/tex"> 2 ^3 </script>通り)を全列挙して， <script type="math/tex"> 2 </script>となる個数を数える．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int formula(string&amp; s, int&amp; i) {
+    if(s[i] == '(') {
+        i++;
+        int val = formula(s, i);
+
+        char op = s[i];
+
+        i++;
+        int val2 = formula(s, i);
+
+        int ret = 0;
+        if(op == '+') {
+            if(val == 2 || val2 == 2) ret = 2;
+            else if(val == 1 || val2 == 1) ret = 1;
+            else ret = 0;
+        }
+        if(op == '*') {
+            if(val == 2 &amp;&amp; val2 == 2) ret = 2;
+            else if((val == 1 || val == 2) &amp;&amp; (val2 == 1 || val2 == 2)) ret = 1;
+            else ret = 0;
+        }
+
+        i++;
+        return ret;
+    } else if(isdigit(s[i])) {
+        int ret = (s[i] - '0');
+        i++;
+        return ret;
+    } else if(s[i] == '-') {
+        i++;
+        int val = formula(s, i);
+
+        int ret = 0;
+        if(val == 0) ret = 2;
+        if(val == 1) ret = 1;
+        if(val == 2) ret = 0;
+
+        return ret;
+    }
+}
+
+
+int main() {
+    string s;
+    while(cin &gt;&gt; s) {
+        if(s == ".") break;
+
+        int ans = 0;
+        rep(i, 3) {
+            rep(j, 3) {
+                rep(k, 3) {
+                    string t = s;
+                    rep(l, s.size()) {
+                        if(t[l] == 'P') t[l] = ('0' + i);
+                        else if(t[l] == 'Q') t[l] = ('0' + j);
+                        else if(t[l] == 'R') t[l] = ('0' + k);
+                    }
+
+                    int p = 0;
+                    if(formula(t, p) == 2) {
+                        ans++;
+                    }
+                }
+            }
+        }
+
+        cout &lt;&lt; ans &lt;&lt; endl;
+    }
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[AOJ2331 A Way to Invite Friends]]></title>
@@ -495,144 +617,6 @@ int main() {
     }
 
     cout &lt;&lt; ans &lt;&lt; endl;
-
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[AOJ1326 Stylish]]></title>
-    <link href="http://ry0u.github.io/blog/2016/03/26/aoj1326-stylish/"/>
-    <updated>2016-03-26T21:21:31+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/03/26/aoj1326-stylish</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1326">Stylish</a></h4><p>Stylish is a programming language whose syntax comprises names, that are sequences of Latin alphabet letters, three types of grouping symbols, periods ('.'), and newlines. Grouping symbols, namely round brackets ('(' and ')'), curly brackets ('{' and '}'), and square brackets ('[' and ']'), must match and be nested properly.</p></blockquote>
-
-
-<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
-
-
-
-
-<!-- more -->
-
-
-<p>i番目までの括弧の量を先に計算しておく．<script type="math/tex"> R </script>, <script type="math/tex"> C </script>, <script type="math/tex"> S </script>を総当りしてインデントが合う組み合わせを見つける． <script type="math/tex"> 2 </script>つ以上ある場合は <script type="math/tex"> -1 </script>にする．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-int main() {
-    int n, m;
-    while(cin &gt;&gt; n &gt;&gt; m) {
-        if(n == 0 &amp;&amp; m == 0) break;
-
-        vector&lt;string&gt; v(n), v2(m);
-        rep(i, n) cin &gt;&gt; v[i];
-        rep(i, m) cin &gt;&gt; v2[i];
-
-        int r[105], c[105], s[105];
-        memset(r, 0, sizeof(r));
-        memset(c, 0, sizeof(c));
-        memset(s, 0, sizeof(s));
-
-        REP(i, 1, n) {
-            r[i] = r[i-1];
-            c[i] = c[i-1];
-            s[i] = s[i-1];
-            rep(j, v[i-1].size()) {
-                char ch = v[i-1][j];
-                if(ch == '(') r[i]++;
-                if(ch == ')') r[i]--;
-                if(ch == '{') c[i]++;
-                if(ch == '}') c[i]--;
-                if(ch == '[') s[i]++;
-                if(ch == ']') s[i]--;
-            }
-        }
-
-        int r2[105], c2[105], s2[105];
-        memset(r2, 0, sizeof(r2));
-        memset(c2, 0, sizeof(c2));
-        memset(s2, 0, sizeof(s2));
-
-        REP(i, 1, m) {
-            r2[i] = r2[i-1];
-            c2[i] = c2[i-1];
-            s2[i] = s2[i-1];
-            rep(j, v2[i-1].size()) {
-                char ch = v2[i-1][j];
-                if(ch == '(') r2[i]++;
-                if(ch == ')') r2[i]--;
-                if(ch == '{') c2[i]++;
-                if(ch == '}') c2[i]--;
-                if(ch == '[') s2[i]++;
-                if(ch == ']') s2[i]--;
-            }
-        }
-
-        int d[105];
-        memset(d, 0, sizeof(d));
-
-        rep(i, n) {
-            rep(j, v[i].size()) {
-                if(v[i][j] != '.') {
-                    d[i] = j;
-                    break;
-                }
-            }
-        }
-
-        vector&lt;int&gt; ans(m);
-        rep(i, m) ans[i] = INF;
-
-        REP(i, 1, 21) {
-            REP(j, 1, 21) {
-                REP(k, 1, 21) {
-                    bool flag = true;
-
-                    rep(l, n) {
-                        if(d[l] == i * r[l] + j * c[l] + k * s[l]) continue;
-                        flag = false;
-                    }
-
-                    if(flag) {
-                        rep(l, m) {
-                            int d = i * r2[l] + j * c2[l] + k * s2[l];
-
-                            if(ans[l] == INF) ans[l] = d;
-                            else if(ans[l] != d) ans[l] = -1;
-                        }
-                    }
-                }
-            }
-        }
-
-        rep(i, m) {
-            cout &lt;&lt; ans[i];
-            if(i == m-1) cout &lt;&lt; endl;
-            else cout &lt;&lt; " ";
-        }
-    }
 
     return 0;
 }
