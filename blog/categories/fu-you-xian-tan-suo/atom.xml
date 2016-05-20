@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 幅優先探索 | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/fu-you-xian-tan-suo/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-05-20T23:41:41+09:00</updated>
+  <updated>2016-05-21T03:15:08+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,152 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ2153 Mirror Cave]]></title>
+    <link href="http://ry0u.github.io/blog/2016/05/21/aoj2153-mirror-cave/"/>
+    <updated>2016-05-21T02:18:25+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/05/21/aoj2153-mirror-cave</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2153">Mirror Cave | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>状態を<script type="math/tex">(ay, ax, by, bx)</script>として幅優先探索．このようにすれば，片方が移動して片方が壁で立ち止まる場合も表現出来る．左右を逆にするのが面倒だったので，まず最初にLenの方の部屋を反転して，同じ <script type="math/tex"> (dy, dx) </script>を使った．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+#include &lt;queue&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int h, w;
+int sax, say, sbx, sby, gax, gay, gbx, gby;
+int dx[4] = {1,0,-1,0};
+int dy[4] = {0,1,0,-1};
+bool used[55][55][55][55];
+
+bool can(int y, int x) {
+    if(0 &lt;= y &amp;&amp; y &lt; h &amp;&amp; 0 &lt;= x &amp;&amp; x &lt; w) return true;
+    return false;
+}
+
+int main() {
+    while(cin &gt;&gt; w &gt;&gt; h) {
+        if(w == 0 &amp;&amp; h == 0) break;
+
+        string A[h], B[h];
+        rep(i, h) cin &gt;&gt; A[i] &gt;&gt; B[i];
+        rep(i, h) reverse(B[i].begin(), B[i].end());
+
+        rep(i, h) {
+            rep(j, w) {
+                if(A[i][j] == 'L') {
+                    say = i;
+                    sax = j;
+                    A[i][j] = '.';
+                }
+
+                if(B[i][j] == 'R') {
+                    sby = i;
+                    sbx = j;
+                    B[i][j] = '.';
+                }
+
+                if(A[i][j] == '%') {
+                    gay = i;
+                    gax = j;
+                    A[i][j] = '.';
+                }
+
+                if(B[i][j] == '%') {
+                    gby = i;
+                    gbx = j;
+                    B[i][j] = '.';
+                }
+            }
+        }
+
+        queue&lt;pair&lt; P, P &gt; &gt; que;
+        que.push(mp( mp(say, sax), mp(sby, sbx) ));
+
+        memset(used, 0, sizeof(used));
+        used[say][sax][sby][sbx] = true;
+
+        bool flag = false;
+
+        while(que.size()) {
+            pair&lt;P, P&gt; p = que.front(); que.pop();
+
+            int ay = p.first.first, ax = p.first.second;
+            int by = p.second.first, bx = p.second.second;
+
+            if(ay == gay &amp;&amp; ax == gax &amp;&amp; by == gby &amp;&amp; bx == gbx) {
+                flag = true;
+                break;
+            }
+
+            if((ay == gay &amp;&amp; ax == gax) || (by == gby &amp;&amp; bx == gbx)) {
+                continue;
+            }
+
+            rep(i, 4) {
+                int nay = ay + dy[i];
+                int nax = ax + dx[i];
+
+                int nby = by + dy[i];
+                int nbx = bx + dx[i];
+
+                if(!can(nay, nax) || A[nay][nax] == '#') {
+                    nay -= dy[i];
+                    nax -= dx[i];
+                }
+
+                if(!can(nby, nbx) || B[nby][nbx] == '#') {
+                    nby -= dy[i];
+                    nbx -= dx[i];
+                }
+
+                if(!used[nay][nax][nby][nbx]) {
+                    que.push(mp( mp(nay, nax), mp(nby, nbx) ));
+                    used[nay][nax][nby][nbx] = true;
+                }
+            }
+        }
+
+        if(flag) {
+            cout &lt;&lt; "Yes" &lt;&lt; endl;
+        } else {
+            cout &lt;&lt; "No" &lt;&lt; endl;
+        }
+    }
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[AOJ0558 Cheese]]></title>

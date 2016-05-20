@@ -4,7 +4,7 @@
   <title><![CDATA[Category: aoj-icpc | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/aoj-icpc/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-05-20T23:41:41+09:00</updated>
+  <updated>2016-05-21T03:15:08+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -14,39 +14,587 @@
 
   
   <entry>
+    <title type="html"><![CDATA[AOJ2301 Sleeping Time]]></title>
+    <link href="http://ry0u.github.io/blog/2016/05/21/aoj2301-sleeping-time/"/>
+    <updated>2016-05-21T03:02:32+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/05/21/aoj2301-sleeping-time</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2301">Sleeping Time | Aizu Online Judge</a></h4><p>Miki is a high school student. She has a part time job, so she cannot take enough sleep on weekdays. She wants to take good sleep on holidays, but she doesn't know the best length of sleeping time for her.</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>愚直に <script type="math/tex"> k </script>回のシュミレーションに対して，間違う/間違わないをすると <script type="math/tex"> 2 ^{30} </script>となる．ここで枝刈りを行う．シュミレーションが2分探索みたいな感じなので，一度解区間 <script type="math/tex"> [T-E, T+E] </script>を外れたら，再度解区間に入ることは無いので切って良い．この枝刈りだけで <script type="math/tex"> 04.91s </script>でACが取れた．</p>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int k;
+double p, e, t;
+
+double ans = 0;
+
+void dfs(double l, double r, int cnt, double x) {
+    if(r &lt; t - e) return;
+    if(l &gt; t + e) return;
+
+    double h = (l + r) / 2;
+
+    if(cnt == k) {
+        if(t - e &lt;= h &amp;&amp; h &lt;= t + e) ans += x;
+        return;
+    }
+
+    if(h &gt;= t) {
+        dfs(l, h, cnt + 1, (1.0 - p) * x);
+        dfs(h, r, cnt + 1, p * x);
+    } else {
+        dfs(h, r, cnt + 1, (1.0 - p) * x);
+        dfs(l, h, cnt + 1, p * x);
+    }
+}
+
+int main() {
+    double l, r;
+    cin &gt;&gt; k &gt;&gt; l &gt;&gt; r;
+    cin &gt;&gt; p &gt;&gt; e &gt;&gt; t;
+
+    dfs(l, r, 0, 1.0);
+
+    cout &lt;&lt; fixed;
+    cout.precision(20);
+    cout &lt;&lt; ans &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
+
+<p>しかし，他の人の解答を見てみると<script type="math/tex"> 0.0s </script>ばかりだった．自分の解法は <script type="math/tex"> E </script>が十分小さい時に有効な枝刈りで， <script type="math/tex"> E </script>が大きい場合を考えていなかった． この時は解区間が探索区間を内包しているので，この先解区間を出ることはない．よってその枝刈りを追加すると <script type="math/tex"> 0.0s </script>とめちゃくちゃ早くなった．</p>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int k;
+double p, e, t;
+
+double ans = 0;
+
+void dfs(double l, double r, int cnt, double x) {
+    if(r &lt; t - e) return;
+    if(l &gt; t + e) return;
+    if(t - e &lt;= l &amp;&amp; r &lt;= t + e) {
+        ans += x;
+        return;
+    }
+
+    double h = (l + r) / 2;
+
+    if(cnt == k) {
+        if(t - e &lt;= h &amp;&amp; h &lt;= t + e) ans += x;
+        return;
+    }
+
+    if(h &gt;= t) {
+        dfs(l, h, cnt + 1, (1.0 - p) * x);
+        dfs(h, r, cnt + 1, p * x);
+    } else {
+        dfs(h, r, cnt + 1, (1.0 - p) * x);
+        dfs(l, h, cnt + 1, p * x);
+    }
+}
+
+int main() {
+    double l, r;
+    cin &gt;&gt; k &gt;&gt; l &gt;&gt; r;
+    cin &gt;&gt; p &gt;&gt; e &gt;&gt; t;
+
+    dfs(l, r, 0, 1.0);
+
+    cout &lt;&lt; fixed;
+    cout.precision(20);
+    cout &lt;&lt; ans &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
+
+<p>まとめると，</p>
+
+<ul>
+<li><script type="math/tex"> E </script>が十分小さい時に，解区間から外れた場合の枝刈りが有効</li>
+<li><script type="math/tex"> E </script>が十分大きい時に，解区間が内包する場合の枝刈りが有効</li>
+</ul>
+
+
+<p>となって， <script type="math/tex"> 2 ^{30} </script>にはならないで間に合う．(どのくらい減るのかよく分かっていない)</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ1280 Slim Span]]></title>
+    <link href="http://ry0u.github.io/blog/2016/05/21/aoj1280-slim-span/"/>
+    <updated>2016-05-21T02:41:52+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/05/21/aoj1280-slim-span</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1280">Slim Span</a></h4><p>Given an undirected weighted graph G, you should find one of spanning trees specified as follows. A spanning tree T is a tree (a connected subgraph without cycles) which connects all the n vertices with n - 1 edges.</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>The <script type="math/tex"> slimness </script> of a spanning tree Tは全域木を構成する辺の最大値 <script type="math/tex"> - </script>最小値と定義される．この値の最小値を求める．<br/>
+出来るだけコストが近いものを使った方が良いので，まず使うコストの一番小さいものを決めて，それからコストを増やしていく．全域木が構成出来た時点でのコストのminを取る． <script type="math/tex"> O(nm) </script>．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+struct UnionFind {
+    vector&lt;int&gt; par,rank;
+    int N;
+
+    UnionFind(int n) {
+        N = n;
+        par.resize(n);
+        rank.resize(n);
+
+        rep(i,n) {
+            par[i] = i;
+            rank[i] = 0;
+        }
+    }
+
+    int find(int x) {
+        if(par[x] == x) return x;
+        else return par[x] = find(par[x]);
+    }
+
+    void unite(int x,int y) {
+        x = find(x);
+        y = find(y);
+
+        if(x == y) return;
+
+        if(rank[x] &lt; rank[y]) {
+            par[x] = y;
+        }
+        else {
+            par[y] = x;
+            if(rank[x] == rank[y]) rank[x]++;
+        }
+    }
+
+    bool same(int x,int y) {
+        return find(x) == find(y);
+    }
+
+    int size() {
+        int cnt = 0;
+        rep(i,N) if(find(i) == i) cnt++;
+        return cnt;
+    }
+};
+
+int main() {
+    int n, m;
+
+    while(cin &gt;&gt; n &gt;&gt; m) {
+        if(n == 0 &amp;&amp; m == 0) break;
+
+        vector&lt;int&gt; a(m), b(m), c(m);
+        map&lt;int, vector&lt;P&gt; &gt; es;
+        rep(i, m) {
+            cin &gt;&gt; a[i] &gt;&gt; b[i] &gt;&gt; c[i];
+            a[i]--; b[i]--;
+
+            es[c[i]].push_back(P(a[i], b[i]));
+        }
+
+        int ans = INF;
+
+        REP(i, 1, 10001) {
+            if(es[i].size() == 0) continue;
+            UnionFind uf(n);
+            REP(j, i, 10001) {
+                if(es[j].size() == 0) continue;
+                rep(k, es[j].size()) {
+                    int a = es[j][k].first;
+                    int b = es[j][k].second;
+
+                    if(uf.same(a, b)) continue;
+                    uf.unite(a, b);
+                }
+
+                if(uf.size() == 1) {
+                    ans = min(ans, j - i);
+                    break;
+                }
+            }
+        }
+
+        if(ans == INF) cout &lt;&lt; -1 &lt;&lt; endl;
+        else cout &lt;&lt; ans &lt;&lt; endl;
+    }
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ2153 Mirror Cave]]></title>
+    <link href="http://ry0u.github.io/blog/2016/05/21/aoj2153-mirror-cave/"/>
+    <updated>2016-05-21T02:18:25+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/05/21/aoj2153-mirror-cave</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2153">Mirror Cave | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>状態を<script type="math/tex">(ay, ax, by, bx)</script>として幅優先探索．このようにすれば，片方が移動して片方が壁で立ち止まる場合も表現出来る．左右を逆にするのが面倒だったので，まず最初にLenの方の部屋を反転して，同じ <script type="math/tex"> (dy, dx) </script>を使った．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+#include &lt;queue&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int h, w;
+int sax, say, sbx, sby, gax, gay, gbx, gby;
+int dx[4] = {1,0,-1,0};
+int dy[4] = {0,1,0,-1};
+bool used[55][55][55][55];
+
+bool can(int y, int x) {
+    if(0 &lt;= y &amp;&amp; y &lt; h &amp;&amp; 0 &lt;= x &amp;&amp; x &lt; w) return true;
+    return false;
+}
+
+int main() {
+    while(cin &gt;&gt; w &gt;&gt; h) {
+        if(w == 0 &amp;&amp; h == 0) break;
+
+        string A[h], B[h];
+        rep(i, h) cin &gt;&gt; A[i] &gt;&gt; B[i];
+        rep(i, h) reverse(B[i].begin(), B[i].end());
+
+        rep(i, h) {
+            rep(j, w) {
+                if(A[i][j] == 'L') {
+                    say = i;
+                    sax = j;
+                    A[i][j] = '.';
+                }
+
+                if(B[i][j] == 'R') {
+                    sby = i;
+                    sbx = j;
+                    B[i][j] = '.';
+                }
+
+                if(A[i][j] == '%') {
+                    gay = i;
+                    gax = j;
+                    A[i][j] = '.';
+                }
+
+                if(B[i][j] == '%') {
+                    gby = i;
+                    gbx = j;
+                    B[i][j] = '.';
+                }
+            }
+        }
+
+        queue&lt;pair&lt; P, P &gt; &gt; que;
+        que.push(mp( mp(say, sax), mp(sby, sbx) ));
+
+        memset(used, 0, sizeof(used));
+        used[say][sax][sby][sbx] = true;
+
+        bool flag = false;
+
+        while(que.size()) {
+            pair&lt;P, P&gt; p = que.front(); que.pop();
+
+            int ay = p.first.first, ax = p.first.second;
+            int by = p.second.first, bx = p.second.second;
+
+            if(ay == gay &amp;&amp; ax == gax &amp;&amp; by == gby &amp;&amp; bx == gbx) {
+                flag = true;
+                break;
+            }
+
+            if((ay == gay &amp;&amp; ax == gax) || (by == gby &amp;&amp; bx == gbx)) {
+                continue;
+            }
+
+            rep(i, 4) {
+                int nay = ay + dy[i];
+                int nax = ax + dx[i];
+
+                int nby = by + dy[i];
+                int nbx = bx + dx[i];
+
+                if(!can(nay, nax) || A[nay][nax] == '#') {
+                    nay -= dy[i];
+                    nax -= dx[i];
+                }
+
+                if(!can(nby, nbx) || B[nby][nbx] == '#') {
+                    nby -= dy[i];
+                    nbx -= dx[i];
+                }
+
+                if(!used[nay][nax][nby][nbx]) {
+                    que.push(mp( mp(nay, nax), mp(nby, nbx) ));
+                    used[nay][nax][nby][nbx] = true;
+                }
+            }
+        }
+
+        if(flag) {
+            cout &lt;&lt; "Yes" &lt;&lt; endl;
+        } else {
+            cout &lt;&lt; "No" &lt;&lt; endl;
+        }
+    }
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ1175 And Then. How Many Any There?]]></title>
+    <link href="http://ry0u.github.io/blog/2016/05/21/and-then-how-many-any-there/"/>
+    <updated>2016-05-21T01:35:44+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/05/21/and-then-how-many-any-there</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1175&lang=jp">And Then. How Many Are There? | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>別の円盤が上に無い状態の円盤は同じ色が偶数の場合は全部消し，奇数の場合は <script type="math/tex"> 1 </script>個消さないのを選ぶ，というやり方でやっていたが，消す順番によりそれより多く消せるパターンというのがありこれは間違いだった．<br/>
+選ぶ順番によって消せる枚数が違ってくるので，各状態毎に <script type="math/tex"> (i, j) </script>を列挙して消せるかどうかを調べる． <script type="math/tex"> n </script>は最大で <script type="math/tex"> 4 * 6 = 24 </script>なので，状態数は <script type="math/tex"> 2 ^{24} </script>．intのbitでどの円盤を使ったかを管理した． <script type="math/tex"> O(2 ^n n ^2)  </script>．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+#include &lt;cmath&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+
+struct P {
+    int x, y, r, c;
+
+    P() : x(0), y(0), r(0), c(0) {}
+    P(int x, int y, int r, int c) : x(x), y(y), r(r), c(c) {}
+};
+
+int n, ans;
+vector&lt;P&gt; v;
+set&lt;int&gt; memo;
+
+void dfs(int S) {
+    if(memo.find(S) != memo.end()) return;
+    memo.insert(S);
+
+    ans = max(ans, __builtin_popcount(S));
+    if(ans == n) return;
+
+    bool up[50];
+    memset(up, 0, sizeof(up));
+    for(int i = n-1; i &gt;= 0; i--) {
+        if(S &amp; (1&lt;&lt;i)) continue;
+
+        bool flag = true;
+        for(int j = i-1; j &gt;= 0; j--) {
+            if(S &amp; (1&lt;&lt;j)) continue;
+            int dist = (v[j].x - v[i].x) * (v[j].x - v[i].x) + (v[j].y - v[i].y) * (v[j].y - v[i].y);
+            int len = (v[i].r + v[j].r) * (v[i].r + v[j].r);
+
+            if(dist &lt; len) {
+                flag = false;
+            }
+        }
+
+        if(!flag) up[i] = true;
+    }
+
+    set&lt;int&gt; st[5];
+    for(int i = n-1; i &gt;= 0; i--) {
+        if((S &amp; (1&lt;&lt;i)) || up[i]) continue;
+
+        bool flag = true;
+
+        for(int j = i-1; j &gt;= 0; j--) {
+            if((S &amp; (1&lt;&lt;j)) || up[j]) continue;
+
+            int dist = (v[j].x - v[i].x) * (v[j].x - v[i].x) + (v[j].y - v[i].y) * (v[j].y - v[i].y);
+            int len = (v[i].r + v[j].r) * (v[i].r + v[j].r);
+
+            if(dist &gt;= len &amp;&amp; v[i].c == v[j].c) {
+                dfs(S + (1&lt;&lt;i) + (1&lt;&lt;j));
+            }
+        }
+    }
+}
+
+int main() {
+    while(cin &gt;&gt; n &amp;&amp; n) {
+
+        v.clear();
+        memo.clear();
+
+        rep(i, n) {
+            int x, y, r, c;
+            cin &gt;&gt; x &gt;&gt; y &gt;&gt; r &gt;&gt; c;
+            v.push_back(P(x, y, r, c));
+        }
+
+        vector&lt;bool&gt; used(n);
+        rep(i, n) used[i] = false;
+
+        ans = 0;
+        int S = 0;
+        dfs(S);
+
+        cout &lt;&lt; ans &lt;&lt; endl;
+    }
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[AOJ2005 Water Pipe Construction]]></title>
     <link href="http://ry0u.github.io/blog/2016/05/20/aoj2005-water-pipe-construction/"/>
     <updated>2016-05-20T23:21:05+09:00</updated>
     <id>http://ry0u.github.io/blog/2016/05/20/aoj2005-water-pipe-construction</id>
-    <content type="html"><![CDATA[<p>水源<script type="math/tex"> s </script>から， <script type="math/tex"> 2つの </script>主要な基地 <script type="math/tex"> g_1, g_2 </script>まで水を運ぶための導水管の敷設にかかるコストを最小化する．<br/>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2005">Water Pipe Construction | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>水源<script type="math/tex"> s </script>から， <script type="math/tex"> 2つの </script>主要な基地 <script type="math/tex"> g_1, g_2 </script>まで水を運ぶための導水管の敷設にかかるコストを最小化する．<br/>
 以下の<script type="math/tex"> 3 </script>パターンに分かれる．</p>
 
 <p><img src="/images/AOJ/2005-1.png">
 <img src="/images/AOJ/2005-2.png">
 <img src="/images/AOJ/2005-3.png"></p>
 
-<p>　<script type="math/tex"> n(3 \leq n \leq 100) </script>なのでwarshall-floyd</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[AOJ2401 Equation]]></title>
-    <link href="http://ry0u.github.io/blog/2016/05/20/aoj2401-equation/"/>
-    <updated>2016-05-20T23:12:19+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/05/20/aoj2401-equation</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2401">Equation | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
-
-
-<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
-
-
-
-
-<!-- more -->
-
-
-<p>最初に与えられる文を <script type="math/tex"> = </script>で分けて構文解析して最終的な値を比較する．前回の，構文解析と問題と同様にやる．新しい演算子"->&ldquo;があるが，今見ている文字と次に見る文字を見て，この演算子かどうかをチェックした．<br/>
-等式が恒等式であるかどうか，は <script type="math/tex"> a \sim k </script>までの <script type="math/tex"> T/F </script>の状態を全列挙( <script type="math/tex"> 2 ^11通り </script>)し，それらの場合の値が全て一致しているかどうか，で判断した．</p>
+<p>　<script type="math/tex"> n(3 \leq n \leq 100) </script>なのでwarshall-floydで最短経路を出してこの <script type="math/tex"> 3 </script>パターンのminを取った．<br/>
+経路復元がいるかと思ったけど，いらなかった．もし <script type="math/tex"> s \to g1 \to g2 </script>で <script type="math/tex"> s \to g1 </script>と <script type="math/tex"> g1 \to g2 </script>の通る頂点に重なりがある場合，重複して道を数えているのでそのパターンではなく，パターン <script type="math/tex"> 3 </script>のケースの方が良い．</p>
 
 <h1>Code</h1>
 
@@ -69,453 +617,68 @@ using namespace std;
 typedef long long ll;
 typedef pair&lt;int,int&gt; P;
 
-vector&lt;string&gt; split(const string &amp;str, char delim) {
-    vector&lt;string&gt; res;
-    size_t current = 0, found;
-    while((found = str.find_first_of(delim, current)) != string::npos) {
-        res.push_back(string(str, current, found - current));
-        current = found + 1;
+ll d[105][105];
+int to[105][105];
+
+void warshall_floyd(int n, int m) {
+    rep(i, n) rep(j, n) d[i][j] = INF;
+    rep(i, n) d[i][i] = 0;
+
+    rep(i, n) rep(j, n) to[i][j] = j;
+
+    //input
+    rep(i, m) {
+        int a, b, c;
+        cin &gt;&gt; a &gt;&gt; b &gt;&gt; c;
+
+        a--; b--;
+        d[a][b] = c;
+        // d[b][a] = c;
     }
-    res.push_back(string(str, current, str.size() - current));
-    return res;
-}
 
-int formula(string&amp; s, int&amp; i) {
-    if(s[i] == '(') {
-        i++;
-        int val = formula(s, i);
-
-        char op = s[i];
-        if(s[i] == '-' &amp;&amp; s[i+1] == '&gt;') {
-            i++;
-            op = s[i];
+    rep(k,n) {
+        rep(i,n) {
+            rep(j,n) {
+                if(d[i][k] == INF || d[k][j] == INF) continue;
+                if(d[i][j] &gt; d[i][k] + d[k][j]) {
+                    d[i][j] = d[i][k] + d[k][j];
+                    to[i][j] = to[i][k];
+                }
+            }
         }
-
-        i++;
-        int val2 = formula(s, i);
-
-        int ret = 0;
-        if(op == '+') {
-            if(val || val2) ret = 1;
-            else ret = 0;
-        } else if(op == '*') {
-            if(val &amp;&amp; val2) ret = 1;
-            else ret = 0;
-        } else if(op == '&gt;') {
-            if(!val) ret = 1;
-            else if(val2) ret = 1;
-            else ret = 0;
-        }
-
-        i++;
-        return ret;
-    } else if(isdigit(s[i])) {
-        int ret = s[i] - '0';
-        i++;
-        return ret;
-    } else if(s[i] == '-') {
-        i++;
-        int ret = formula(s, i);
-
-        if(ret == 0) return 1;
-        else return 0;
     }
 }
 
-bool used[30];
+vector&lt;int&gt; path(int s, int g) {
+    int cur = s;
+    vector&lt;int&gt; ret;
+    for(; cur != g; cur = to[cur][g]) {
+        ret.push_back(cur);
+    }
+
+    ret.push_back(g);
+    return ret;
+}
 
 int main() {
-    string s;
+    int n, m, s, g1, g2;
+    while(cin &gt;&gt; n &gt;&gt; m &gt;&gt; s &gt;&gt; g1 &gt;&gt; g2) {
+        if(n == 0 &amp;&amp; m == 0 &amp;&amp; s == 0 &amp;&amp; g1 == 0 &amp;&amp; g2 == 0) break;
 
-    while(cin &gt;&gt; s) {
-        if(s == "#") break;
+        s--; g1--; g2--;
+        warshall_floyd(n, m);
 
-        vector&lt;string&gt; ret = split(s, '=');
-        string s1 = ret[0];
-        string s2 = ret[1];
-
-        bool flag = true;
-
-        rep(i, 1&lt;&lt;11) {
-            memset(used, 0, sizeof(used));
-            rep(j, 11) {
-                if(i &amp; (1&lt;&lt;j)) used[j] = true;
-            }
-
-            string t1 = s1, t2 = s2;
-            rep(j, t1.size()) {
-                if('a' &lt;= t1[j] &amp;&amp; t1[j] &lt;= 'k') {
-                    if(used[t1[j] - 'a']) t1[j] = 'T';
-                    else t1[j] = 'F';
-                }
-
-                if(t1[j] == 'T') t1[j] = '1';
-                if(t1[j] == 'F') t1[j] = '0';
-            }
-
-            rep(j, t2.size()) {
-                if('a' &lt;= t2[j] &amp;&amp; t2[j] &lt;= 'k') {
-                    if(used[t2[j] - 'a']) t2[j] = 'T';
-                    else t2[j] = 'F';
-                }
-
-                if(t2[j] == 'T') t2[j] = '1';
-                if(t2[j] == 'F') t2[j] = '0';
-            }
-
-            int j = 0, k = 0;
-            int f1 = formula(t1, j);
-            int f2 = formula(t2, k);
-
-            if(f1 == f2) continue;
-
-            flag = false;
-            break;
+        ll ans = INF;
+        rep(i, n) {
+            ans = min(ans, d[s][i] + d[i][g1] + d[i][g2]);
         }
 
-        if(flag) cout &lt;&lt; "YES" &lt;&lt; endl;
-        else cout &lt;&lt; "NO" &lt;&lt; endl;
-    }
-
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[AOJ1155 How can I satisfy thee? Let me count the ways...]]></title>
-    <link href="http://ry0u.github.io/blog/2016/05/20/how-can-i-satisfy-thee-let-me-count-the-ways-dot-dot-dot/"/>
-    <updated>2016-05-20T22:38:10+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/05/20/how-can-i-satisfy-thee-let-me-count-the-ways-dot-dot-dot</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-image="http://judge.u-aizu.ac.jp/onlinejudge/IMAGE1/2008C2.png" data-card-type="article"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1155&lang=jp">How can I satisfy thee? Let me count the ways... | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
-
-
-<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
-
-
-
-
-<!-- more -->
-
-
-<p>構文解析．
-<script type="math/tex; mode=display">
-\begin{eqnarray}
-<formula>\ &amp;::=&amp;\ 0\ or\ 1\ or\ 2 \
-<formula>\ &amp;::=&amp;\ -<formula> \
-<formula>\ &amp;::=&amp;\ (<formula>\ +\ or\ * <formula>) \
-\end{eqnarray}
-</script>
-の場合に分けて考える．入れ子の括弧にどう対応させるかよく分からなかったが，自分なりに理解することができた．構文解析の関数が出来たら，<script type="math/tex"> (P, Q, R) </script>の組み合わせ(<script type="math/tex"> 2 ^3 </script>通り)を全列挙して， <script type="math/tex"> 2 </script>となる個数を数える．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-int formula(string&amp; s, int&amp; i) {
-    if(s[i] == '(') {
-        i++;
-        int val = formula(s, i);
-
-        char op = s[i];
-
-        i++;
-        int val2 = formula(s, i);
-
-        int ret = 0;
-        if(op == '+') {
-            if(val == 2 || val2 == 2) ret = 2;
-            else if(val == 1 || val2 == 1) ret = 1;
-            else ret = 0;
-        }
-        if(op == '*') {
-            if(val == 2 &amp;&amp; val2 == 2) ret = 2;
-            else if((val == 1 || val == 2) &amp;&amp; (val2 == 1 || val2 == 2)) ret = 1;
-            else ret = 0;
-        }
-
-        i++;
-        return ret;
-    } else if(isdigit(s[i])) {
-        int ret = (s[i] - '0');
-        i++;
-        return ret;
-    } else if(s[i] == '-') {
-        i++;
-        int val = formula(s, i);
-
-        int ret = 0;
-        if(val == 0) ret = 2;
-        if(val == 1) ret = 1;
-        if(val == 2) ret = 0;
-
-        return ret;
-    }
-}
-
-
-int main() {
-    string s;
-    while(cin &gt;&gt; s) {
-        if(s == ".") break;
-
-        int ans = 0;
-        rep(i, 3) {
-            rep(j, 3) {
-                rep(k, 3) {
-                    string t = s;
-                    rep(l, s.size()) {
-                        if(t[l] == 'P') t[l] = ('0' + i);
-                        else if(t[l] == 'Q') t[l] = ('0' + j);
-                        else if(t[l] == 'R') t[l] = ('0' + k);
-                    }
-
-                    int p = 0;
-                    if(formula(t, p) == 2) {
-                        ans++;
-                    }
-                }
-            }
-        }
+        ans = min(ans, d[s][g1] + d[g1][g2]);
+        ans = min(ans, d[s][g2] + d[g2][g1]);
 
         cout &lt;&lt; ans &lt;&lt; endl;
     }
 
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[AOJ2331 A Way to Invite Friends]]></title>
-    <link href="http://ry0u.github.io/blog/2016/05/14/aoj2331-a-way-to-invite-friends/"/>
-    <updated>2016-05-14T23:45:52+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/05/14/aoj2331-a-way-to-invite-friends</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2331">A Way to Invite Friends | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
-
-
-<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
-
-
-
-
-<!-- more -->
-
-
-<p>各友だちの，嫌がらない海に行く人数の範囲( <script type="math/tex"> a_i 〜 b_i </script>)が与えられる．海に誘える最大人数を求める．<br/>
-海に行く人数には「わたし」も含まれるので <script type="math/tex"> i </script>人誘えるかは， <script type="math/tex"> i+1 </script>人で海に行くことを嫌がらない友だちの数が <script type="math/tex"> i </script>人以上いるか，となるのでいもす法で累積和を取って順番に見ていった．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-int main() {
-    int n;
-    cin &gt;&gt; n;
-
-    int imos[100005];
-    memset(imos, 0, sizeof(imos));
-
-    rep(i, n) {
-        int a, b;
-        cin &gt;&gt; a &gt;&gt; b;
-
-        imos[a]++;
-        imos[b+1]--;
-    }
-
-    REP(i, 1, 100005) {
-        imos[i] += imos[i-1];
-    }
-
-    int ans = 0;
-    rep(i, 100005) {
-        if(imos[i+1] &gt;= i) {
-            ans = i;
-        }
-    }
-
-    cout &lt;&lt; ans &lt;&lt; endl;
-
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[AOJ1174 Identically Colored Panels Connection]]></title>
-    <link href="http://ry0u.github.io/blog/2016/04/18/aoj1174-identically-colored-panels-connection/"/>
-    <updated>2016-04-18T23:00:29+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/04/18/aoj1174-identically-colored-panels-connection</id>
-    <content type="html"><![CDATA[<p><a class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article" href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1174">Identically Colored Panels Connection</a></p>
-
-<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
-
-
-
-
-<!-- more -->
-
-
-<p>塗る色を決めて順番に塗っていく． それぞれ</p>
-
-<ul>
-<li><script type="math/tex"> rec </script> : 始点から探索して<script type="math/tex"> c </script>と同じパネルが何色あるか</li>
-<li><script type="math/tex"> dfs </script> : 始点から探索して<script type="math/tex"> target </script>の色を <script type="math/tex"> change </script>にする．</li>
-<li><script type="math/tex"> func </script> : <script type="math/tex"> i </script>回塗った状態． 最終的に<script type="math/tex"> 5 </script>回塗った回数を答えるが，最後に <script type="math/tex"> c </script>に塗り替えた場合なので，<script type="math/tex"> 4 </script>回塗った後に <script type="math/tex"> c </script>に塗って <script type="math/tex"> rec </script>を呼ぶ．</li>
-</ul>
-
-
-<blockquote><p>ただし，電極は左上角のパネルに固定されていることとする．</p></blockquote>
-
-<p>の文を見逃していて，塗り始める場所を全探索していてSampleがずっと合わなかった&hellip;<br/>
-全体的に辛い</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-int h, w, c;
-int dx[4] = {1,0,-1,0};
-int dy[4] = {0,1,0,-1};
-
-bool can(int y,int x) {
-    if(0 &lt;= y &amp;&amp; y &lt; h &amp;&amp; 0 &lt;= x &amp;&amp; x &lt; w) return true;
-    return false;
-}
-
-int cnt = 0, sy = 0, sx = 0;
-bool used[10][10];
-vector&lt; vector&lt;int&gt; &gt; v;
-
-void rec(int y, int x) {
-    used[y][x] = true;
-    cnt++;
-
-    rep(i, 4) {
-        int ny = y + dy[i];
-        int nx = x + dx[i];
-
-        if(can(ny, nx) &amp;&amp; !used[ny][nx] &amp;&amp; v[ny][nx] == c) {
-            rec(ny, nx);
-        }
-    }
-}
-
-int target, change;
-
-void dfs(int y, int x) {
-    v[y][x] = change;
-    rep(i, 4) {
-        int ny = y + dy[i];
-        int nx = x + dx[i];
-
-        if(can(ny, nx) &amp;&amp; v[ny][nx] == target) {
-            dfs(ny, nx);
-        }
-    }
-}
-
-int ans = 0;
-void func(vector&lt; vector&lt;int&gt; &gt; t, int id) {
-    // cout &lt;&lt; " ------ func ---- :" &lt;&lt; id &lt;&lt; endl;
-    // rep(i, h) {
-    //  rep(j, w) cout &lt;&lt; t[i][j] &lt;&lt; " ";
-    //  cout &lt;&lt; endl;
-    // }
-    if(id == 4) {
-        v = t;
-        target = t[sy][sx];
-
-        if(target == c) return;
-        change = c;
-        dfs(sy, sx);
-
-        cnt = 0;
-        memset(used, 0, sizeof(used));
-        rec(sy, sx);
-        ans = max(ans, cnt);
-        return;
-    }
-
-    REP(i, 1, 7) {
-        if(i == t[sy][sx]) continue;
-        v = t;
-        target = t[sy][sx]; change = i;
-        dfs(sy, sx);
-        func(v, id + 1);
-    }
-}
-
-int main() {
-    while(cin &gt;&gt; h &gt;&gt; w &gt;&gt; c) {
-        if(h == 0 &amp;&amp; w == 0 &amp;&amp; c == 0) break;
-
-        v.resize(h);
-        rep(i, h) {
-            v[i].resize(w);
-            rep(j, w) cin &gt;&gt; v[i][j];
-        }
-
-        ans = 0;
-        func(v, 0);
-
-        cout &lt;&lt; ans &lt;&lt; endl;
-    }
     return 0;
 }
 </code></pre>

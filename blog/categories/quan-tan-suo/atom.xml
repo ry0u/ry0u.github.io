@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 全探索 | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/quan-tan-suo/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-05-20T23:41:41+09:00</updated>
+  <updated>2016-05-21T03:15:08+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,130 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ1175 And Then. How Many Any There?]]></title>
+    <link href="http://ry0u.github.io/blog/2016/05/21/and-then-how-many-any-there/"/>
+    <updated>2016-05-21T01:35:44+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/05/21/and-then-how-many-any-there</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1175&lang=jp">And Then. How Many Are There? | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>別の円盤が上に無い状態の円盤は同じ色が偶数の場合は全部消し，奇数の場合は <script type="math/tex"> 1 </script>個消さないのを選ぶ，というやり方でやっていたが，消す順番によりそれより多く消せるパターンというのがありこれは間違いだった．<br/>
+選ぶ順番によって消せる枚数が違ってくるので，各状態毎に <script type="math/tex"> (i, j) </script>を列挙して消せるかどうかを調べる． <script type="math/tex"> n </script>は最大で <script type="math/tex"> 4 * 6 = 24 </script>なので，状態数は <script type="math/tex"> 2 ^{24} </script>．intのbitでどの円盤を使ったかを管理した． <script type="math/tex"> O(2 ^n n ^2)  </script>．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+#include &lt;cmath&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+
+struct P {
+    int x, y, r, c;
+
+    P() : x(0), y(0), r(0), c(0) {}
+    P(int x, int y, int r, int c) : x(x), y(y), r(r), c(c) {}
+};
+
+int n, ans;
+vector&lt;P&gt; v;
+set&lt;int&gt; memo;
+
+void dfs(int S) {
+    if(memo.find(S) != memo.end()) return;
+    memo.insert(S);
+
+    ans = max(ans, __builtin_popcount(S));
+    if(ans == n) return;
+
+    bool up[50];
+    memset(up, 0, sizeof(up));
+    for(int i = n-1; i &gt;= 0; i--) {
+        if(S &amp; (1&lt;&lt;i)) continue;
+
+        bool flag = true;
+        for(int j = i-1; j &gt;= 0; j--) {
+            if(S &amp; (1&lt;&lt;j)) continue;
+            int dist = (v[j].x - v[i].x) * (v[j].x - v[i].x) + (v[j].y - v[i].y) * (v[j].y - v[i].y);
+            int len = (v[i].r + v[j].r) * (v[i].r + v[j].r);
+
+            if(dist &lt; len) {
+                flag = false;
+            }
+        }
+
+        if(!flag) up[i] = true;
+    }
+
+    set&lt;int&gt; st[5];
+    for(int i = n-1; i &gt;= 0; i--) {
+        if((S &amp; (1&lt;&lt;i)) || up[i]) continue;
+
+        bool flag = true;
+
+        for(int j = i-1; j &gt;= 0; j--) {
+            if((S &amp; (1&lt;&lt;j)) || up[j]) continue;
+
+            int dist = (v[j].x - v[i].x) * (v[j].x - v[i].x) + (v[j].y - v[i].y) * (v[j].y - v[i].y);
+            int len = (v[i].r + v[j].r) * (v[i].r + v[j].r);
+
+            if(dist &gt;= len &amp;&amp; v[i].c == v[j].c) {
+                dfs(S + (1&lt;&lt;i) + (1&lt;&lt;j));
+            }
+        }
+    }
+}
+
+int main() {
+    while(cin &gt;&gt; n &amp;&amp; n) {
+
+        v.clear();
+        memo.clear();
+
+        rep(i, n) {
+            int x, y, r, c;
+            cin &gt;&gt; x &gt;&gt; y &gt;&gt; r &gt;&gt; c;
+            v.push_back(P(x, y, r, c));
+        }
+
+        vector&lt;bool&gt; used(n);
+        rep(i, n) used[i] = false;
+
+        ans = 0;
+        int S = 0;
+        dfs(S);
+
+        cout &lt;&lt; ans &lt;&lt; endl;
+    }
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Codeforces353-div2B Restoring Painting]]></title>
@@ -389,97 +513,6 @@ int main() {
 
         cout &lt;&lt; ans.size() &lt;&lt; endl;
     }
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[yukicoder No.77 レンガのピラミッド]]></title>
-    <link href="http://ry0u.github.io/blog/2015/09/03/yukicoder-no-dot-77-rengafalsepiramitudo/"/>
-    <updated>2015-09-03T21:06:33+09:00</updated>
-    <id>http://ry0u.github.io/blog/2015/09/03/yukicoder-no-dot-77-rengafalsepiramitudo</id>
-    <content type="html"><![CDATA[<p><a href="http://yukicoder.me/problems/186">http://yukicoder.me/problems/186</a></p>
-
-<h1>考察</h1>
-
-<p>移動とは</p>
-
-<blockquote><p>任意の列の一番上にある1つのレンガを持ち，別の列に移動するか，もしくは捨て置き場に移動すること．</p></blockquote>
-
-<p>なので，ピラミッドの長さを決めたら，それに対応する長さとのdiffを取る．もし超えている部分のほうが大きくても捨て置き場に置けばよいので，長さを決め打ちすれば，その長さにするための移動数が求まる．ピラミッドの長さはNよりも大きくてもよいので(特に考えず出してWAを生やした)，十分な回数まで調べた．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-vector&lt;int&gt; init(int n) {
-    vector&lt;int&gt; ret;
-    rep(i,n/2) {
-        ret.push_back(i+1);
-    }
-    ret.push_back(n/2+1);
-    for(int i=n/2; i&gt;0; i--) {
-        ret.push_back(i);
-    }
-    return ret;
-}
-
-int main() {
-    int n;
-    cin &gt;&gt; n;
-
-    vector&lt;int&gt; v(1005);
-    rep(i,n) cin &gt;&gt; v[i];
-
-    int ans = INF;
-
-    REP(size,1,1005) {
-        if(size % 2 == 0) continue;
-        vector&lt;int&gt; t = init(size);
-
-        rep(i,n) {
-            int a = 0, b = 0;
-
-            rep(j,i) a += v[j];
-
-            REP(j,i,size) {
-                if(v[j] &gt; t[j-i]) {
-                    a += v[j] - t[j-i];
-                }
-                if(v[j] &lt; t[j-i]) {
-                    b += t[j-i] - v[j];
-                }
-            }
-
-            REP(j,size,n) a += v[j];
-
-            if(a &gt;= b) {
-                ans = min(ans,a);
-            }
-        }
-    }
-
-    cout &lt;&lt; ans &lt;&lt; endl;
-
     return 0;
 }
 </code></pre>

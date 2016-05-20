@@ -4,7 +4,7 @@
   <title><![CDATA[Category: グラフ | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/gurahu/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-05-20T23:41:41+09:00</updated>
+  <updated>2016-05-21T03:15:08+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -14,18 +14,250 @@
 
   
   <entry>
+    <title type="html"><![CDATA[AOJ1280 Slim Span]]></title>
+    <link href="http://ry0u.github.io/blog/2016/05/21/aoj1280-slim-span/"/>
+    <updated>2016-05-21T02:41:52+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/05/21/aoj1280-slim-span</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1280">Slim Span</a></h4><p>Given an undirected weighted graph G, you should find one of spanning trees specified as follows. A spanning tree T is a tree (a connected subgraph without cycles) which connects all the n vertices with n - 1 edges.</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>The <script type="math/tex"> slimness </script> of a spanning tree Tは全域木を構成する辺の最大値 <script type="math/tex"> - </script>最小値と定義される．この値の最小値を求める．<br/>
+出来るだけコストが近いものを使った方が良いので，まず使うコストの一番小さいものを決めて，それからコストを増やしていく．全域木が構成出来た時点でのコストのminを取る． <script type="math/tex"> O(nm) </script>．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+struct UnionFind {
+    vector&lt;int&gt; par,rank;
+    int N;
+
+    UnionFind(int n) {
+        N = n;
+        par.resize(n);
+        rank.resize(n);
+
+        rep(i,n) {
+            par[i] = i;
+            rank[i] = 0;
+        }
+    }
+
+    int find(int x) {
+        if(par[x] == x) return x;
+        else return par[x] = find(par[x]);
+    }
+
+    void unite(int x,int y) {
+        x = find(x);
+        y = find(y);
+
+        if(x == y) return;
+
+        if(rank[x] &lt; rank[y]) {
+            par[x] = y;
+        }
+        else {
+            par[y] = x;
+            if(rank[x] == rank[y]) rank[x]++;
+        }
+    }
+
+    bool same(int x,int y) {
+        return find(x) == find(y);
+    }
+
+    int size() {
+        int cnt = 0;
+        rep(i,N) if(find(i) == i) cnt++;
+        return cnt;
+    }
+};
+
+int main() {
+    int n, m;
+
+    while(cin &gt;&gt; n &gt;&gt; m) {
+        if(n == 0 &amp;&amp; m == 0) break;
+
+        vector&lt;int&gt; a(m), b(m), c(m);
+        map&lt;int, vector&lt;P&gt; &gt; es;
+        rep(i, m) {
+            cin &gt;&gt; a[i] &gt;&gt; b[i] &gt;&gt; c[i];
+            a[i]--; b[i]--;
+
+            es[c[i]].push_back(P(a[i], b[i]));
+        }
+
+        int ans = INF;
+
+        REP(i, 1, 10001) {
+            if(es[i].size() == 0) continue;
+            UnionFind uf(n);
+            REP(j, i, 10001) {
+                if(es[j].size() == 0) continue;
+                rep(k, es[j].size()) {
+                    int a = es[j][k].first;
+                    int b = es[j][k].second;
+
+                    if(uf.same(a, b)) continue;
+                    uf.unite(a, b);
+                }
+
+                if(uf.size() == 1) {
+                    ans = min(ans, j - i);
+                    break;
+                }
+            }
+        }
+
+        if(ans == INF) cout &lt;&lt; -1 &lt;&lt; endl;
+        else cout &lt;&lt; ans &lt;&lt; endl;
+    }
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[AOJ2005 Water Pipe Construction]]></title>
     <link href="http://ry0u.github.io/blog/2016/05/20/aoj2005-water-pipe-construction/"/>
     <updated>2016-05-20T23:21:05+09:00</updated>
     <id>http://ry0u.github.io/blog/2016/05/20/aoj2005-water-pipe-construction</id>
-    <content type="html"><![CDATA[<p>水源<script type="math/tex"> s </script>から， <script type="math/tex"> 2つの </script>主要な基地 <script type="math/tex"> g_1, g_2 </script>まで水を運ぶための導水管の敷設にかかるコストを最小化する．<br/>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2005">Water Pipe Construction | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>水源<script type="math/tex"> s </script>から， <script type="math/tex"> 2つの </script>主要な基地 <script type="math/tex"> g_1, g_2 </script>まで水を運ぶための導水管の敷設にかかるコストを最小化する．<br/>
 以下の<script type="math/tex"> 3 </script>パターンに分かれる．</p>
 
 <p><img src="/images/AOJ/2005-1.png">
 <img src="/images/AOJ/2005-2.png">
 <img src="/images/AOJ/2005-3.png"></p>
 
-<p>　<script type="math/tex"> n(3 \leq n \leq 100) </script>なのでwarshall-floyd</p>
+<p>　<script type="math/tex"> n(3 \leq n \leq 100) </script>なのでwarshall-floydで最短経路を出してこの <script type="math/tex"> 3 </script>パターンのminを取った．<br/>
+経路復元がいるかと思ったけど，いらなかった．もし <script type="math/tex"> s \to g1 \to g2 </script>で <script type="math/tex"> s \to g1 </script>と <script type="math/tex"> g1 \to g2 </script>の通る頂点に重なりがある場合，重複して道を数えているのでそのパターンではなく，パターン <script type="math/tex"> 3 </script>のケースの方が良い．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+ll d[105][105];
+int to[105][105];
+
+void warshall_floyd(int n, int m) {
+    rep(i, n) rep(j, n) d[i][j] = INF;
+    rep(i, n) d[i][i] = 0;
+
+    rep(i, n) rep(j, n) to[i][j] = j;
+
+    //input
+    rep(i, m) {
+        int a, b, c;
+        cin &gt;&gt; a &gt;&gt; b &gt;&gt; c;
+
+        a--; b--;
+        d[a][b] = c;
+        // d[b][a] = c;
+    }
+
+    rep(k,n) {
+        rep(i,n) {
+            rep(j,n) {
+                if(d[i][k] == INF || d[k][j] == INF) continue;
+                if(d[i][j] &gt; d[i][k] + d[k][j]) {
+                    d[i][j] = d[i][k] + d[k][j];
+                    to[i][j] = to[i][k];
+                }
+            }
+        }
+    }
+}
+
+vector&lt;int&gt; path(int s, int g) {
+    int cur = s;
+    vector&lt;int&gt; ret;
+    for(; cur != g; cur = to[cur][g]) {
+        ret.push_back(cur);
+    }
+
+    ret.push_back(g);
+    return ret;
+}
+
+int main() {
+    int n, m, s, g1, g2;
+    while(cin &gt;&gt; n &gt;&gt; m &gt;&gt; s &gt;&gt; g1 &gt;&gt; g2) {
+        if(n == 0 &amp;&amp; m == 0 &amp;&amp; s == 0 &amp;&amp; g1 == 0 &amp;&amp; g2 == 0) break;
+
+        s--; g1--; g2--;
+        warshall_floyd(n, m);
+
+        ll ans = INF;
+        rep(i, n) {
+            ans = min(ans, d[s][i] + d[i][g1] + d[i][g2]);
+        }
+
+        ans = min(ans, d[s][g1] + d[g1][g2]);
+        ans = min(ans, d[s][g2] + d[g2][g1]);
+
+        cout &lt;&lt; ans &lt;&lt; endl;
+    }
+
+    return 0;
+}
+</code></pre>
 ]]></content>
   </entry>
   
@@ -497,142 +729,6 @@ int main() {
 
     cout &lt;&lt; ans &lt;&lt; endl;
 
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[AOJ2021 Princess in Danger]]></title>
-    <link href="http://ry0u.github.io/blog/2016/03/23/aoj2021-princess-in-danger/"/>
-    <updated>2016-03-23T19:48:34+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/03/23/aoj2021-princess-in-danger</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2021">Princess in Danger | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
-
-
-<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
-
-
-
-
-<!-- more -->
-
-
-<p>状態を <script type="math/tex"> (cost, 残り時間, 番号) </script>としてdijkstra．現在の状態の残り時間のほうが辺のコストより大きい時に，次の町に行くことが可能．冷凍施設にいるときは， 現在の残り時間から<script type="math/tex"> M </script>まで回復出来るので <script type="math/tex"> 1 </script>分ずつ試す．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-#include &lt;queue&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-typedef pair&lt;P, int&gt; PI;
-typedef pair&lt;P, P &gt; PP;
-
-struct edge {
-    int from,to;
-    int cost;
-
-    edge(int t,int c) : to(t),cost(c) {}
-    edge(int f,int t,int c) : from(f),to(t),cost(c) {}
-
-    bool operator&lt;(const edge &amp;e) const {
-        return cost &lt; e.cost;
-    }
-};
-
-int n, m, l, k, a, h;
-vector&lt;edge&gt; G[105];
-int d[105][105];
-bool L[105];
-
-void dijkstra(int s) {
-    priority_queue&lt;PI, vector&lt;PI&gt;, greater&lt;PI&gt; &gt; que;
-    rep(i, 105) {
-        rep(j, 105) {
-            d[i][j] = INF;
-        }
-    }
-
-    d[s][m] = 0;
-    que.push(PI(P(0, m), s));
-
-    while(que.size()) {
-        PI p = que.top();
-        que.pop();
-
-        int cost = p.first.first;
-        int t = p.first.second;
-        int v = p.second;
-        if(d[v][t] &lt; cost) continue;
-
-        if(L[v]) {
-            REP(i, t+1, m+1) {
-                if(d[v][i] &gt; d[v][t] + (i - t)) {
-                    d[v][i] = d[v][t] + (i - t);
-                    que.push(PI(P(d[v][i], i), v) );
-                }
-            }
-        }
-
-        rep(i, G[v].size()) {
-            edge e = G[v][i];
-            int nt = t - e.cost;
-            if(nt &gt;= 0 &amp;&amp; d[e.to][nt] &gt; d[v][t] + e.cost) {
-                d[e.to][nt] = d[v][t] + e.cost;
-                que.push(PI(P(d[e.to][nt], nt), e.to));
-            }
-        }
-    }
-}
-
-
-int main() {
-    while(cin &gt;&gt; n &gt;&gt; m &gt;&gt; l &gt;&gt; k &gt;&gt; a &gt;&gt; h) {
-        if(n == 0 &amp;&amp; m == 0 &amp;&amp; l == 0 &amp;&amp; k == 0 &amp;&amp; a == 0 &amp;&amp; h == 0) break;
-
-        rep(i, 105) G[i].clear();
-        memset(L, 0, sizeof(L));
-
-        rep(i, l) {
-            int x;
-            cin &gt;&gt; x;
-            L[x] = true;
-        }
-
-        rep(i, k) {
-            int s, t, c;
-            cin &gt;&gt; s &gt;&gt; t &gt;&gt; c;
-            G[s].push_back(edge(t, c));
-            G[t].push_back(edge(s, c));
-        }
-
-        dijkstra(a);
-
-        int ans = INF;
-        rep(i, m + 1) {
-            ans = min(ans, d[h][i]);
-        }
-
-        if(ans == INF) cout &lt;&lt; "Help!" &lt;&lt; endl;
-        else cout &lt;&lt; ans &lt;&lt; endl;
-    }
     return 0;
 }
 </code></pre>
