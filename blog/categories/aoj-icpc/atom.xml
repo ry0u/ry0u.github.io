@@ -4,7 +4,7 @@
   <title><![CDATA[Category: aoj-icpc | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/aoj-icpc/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-05-21T03:15:08+09:00</updated>
+  <updated>2016-05-22T23:57:58+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,165 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ2320 Infinity Maze]]></title>
+    <link href="http://ry0u.github.io/blog/2016/05/22/aoj2320-infinity-maze/"/>
+    <updated>2016-05-22T23:54:24+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/05/22/aoj2320-infinity-maze</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2320">Infinity Maze</a></h4><p>Dr. Fukuoka has placed a simple robot in a two-dimensional maze. It moves within the maze and never goes out of the maze as there is no exit. The maze is made up of H × W grid cells as depicted below. The upper side of the maze faces north.</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>向いてる方向に一歩進む．進めない場合は進めるまで<script type="math/tex"> 90 </script>度回転して進む．この行動をL( <script type="math/tex"> 1 \leq L \leq 10 ^18) </script>)回行った時に最終的にはどこにどの向きでいるか．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int h, w;
+int sy, sx, dir;
+int dx[4] = {1, 0, -1, 0};
+int dy[4] = {0, 1, 0, -1};
+char dd[4] = {'E', 'S', 'W', 'N'};
+
+bool can(int y, int x) {
+    if(0 &lt;= y &amp;&amp; y &lt; h &amp;&amp; 0 &lt;= x &amp;&amp; x &lt; w) return true;
+    return false;
+}
+
+int main() {
+    ll l;
+    while(cin &gt;&gt; h &gt;&gt; w &gt;&gt; l) {
+        if(h == 0 &amp;&amp; w == 0 &amp;&amp; l == 0) break;
+
+        vector&lt;string&gt; v(h);
+        rep(i, h) cin &gt;&gt; v[i];
+
+        rep(i, h) {
+            rep(j, w) {
+                if(v[i][j] == 'E') {
+                    sy = i; sx = j;
+                    dir = 0;
+                    v[i][j] = '.';
+                }
+                else if(v[i][j] == 'S') {
+                    sy = i; sx = j;
+                    dir = 1;
+                    v[i][j] = '.';
+                }
+                else if(v[i][j] == 'W') {
+                    sy = i; sx = j;
+                    dir = 2;
+                    v[i][j] = '.';
+                }
+                else if(v[i][j] == 'N') {
+                    sy = i; sx = j;
+                    dir = 3;
+                    v[i][j] = '.';
+                }
+            }
+        }
+
+        ll d[105][105][4];
+        memset(d, -1, sizeof(d));
+
+        vector&lt;int&gt; X, Y, D;
+        int y = sy, x = sx, cnt = 0;
+
+        rep(i, 4) {
+            int ny = y + dy[(dir + i) % 4];
+            int nx = x + dx[(dir + i) % 4];
+
+            if(can(ny, nx) &amp;&amp; v[ny][nx] == '.') {
+                dir = (dir + i) % 4;
+                break;
+            }
+        }
+
+        int pdir = dir;
+        d[y][x][dir] = cnt;
+        cnt++;
+
+        while(l) {
+            y = y + dy[dir];
+            x = x + dx[dir];
+            pdir = dir;
+            l--;
+
+            rep(i, 4) {
+                int ny = y + dy[(dir + i) % 4];
+                int nx = x + dx[(dir + i) % 4];
+
+                if(can(ny, nx) &amp;&amp; v[ny][nx] == '.') {
+                    dir = (dir + i) % 4;
+                    break;
+                }
+            }
+
+            if(d[y][x][dir] == -1) {
+                d[y][x][dir] = cnt;
+                cnt++;
+            } else {
+                break;
+            }
+        }
+
+        if(l == 0) {
+            cout &lt;&lt; y + 1 &lt;&lt; " " &lt;&lt; x + 1 &lt;&lt; " " &lt;&lt; dd[pdir] &lt;&lt; endl;
+            continue;
+        }
+
+        ll len = cnt - d[y][x][dir];
+        l = l % len;
+        dir = pdir;
+
+        rep(i, l) {
+            rep(j, 4) {
+                int ny = y + dy[(dir + j) % 4];
+                int nx = x + dx[(dir + j) % 4];
+
+                if(can(ny, nx) &amp;&amp; v[ny][nx] == '.') {
+                    y = ny; x = nx;
+                    dir = (dir + j) % 4;
+                    break;
+                }
+            }
+        }
+
+        cout &lt;&lt; y + 1 &lt;&lt; " " &lt;&lt; x + 1 &lt;&lt; " " &lt;&lt; dd[dir] &lt;&lt; endl;
+    }
+
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[AOJ2301 Sleeping Time]]></title>
@@ -560,121 +719,6 @@ int main() {
         ans = 0;
         int S = 0;
         dfs(S);
-
-        cout &lt;&lt; ans &lt;&lt; endl;
-    }
-
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[AOJ2005 Water Pipe Construction]]></title>
-    <link href="http://ry0u.github.io/blog/2016/05/20/aoj2005-water-pipe-construction/"/>
-    <updated>2016-05-20T23:21:05+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/05/20/aoj2005-water-pipe-construction</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2005">Water Pipe Construction | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
-
-
-<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
-
-
-
-
-<!-- more -->
-
-
-<p>水源<script type="math/tex"> s </script>から， <script type="math/tex"> 2つの </script>主要な基地 <script type="math/tex"> g_1, g_2 </script>まで水を運ぶための導水管の敷設にかかるコストを最小化する．<br/>
-以下の<script type="math/tex"> 3 </script>パターンに分かれる．</p>
-
-<p><img src="/images/AOJ/2005-1.png">
-<img src="/images/AOJ/2005-2.png">
-<img src="/images/AOJ/2005-3.png"></p>
-
-<p>　<script type="math/tex"> n(3 \leq n \leq 100) </script>なのでwarshall-floydで最短経路を出してこの <script type="math/tex"> 3 </script>パターンのminを取った．<br/>
-経路復元がいるかと思ったけど，いらなかった．もし <script type="math/tex"> s \to g1 \to g2 </script>で <script type="math/tex"> s \to g1 </script>と <script type="math/tex"> g1 \to g2 </script>の通る頂点に重なりがある場合，重複して道を数えているのでそのパターンではなく，パターン <script type="math/tex"> 3 </script>のケースの方が良い．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-ll d[105][105];
-int to[105][105];
-
-void warshall_floyd(int n, int m) {
-    rep(i, n) rep(j, n) d[i][j] = INF;
-    rep(i, n) d[i][i] = 0;
-
-    rep(i, n) rep(j, n) to[i][j] = j;
-
-    //input
-    rep(i, m) {
-        int a, b, c;
-        cin &gt;&gt; a &gt;&gt; b &gt;&gt; c;
-
-        a--; b--;
-        d[a][b] = c;
-        // d[b][a] = c;
-    }
-
-    rep(k,n) {
-        rep(i,n) {
-            rep(j,n) {
-                if(d[i][k] == INF || d[k][j] == INF) continue;
-                if(d[i][j] &gt; d[i][k] + d[k][j]) {
-                    d[i][j] = d[i][k] + d[k][j];
-                    to[i][j] = to[i][k];
-                }
-            }
-        }
-    }
-}
-
-vector&lt;int&gt; path(int s, int g) {
-    int cur = s;
-    vector&lt;int&gt; ret;
-    for(; cur != g; cur = to[cur][g]) {
-        ret.push_back(cur);
-    }
-
-    ret.push_back(g);
-    return ret;
-}
-
-int main() {
-    int n, m, s, g1, g2;
-    while(cin &gt;&gt; n &gt;&gt; m &gt;&gt; s &gt;&gt; g1 &gt;&gt; g2) {
-        if(n == 0 &amp;&amp; m == 0 &amp;&amp; s == 0 &amp;&amp; g1 == 0 &amp;&amp; g2 == 0) break;
-
-        s--; g1--; g2--;
-        warshall_floyd(n, m);
-
-        ll ans = INF;
-        rep(i, n) {
-            ans = min(ans, d[s][i] + d[i][g1] + d[i][g2]);
-        }
-
-        ans = min(ans, d[s][g1] + d[g1][g2]);
-        ans = min(ans, d[s][g2] + d[g2][g1]);
 
         cout &lt;&lt; ans &lt;&lt; endl;
     }
