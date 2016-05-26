@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 幅優先 | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/fu-you-xian/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-05-23T00:20:55+09:00</updated>
+  <updated>2016-05-26T10:35:08+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,226 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Codeforces354-div2D Theseus and labyrinth]]></title>
+    <link href="http://ry0u.github.io/blog/2016/05/26/codeforces354-div2d-theseus-and-labyrinth/"/>
+    <updated>2016-05-26T10:19:44+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/05/26/codeforces354-div2d-theseus-and-labyrinth</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://codeforces.com/contest/676/problem/D">Problem - D - Codeforces</a></h4><p>Theseus has just arrived to Crete to fight Minotaur. He found a labyrinth that has a form of a rectangular field of size and consists of blocks of size 1 × 1. Each block of the labyrinth has a button that rotates all blocks 90 degrees clockwise.</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>サイズが <script type="math/tex"> 1 \times 1 </script>のブロックで構成される <script type="math/tex"> n \times m </script>の <script type="math/tex"> field </script>がある． <script type="math/tex"> 1 </script>回の行動で隣接するマスに移動するか，全てのブロックを <script type="math/tex"> 90 </script>度時計回りに回転するかが出来る．隣接するマスには移動するためには，現在のマスから隣接するマスの方向にドアがあり，隣接するマスから現在のマスの方向にドアがあるのが条件となる． <script type="math/tex"> (x_t, y_t) </script>から <script type="math/tex"> (x_mm, y_m) </script>には最小何回でいけるか．</p>
+
+<p>盤面と状態を<script type="math/tex"> (y, x, rot) </script>で持って，幅優先探索．当たられる座標が <script type="math/tex"> xとy </script>で逆なので注意する．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+#include &lt;queue&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+typedef pair&lt;int, P&gt; IP;
+typedef pair&lt;P, P&gt; PP;
+
+int d[1001][1001][4];
+char v[1001][1001][4];
+map&lt;char, vector&lt;char&gt; &gt; ma;
+
+// (y, x)にdirのドアがあるか
+bool ch(int y, int x, int rot, int i) {
+    char c = v[y][x][rot];
+    if(c == '+') return true;
+    if(c == '*') return false;
+
+    if(i == 0) {
+        if(c == '-' || c == '&gt;' || c == 'D' || c == 'L' || c == 'U') return true;
+        return false;
+    } else if(i == 1) {
+        if(c == '|' || c == 'v' || c == 'L' || c == 'U' || c == 'R') return true;
+        return false;
+    } else if(i == 2) {
+        if(c == '-' || c == '&lt;' || c == 'U' || c == 'R' || c == 'D') return true;
+        return false;
+    } else if(i == 3) {
+        if(c == '|' || c == '^' || c == 'R' || c == 'D' || c == 'L') return true;
+        return false;
+    }
+}
+
+int main() {
+    int n, m;
+    cin &gt;&gt; n &gt;&gt; m;
+
+    ma['+'].push_back('+');
+    ma['+'].push_back('+');
+    ma['+'].push_back('+');
+    ma['+'].push_back('+');
+
+    ma['-'].push_back('-');
+    ma['-'].push_back('|');
+    ma['-'].push_back('-');
+    ma['-'].push_back('|');
+
+    ma['|'].push_back('|');
+    ma['|'].push_back('-');
+    ma['|'].push_back('|');
+    ma['|'].push_back('-');
+
+    ma['^'].push_back('^');
+    ma['^'].push_back('&gt;');
+    ma['^'].push_back('v');
+    ma['^'].push_back('&lt;');
+
+    ma['&gt;'].push_back('&gt;');
+    ma['&gt;'].push_back('v');
+    ma['&gt;'].push_back('&lt;');
+    ma['&gt;'].push_back('^');
+
+    ma['v'].push_back('v');
+    ma['v'].push_back('&lt;');
+    ma['v'].push_back('^');
+    ma['v'].push_back('&gt;');
+
+    ma['&lt;'].push_back('&lt;');
+    ma['&lt;'].push_back('^');
+    ma['&lt;'].push_back('&gt;');
+    ma['&lt;'].push_back('v');
+
+    ma['L'].push_back('L');
+    ma['L'].push_back('U');
+    ma['L'].push_back('R');
+    ma['L'].push_back('D');
+
+    ma['U'].push_back('U');
+    ma['U'].push_back('R');
+    ma['U'].push_back('D');
+    ma['U'].push_back('L');
+
+    ma['R'].push_back('R');
+    ma['R'].push_back('D');
+    ma['R'].push_back('L');
+    ma['R'].push_back('U');
+
+    ma['D'].push_back('D');
+    ma['D'].push_back('L');
+    ma['D'].push_back('U');
+    ma['D'].push_back('R');
+
+    ma['*'].push_back('*');
+    ma['*'].push_back('*');
+    ma['*'].push_back('*');
+    ma['*'].push_back('*');
+
+    vector&lt;string&gt; s(n);
+    rep(i, n) cin &gt;&gt; s[i];
+
+    rep(i, n) {
+        rep(j, m) {
+            rep(k, 4) {
+                v[i][j][k] = ma[s[i][j]][k];
+            }
+        }
+    }
+
+    int sy, sx;
+    cin &gt;&gt; sy &gt;&gt; sx;
+
+    sy--; sx--;
+
+    int gy, gx;
+    cin &gt;&gt; gy &gt;&gt; gx;
+
+    gy--; gx--;
+
+    rep(i, n) {
+        rep(j, m) {
+            rep(k, 4) d[i][j][k] = INF;
+        }
+    }
+
+    queue&lt;IP&gt; que;
+    que.push(mp(0, mp(sy, sx)));
+    d[sy][sx][0] = 0;
+
+    int dx[4] = {1, 0, -1, 0};
+    int dy[4] = {0, 1, 0, -1};
+    int nd[4] = {2, 3, 0, 1};
+
+    while(que.size()) {
+        IP p = que.front(); que.pop();
+        int rot = p.first;
+        int y = p.second.first;
+        int x = p.second.second;
+
+        rep(i, 4) {
+            int ny = y + dy[i];
+            int nx = x + dx[i];
+
+            if(0 &lt;= ny &amp;&amp; ny &lt; n &amp;&amp; 0 &lt;= nx &amp;&amp; nx &lt; m &amp;&amp; ch(y, x, rot, i) &amp;&amp; ch(ny, nx, rot, nd[i])) {
+                if(d[ny][nx][rot] &gt; d[y][x][rot] + 1) {
+                   d[ny][nx][rot] = d[y][x][rot] + 1;
+                    que.push(mp(rot, mp(ny, nx)));
+                }
+            }
+        }
+
+        int nr = (rot + 1) % 4;
+        if(d[y][x][nr] &gt; d[y][x][rot] + 1) {
+            d[y][x][nr] = d[y][x][rot] + 1;
+            que.push(mp(nr, mp(y, x)));
+        }
+    }
+
+    // rep(k, 4) {
+    //  cout  &lt;&lt; "-------- " &lt;&lt; endl;
+    //  rep(i, n) {
+    //      rep(j, m) {
+    //          if(d[i][j][k] == INF) cout &lt;&lt; "X ";
+    //          else cout &lt;&lt; d[i][j][k] &lt;&lt; " ";
+    //      }
+    //      cout &lt;&lt; endl;
+    //  }
+    // }
+
+    int ans = INF;
+    rep(i, 4) {
+        ans = min(ans, d[gy][gx][i]);
+    }
+
+    if(ans == INF) cout &lt;&lt; -1 &lt;&lt; endl;
+    else cout &lt;&lt; ans &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
+
+<p>実装がひどい．各方向に行けるかいけないかをboolで持っておけば， <script type="math/tex"> ch </script>の中で全て列挙する形にならないので良いと思った．実装の方針がミスのしやすさ，実装時間に影響すると思うのでなるべく考えてから書きたいと思った．</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[AOJ1501 Grid]]></title>

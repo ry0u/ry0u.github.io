@@ -4,7 +4,7 @@
   <title><![CDATA[Category: シュミレーション | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/siyumiresiyon/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-05-23T00:20:55+09:00</updated>
+  <updated>2016-05-26T10:36:09+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,99 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Codeforces354-div2B Pyramid of Glasses]]></title>
+    <link href="http://ry0u.github.io/blog/2016/05/26/codeforces354-div2b-pyramid-of-glasses/"/>
+    <updated>2016-05-26T09:11:14+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/05/26/codeforces354-div2b-pyramid-of-glasses</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://codeforces.com/contest/676/problem/B">Problem - B - Codeforces</a></h4><p>Mary has just graduated from one well-known University and is now attending celebration party. Students like to dream of a beautiful life, so they used champagne glasses to construct a small pyramid. The height of the pyramid is n.</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>グラスがピラミッドのように並んでいる．上から{% m %} n {% em %}段目には{% m %} n {% em %}個のグラスがある．そのグラスがいっぱいになった時は{% m %} 1 {% em %}段下のグラスに均等に注がれる．{% m %} t {% em %}秒後にいっぱいになっているグラスはいくつあるか？</p>
+
+<p>実際にグラフを作って，グラス{% m %} 0 {% em %}から {% m %} 1 {% em %}秒ずつ流していく．グラフは， {% m %} i {% em %}段目の頂点は(自分の番号 {% m %} + i {% em %}), (自分の番号{% m %} + i + 1 {% em %})と繋がるようにした．</p>
+
+<p>{% img /images/Codeforces/354/b.png %}</p>
+
+<p>流す量を {% m %} 1.0 {% em %}から初めて，いっぱいになっている場合は，その半分を繋がっている頂点に流す．流れる量は必ず {% m %} \frac{1}{2 ^x} {% em %}という形になり， {% m %} n {% em %}は最大で {% m %} 10 {% em %}段なので誤差無く保持出来る(はず)．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+vector&lt;int&gt; g[105];
+double v[105];
+
+void dfs(int cur, double x) {
+    if(v[cur] == 1.0) {
+        rep(i, g[cur].size()) {
+            dfs(g[cur][i], x / 2.0);
+        }
+    } else {
+        v[cur] += x;
+        return;
+    }
+}
+
+int main() {
+    int n, t;
+    cin &gt;&gt; n &gt;&gt; t;
+
+    int m = (n * (n+1) ) / 2;
+
+    memset(v, 0, sizeof(v));
+    int id = 0, len = 1;
+    rep(i, n-1) {
+        rep(j, i+1) {
+            g[id].push_back(id + len);
+            g[id].push_back(id + len+1);
+            id++;
+        }
+        len++;
+    }
+
+    rep(i, t) {
+        dfs(0, 1.0);
+    }
+
+    int cnt = 0;
+    rep(i, m) {
+        if(v[i] &gt;= 1.0) cnt++;
+    }
+
+    cout &lt;&lt; cnt &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[AOJ1144 Curling 2.0]]></title>
@@ -146,7 +239,7 @@ int main() {
 <!-- more -->
 
 
-<p>最初に崩壊するマスをqueueに突っ込む．そのマスが崩壊したことによって崩壊するマスは隣接しているマスのみなので，queueから取ってきた時に隣接するマスのカウンタを<script type="math/tex"> +1 </script>して崩壊するならまたqueueに突っ込む．</p>
+<p>最初に崩壊するマスをqueueに突っ込む．そのマスが崩壊したことによって崩壊するマスは隣接しているマスのみなので，queueから取ってきた時に隣接するマスのカウンタを{% m %} +1 {% em %}して崩壊するならまたqueueに突っ込む．</p>
 
 <h1>Code</h1>
 
@@ -329,13 +422,13 @@ int main() {
 <!-- more -->
 
 
-<p>やることは， <script type="math/tex"> f_0とf_1 </script>選び，シュミレーションする．本番中はpretest 3でTLEを出して，これじゃあ間に合わないと考えていたが，単純に<script type="math/tex"> 0 </script>を考慮していないためだった．<br/>
-最初に <script type="math/tex"> 0 </script>をはじいて，全て<script type="math/tex"> 0 </script>のみのパターンか最初に<script type="math/tex"> 0 </script>をつけるパターンのみでいいと思っていたが，途中で<script type="math/tex"> 0 </script>を経由するパターンも普通にあってそこに気づかなかった．<br/>
+<p>やることは， {% m %} f_0とf_1 {% em %}選び，シュミレーションする．本番中はpretest 3でTLEを出して，これじゃあ間に合わないと考えていたが，単純に{% m %} 0 {% em %}を考慮していないためだった．<br/>
+最初に {% m %} 0 {% em %}をはじいて，全て{% m %} 0 {% em %}のみのパターンか最初に{% m %} 0 {% em %}をつけるパターンのみでいいと思っていたが，途中で{% m %} 0 {% em %}を経由するパターンも普通にあってそこに気づかなかった．<br/>
 またsetに突っ込んでその数があるかを確認していたけど，同じ数が出てくるパターンがあるので最初にどの数が何個あるかをmapで持たなければいけなかった．<br/>
 stackに積んでおけば後に続く項の個数が分かるので
-<script type="math/tex; mode=display">
+{% math %}
     memo[mp(a, b)] := (a, b)の時の後に続く項の個数
-</script>
+{% endmath %}
 とかやるのかな思ったけど，(a, b)にいたるまでに使ってきた数が違えば後に続く項も違いダメだった．</p>
 
 <h1>Code</h1>
@@ -411,66 +504,6 @@ int main() {
 
     return 0;
 }
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[SRM682 D2M TopBiologist]]></title>
-    <link href="http://ry0u.github.io/blog/2016/02/29/srm682-d2m-topbiologist/"/>
-    <updated>2016-02-29T00:36:01+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/02/29/srm682-d2m-topbiologist</id>
-    <content type="html"><![CDATA[<p>大文字アルファベットの<script type="math/tex">A, C, G, T</script>で構成される文字列が与えられる．この文字列に含まれない最小の<script type="math/tex">A, C, G, T</script>で構成される文字列を返す．</p>
-
-<!-- more -->
-
-
-<hr />
-
-<p>与えられる文字列の長さは最大で<script type="math/tex">2000</script>なので長さ<script type="math/tex">6</script>の文字列が最大となる（長さ<script type="math/tex">5</script>の文字列を単純に連結すれば<script type="math/tex">5120</script>になるが上手いこと組み合わせれば<script type="math/tex">2000</script>以下になる）．</p>
-
-<p>愚直に探索し，その文字列が見つからなければ返す．<br/>
-部分文字列を全て列挙しmapに突っ込んだらMLEして落とした．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">    public:
-    string findShortestNewSequence(string s) {
-        m.clear();
-
-        rep(i, s.size()) {
-            stringstream ss;
-            REP(j, i, s.size()) {
-                string t = s.substr(i, j-i+1);
-                if(t.size() &gt;= 10) continue;
-                m[t] = true;
-            }
-        }
-
-        que.push("A");
-        que.push("C");
-        que.push("G");
-        que.push("T");
-
-        string ans = "";
-        while(que.size()) {
-            string t = que.front();
-            que.pop();
-
-            if(!m[t]) {
-                ans = t;
-                break;
-            }
-
-            que.push(t + "A");
-            que.push(t + "C");
-            que.push(t + "G");
-            que.push(t + "T");
-        }
-
-        // last check
-        return ans;
-    }
 </code></pre>
 ]]></content>
   </entry>

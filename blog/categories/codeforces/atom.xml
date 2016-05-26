@@ -4,7 +4,7 @@
   <title><![CDATA[Category: codeforces | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/codeforces/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-05-23T00:20:55+09:00</updated>
+  <updated>2016-05-26T10:36:09+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,410 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Codeforces354-div2D Theseus and labyrinth]]></title>
+    <link href="http://ry0u.github.io/blog/2016/05/26/codeforces354-div2d-theseus-and-labyrinth/"/>
+    <updated>2016-05-26T10:19:44+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/05/26/codeforces354-div2d-theseus-and-labyrinth</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://codeforces.com/contest/676/problem/D">Problem - D - Codeforces</a></h4><p>Theseus has just arrived to Crete to fight Minotaur. He found a labyrinth that has a form of a rectangular field of size and consists of blocks of size 1 × 1. Each block of the labyrinth has a button that rotates all blocks 90 degrees clockwise.</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>サイズが {% m %} 1 \times 1 {% em %}のブロックで構成される {% m %} n \times m {% em %}の {% m %} field {% em %}がある． {% m %} 1 {% em %}回の行動で隣接するマスに移動するか，全てのブロックを {% m %} 90 {% em %}度時計回りに回転するかが出来る．隣接するマスには移動するためには，現在のマスから隣接するマスの方向にドアがあり，隣接するマスから現在のマスの方向にドアがあるのが条件となる． {% m %} (x_t, y_t) {% em %}から {% m %} (x_mm, y_m) {% em %}には最小何回でいけるか．</p>
+
+<p>盤面と状態を{% m %} (y, x, rot) {% em %}で持って，幅優先探索．当たられる座標が {% m %} xとy {% em %}で逆なので注意する．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+#include &lt;queue&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+typedef pair&lt;int, P&gt; IP;
+typedef pair&lt;P, P&gt; PP;
+
+int d[1001][1001][4];
+char v[1001][1001][4];
+map&lt;char, vector&lt;char&gt; &gt; ma;
+
+// (y, x)にdirのドアがあるか
+bool ch(int y, int x, int rot, int i) {
+    char c = v[y][x][rot];
+    if(c == '+') return true;
+    if(c == '*') return false;
+
+    if(i == 0) {
+        if(c == '-' || c == '&gt;' || c == 'D' || c == 'L' || c == 'U') return true;
+        return false;
+    } else if(i == 1) {
+        if(c == '|' || c == 'v' || c == 'L' || c == 'U' || c == 'R') return true;
+        return false;
+    } else if(i == 2) {
+        if(c == '-' || c == '&lt;' || c == 'U' || c == 'R' || c == 'D') return true;
+        return false;
+    } else if(i == 3) {
+        if(c == '|' || c == '^' || c == 'R' || c == 'D' || c == 'L') return true;
+        return false;
+    }
+}
+
+int main() {
+    int n, m;
+    cin &gt;&gt; n &gt;&gt; m;
+
+    ma['+'].push_back('+');
+    ma['+'].push_back('+');
+    ma['+'].push_back('+');
+    ma['+'].push_back('+');
+
+    ma['-'].push_back('-');
+    ma['-'].push_back('|');
+    ma['-'].push_back('-');
+    ma['-'].push_back('|');
+
+    ma['|'].push_back('|');
+    ma['|'].push_back('-');
+    ma['|'].push_back('|');
+    ma['|'].push_back('-');
+
+    ma['^'].push_back('^');
+    ma['^'].push_back('&gt;');
+    ma['^'].push_back('v');
+    ma['^'].push_back('&lt;');
+
+    ma['&gt;'].push_back('&gt;');
+    ma['&gt;'].push_back('v');
+    ma['&gt;'].push_back('&lt;');
+    ma['&gt;'].push_back('^');
+
+    ma['v'].push_back('v');
+    ma['v'].push_back('&lt;');
+    ma['v'].push_back('^');
+    ma['v'].push_back('&gt;');
+
+    ma['&lt;'].push_back('&lt;');
+    ma['&lt;'].push_back('^');
+    ma['&lt;'].push_back('&gt;');
+    ma['&lt;'].push_back('v');
+
+    ma['L'].push_back('L');
+    ma['L'].push_back('U');
+    ma['L'].push_back('R');
+    ma['L'].push_back('D');
+
+    ma['U'].push_back('U');
+    ma['U'].push_back('R');
+    ma['U'].push_back('D');
+    ma['U'].push_back('L');
+
+    ma['R'].push_back('R');
+    ma['R'].push_back('D');
+    ma['R'].push_back('L');
+    ma['R'].push_back('U');
+
+    ma['D'].push_back('D');
+    ma['D'].push_back('L');
+    ma['D'].push_back('U');
+    ma['D'].push_back('R');
+
+    ma['*'].push_back('*');
+    ma['*'].push_back('*');
+    ma['*'].push_back('*');
+    ma['*'].push_back('*');
+
+    vector&lt;string&gt; s(n);
+    rep(i, n) cin &gt;&gt; s[i];
+
+    rep(i, n) {
+        rep(j, m) {
+            rep(k, 4) {
+                v[i][j][k] = ma[s[i][j]][k];
+            }
+        }
+    }
+
+    int sy, sx;
+    cin &gt;&gt; sy &gt;&gt; sx;
+
+    sy--; sx--;
+
+    int gy, gx;
+    cin &gt;&gt; gy &gt;&gt; gx;
+
+    gy--; gx--;
+
+    rep(i, n) {
+        rep(j, m) {
+            rep(k, 4) d[i][j][k] = INF;
+        }
+    }
+
+    queue&lt;IP&gt; que;
+    que.push(mp(0, mp(sy, sx)));
+    d[sy][sx][0] = 0;
+
+    int dx[4] = {1, 0, -1, 0};
+    int dy[4] = {0, 1, 0, -1};
+    int nd[4] = {2, 3, 0, 1};
+
+    while(que.size()) {
+        IP p = que.front(); que.pop();
+        int rot = p.first;
+        int y = p.second.first;
+        int x = p.second.second;
+
+        rep(i, 4) {
+            int ny = y + dy[i];
+            int nx = x + dx[i];
+
+            if(0 &lt;= ny &amp;&amp; ny &lt; n &amp;&amp; 0 &lt;= nx &amp;&amp; nx &lt; m &amp;&amp; ch(y, x, rot, i) &amp;&amp; ch(ny, nx, rot, nd[i])) {
+                if(d[ny][nx][rot] &gt; d[y][x][rot] + 1) {
+                   d[ny][nx][rot] = d[y][x][rot] + 1;
+                    que.push(mp(rot, mp(ny, nx)));
+                }
+            }
+        }
+
+        int nr = (rot + 1) % 4;
+        if(d[y][x][nr] &gt; d[y][x][rot] + 1) {
+            d[y][x][nr] = d[y][x][rot] + 1;
+            que.push(mp(nr, mp(y, x)));
+        }
+    }
+
+    // rep(k, 4) {
+    //  cout  &lt;&lt; "-------- " &lt;&lt; endl;
+    //  rep(i, n) {
+    //      rep(j, m) {
+    //          if(d[i][j][k] == INF) cout &lt;&lt; "X ";
+    //          else cout &lt;&lt; d[i][j][k] &lt;&lt; " ";
+    //      }
+    //      cout &lt;&lt; endl;
+    //  }
+    // }
+
+    int ans = INF;
+    rep(i, 4) {
+        ans = min(ans, d[gy][gx][i]);
+    }
+
+    if(ans == INF) cout &lt;&lt; -1 &lt;&lt; endl;
+    else cout &lt;&lt; ans &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
+
+<p>実装がひどい．各方向に行けるかいけないかをboolで持っておけば， {% m %} ch {% em %}の中で全て列挙する形にならないので良いと思った．実装の方針がミスのしやすさ，実装時間に影響すると思うのでなるべく考えてから書きたい．</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Codeforces354-div2C Vasya and String]]></title>
+    <link href="http://ry0u.github.io/blog/2016/05/26/codeforces354-div2c-vasya-and-string/"/>
+    <updated>2016-05-26T09:38:50+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/05/26/codeforces354-div2c-vasya-and-string</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://codeforces.com/contest/676/problem/C">Problem - C - Codeforces</a></h4><p>High school student Vasya got a string of length n as a birthday present. This string consists of letters 'a' and '' only. Vasya denotes beauty of the string as the maximum length of a substring (consecutive subsequence) consisting of equal letters. Vasya can change no more than k characters of the original string.</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>長さ{% m %} n {% em %}の文字{% m %} a, b {% em %}で構成された文字列が与えられる．{% m %} k {% em %}回変更可能な時に，同じ文字で構成される部分文字列の最大長を答える．</p>
+
+<p>文字 {% m %} a {% em %}だけで構成される部分文字列を考える．区間{% m %} [l, r]{% em %}の中に文字{% m %} b {% em %}が {% m %} k {% em %}個以下ならば，その区間では全て {% m %} a {% em %}にすることができる．これをずらしながらやっていく．文字{% m %} b {% em %}で構成される部分文字列も同様にやり，最大値を取った． {% m %} O(n) {% em %}．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int main() {
+    int n, k;
+    cin &gt;&gt; n &gt;&gt; k;
+
+    string s;
+    cin &gt;&gt; s;
+
+    int ans = 0;
+
+    int l = 0, r = 0, cnt = 0;
+    rep(i, n) {
+        r = i;
+        if(s[i] == 'b') cnt++;
+
+        if(cnt &lt;= k) {
+            ans = max(ans, r - l + 1);
+        }
+
+        while(cnt &gt; k) {
+            if(s[l] == 'b') cnt--;
+            l++;
+        }
+    }
+
+    l = 0, r = 0, cnt = 0;
+    rep(i, n) {
+        r = i;
+        if(s[i] == 'a') cnt++;
+
+        if(cnt &lt;= k) {
+            ans = max(ans, r - l + 1);
+        }
+
+        while(cnt &gt; k) {
+            if(s[l] == 'a') cnt--;
+            l++;
+        }
+    }
+
+    cout &lt;&lt; ans &lt;&lt; endl;
+
+
+    return 0;
+}
+</code></pre>
+
+<p>本番では落ちた．区間 {% m %} [l, r] {% em %}の中の{% m %} b {% em %}が{% m %} k {% em %}を超えた時，というのは今見ている文字が{% m %} b {% em %}でその文字を {% m %} a {% em %}に変えて， {% m %} l {% em %}をずらす，ということなので {% m %} r {% em %}は必ず今見ている場所 {% m %} i {% em %}となる．ということがよく整理できていなかった．反省．</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Codeforces354-div2B Pyramid of Glasses]]></title>
+    <link href="http://ry0u.github.io/blog/2016/05/26/codeforces354-div2b-pyramid-of-glasses/"/>
+    <updated>2016-05-26T09:11:14+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/05/26/codeforces354-div2b-pyramid-of-glasses</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://codeforces.com/contest/676/problem/B">Problem - B - Codeforces</a></h4><p>Mary has just graduated from one well-known University and is now attending celebration party. Students like to dream of a beautiful life, so they used champagne glasses to construct a small pyramid. The height of the pyramid is n.</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>グラスがピラミッドのように並んでいる．上から{% m %} n {% em %}段目には{% m %} n {% em %}個のグラスがある．そのグラスがいっぱいになった時は{% m %} 1 {% em %}段下のグラスに均等に注がれる．{% m %} t {% em %}秒後にいっぱいになっているグラスはいくつあるか？</p>
+
+<p>実際にグラフを作って，グラス{% m %} 0 {% em %}から {% m %} 1 {% em %}秒ずつ流していく．グラフは， {% m %} i {% em %}段目の頂点は(自分の番号 {% m %} + i {% em %}), (自分の番号{% m %} + i + 1 {% em %})と繋がるようにした．</p>
+
+<p>{% img /images/Codeforces/354/b.png %}</p>
+
+<p>流す量を {% m %} 1.0 {% em %}から初めて，いっぱいになっている場合は，その半分を繋がっている頂点に流す．流れる量は必ず {% m %} \frac{1}{2 ^x} {% em %}という形になり， {% m %} n {% em %}は最大で {% m %} 10 {% em %}段なので誤差無く保持出来る(はず)．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+vector&lt;int&gt; g[105];
+double v[105];
+
+void dfs(int cur, double x) {
+    if(v[cur] == 1.0) {
+        rep(i, g[cur].size()) {
+            dfs(g[cur][i], x / 2.0);
+        }
+    } else {
+        v[cur] += x;
+        return;
+    }
+}
+
+int main() {
+    int n, t;
+    cin &gt;&gt; n &gt;&gt; t;
+
+    int m = (n * (n+1) ) / 2;
+
+    memset(v, 0, sizeof(v));
+    int id = 0, len = 1;
+    rep(i, n-1) {
+        rep(j, i+1) {
+            g[id].push_back(id + len);
+            g[id].push_back(id + len+1);
+            id++;
+        }
+        len++;
+    }
+
+    rep(i, t) {
+        dfs(0, 1.0);
+    }
+
+    int cnt = 0;
+    rep(i, m) {
+        if(v[i] &gt;= 1.0) cnt++;
+    }
+
+    cout &lt;&lt; cnt &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Codeforces353-div2D Tree Construction]]></title>
@@ -29,19 +433,19 @@
 <!-- more -->
 
 
-<p>　<script type="math/tex"> 2 </script>分木の挿入する順番が与えられる．挿入した時の親の番号を答える．<br/>
-愚直に木を構成すると線のような木の場合に <script type="math/tex"> O(n ^2) </script>となるので間に合わない．区間をsetで管理すると次に挿入する場所が <script type="math/tex"> logn </script>で持ってこれるので，全体で <script type="math/tex"> O(n logn) </script>となる．map(<script type="math/tex">l, r </script>)に区間 <script type="math/tex"> [l, r] </script>の親を持っておくようにした．</p>
+<p>　{% m %} 2 {% em %}分木の挿入する順番が与えられる．挿入した時の親の番号を答える．<br/>
+愚直に木を構成すると線のような木の場合に {% m %} O(n ^2) {% em %}となるので間に合わない．区間をsetで管理すると次に挿入する場所が {% m %} logn {% em %}で持ってこれるので，全体で {% m %} O(n logn) {% em %}となる．map({% m %}l, r {% em %})に区間 {% m %} [l, r] {% em %}の親を持っておくようにした．</p>
 
 <p>sample2でどのように動くかをメモしておく．(書いておかないと絶対忘れる．．．)</p>
 
 <h1>Sample 2</h1>
 
-<blockquote><p><script type="math/tex"> 5 </script><br/>
-<script type="math/tex"> 4\ 2\ 3\ 1\ 6\ </script></p></blockquote>
+<blockquote><p>{% m %} 5 {% em %}<br/>
+{% m %} 4\ 2\ 3\ 1\ 6\ {% em %}</p></blockquote>
 
-<p>手順，挿入する数，挿入する区間 <script type="math/tex"> \to </script> 挿入した結果と書いてみた．</p>
+<p>手順，挿入する数，挿入する区間 {% m %} \to {% em %} 挿入した結果と書いてみた．</p>
 
-<p><script type="math/tex; mode=display">
+<p>{% math %}
 \begin{eqnarray}
 insert \ \ (4) \ \ [-\infty, \infty] \ \ &amp;\to&amp; \ \ [-\infty, 4], [4, \infty] \
 insert \ \ (2) \ \ [-\infty,\ \ 4] \ \ &amp;\to&amp; \ \ [-\infty, 2], [2, 4], [4, \infty]  \
@@ -49,9 +453,9 @@ insert \ \ (3) \ \ [\,\ \ \ \ 2,\ \ 4] \ \ &amp;\to&amp; \ \ [-\infty, 2], [2, 3
 insert \ \ (1) \ \ [-\infty,\ \ 2] \ \ &amp;\to&amp; \ \ [-\infty, 1], [1, 2], [2, 3], [3, 4], [4, \infty] \
 insert \ \ (6) \ \ [\,\ \ \ \ 4,\infty] \ \ &amp;\to&amp; \ \ [-\infty, 1], [1, 2], [2, 3], [3, 4], [4, 6], [6, \infty] \
 \end{eqnarray}
-</script></p>
+{% endmath %}</p>
 
-<p>後は区間<script type="math/tex"> [l, r] </script>のmapに入っている値を答えて， <script type="math/tex"> [l, v[i]], [v[i], r] </script>に <script type="math/tex"> v[i] </script>を入れておく．</p>
+<p>後は区間{% m %} [l, r] {% em %}のmapに入っている値を答えて， {% m %} [l, v[i]], [v[i], r] {% em %}に {% m %} v[i] {% em %}を入れておく．</p>
 
 <h1>Code</h1>
 
@@ -136,13 +540,13 @@ int main() {
 <!-- more -->
 
 
-<p>隣接した場所の値を自由に交換出来る時，数列を全部<script type="math/tex"> 0 </script>にするには最小何回で出来るか．<br/>
-円環なので，切って <script type="math/tex"> 2 </script>つ繋げて表現した．最初は累積和を取って， <script type="math/tex"> [0, 0] </script>となる区間で移動させるようにしていた．これはそれぞれの <script type="math/tex"> (区間数-1) </script>の和が答えで，つまり <script type="math/tex"> (n - 累積和が0の個数) </script>となる．<br/>
-累積和が <script type="math/tex"> 0 </script>となる場所の個数は，累積和を開始する地点による．</p>
+<p>隣接した場所の値を自由に交換出来る時，数列を全部{% m %} 0 {% em %}にするには最小何回で出来るか．<br/>
+円環なので，切って {% m %} 2 {% em %}つ繋げて表現した．最初は累積和を取って， {% m %} [0, 0] {% em %}となる区間で移動させるようにしていた．これはそれぞれの {% m %} (区間数-1) {% em %}の和が答えで，つまり {% m %} (n - 累積和が0の個数) {% em %}となる．<br/>
+累積和が {% m %} 0 {% em %}となる場所の個数は，累積和を開始する地点による．</p>
 
-<p><img src="/images/Codeforces/353/c.png"></p>
+<p>{% img /images/Codeforces/353/c.png %}</p>
 
-<p>上の図(適当)は，累積和をカウントしたものとする．開始地点をずらすというのは，赤の線をどこに引くか( <script type="math/tex"> 0 </script>となる基準をどこにするか)ということになる．よって，最初の累積和の数の個数を数えて，そのmaxを <script type="math/tex"> n </script>から引く．</p>
+<p>上の図(適当)は，累積和をカウントしたものとする．開始地点をずらすというのは，赤の線をどこに引くか( {% m %} 0 {% em %}となる基準をどこにするか)ということになる．よって，最初の累積和の数の個数を数えて，そのmaxを {% m %} n {% em %}から引く．</p>
 
 <h1>Code</h1>
 
@@ -190,379 +594,6 @@ int main() {
     }
 
     cout &lt;&lt; n - x &lt;&lt; endl;
-
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Codeforces353-div2B Restoring Painting]]></title>
-    <link href="http://ry0u.github.io/blog/2016/05/17/codeforces353-div2b-restoring-painting/"/>
-    <updated>2016-05-17T17:43:57+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/05/17/codeforces353-div2b-restoring-painting</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://codeforces.com/contest/675/problem/B">Problem - B - Codeforces</a></h4><p>Vasya works as a watchman in the gallery. Unfortunately, one of the most expensive paintings was stolen while he was on duty. He doesn't want to be fired, so he has to quickly restore the painting. He remembers some facts about it.</p></blockquote>
-
-
-<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
-
-
-
-
-<!-- more -->
-
-
-<p>　<script type="math/tex"> 3 \times 3 </script>のマスで <script type="math/tex"> a, b, c, d </script>が与えられる． <script type="math/tex"> 2 \times 2 </script>の マスの和が全て等しくなるような ?を埋める <script type="math/tex"> 1 \sim n </script>数字の組はいくつあるか？<br/>
-<img src="/images/Codeforces/353/b.png"></p>
-
-<p>　?のマスをそれぞれ <script type="math/tex"> x, y, z, h, m </script> と置くと，それぞれ <script type="math/tex"> 4 </script>つの正方形の和は<br/>
-<img src="/images/Codeforces/353/b2.png"></p>
-
-<ol>
-<li><script type="math/tex"> a + b + x + m </script></li>
-<li><script type="math/tex"> a + c + y + m </script></li>
-<li><script type="math/tex"> b + d + z + m </script></li>
-<li><script type="math/tex"> c + d + h + m </script></li>
-</ol>
-
-
-<p>となり，全て <script type="math/tex"> m </script>が入っていて，<script type="math/tex"> m </script>の値は関係ないことがわかる．なので<script type="math/tex"> x, y, z, h </script>の組の<script type="math/tex"> n </script>倍でいい．<br/>
-まず， <script type="math/tex"> x </script>の値を全探索する． <script type="math/tex"> x = i </script>と置くと， <script type="math/tex"> y, z, h </script>が</p>
-
-<ul>
-<li><script type="math/tex"> y = b + x - c </script></li>
-<li><script type="math/tex"> z = a + x - d </script></li>
-<li><script type="math/tex"> h = a + y - d </script></li>
-</ul>
-
-
-<p>と決まるので，その値が <script type="math/tex"> 1 \sim n </script>の間に収まっていれば，正しい組となる．その組の場合に <script type="math/tex"> n </script>を足していった(<script type="math/tex"> m </script>は何でも良い)．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-int main() {
-    ll n, a, b, c, d;
-    cin &gt;&gt; n &gt;&gt; a &gt;&gt; b &gt;&gt; c &gt;&gt; d;
-
-    ll ans = 0;
-
-    REP(i, 1, n + 1) {
-        ll x = i;
-        ll y = b + x - c;
-        ll z = a + x - d;
-        ll h = a + y - d;
-
-        if(1 &lt;= y &amp;&amp; y &lt;= n &amp;&amp; 1 &lt;= z &amp;&amp; z &lt;= n &amp;&amp; 1 &lt;= h &amp;&amp; h &lt;= n) {
-            ans += n;
-        }
-    }
-
-    cout &lt;&lt; ans &lt;&lt; endl;
-
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Codeforces352-div2D Robin Hood]]></title>
-    <link href="http://ry0u.github.io/blog/2016/05/12/codeforces352-div2-robin-hood/"/>
-    <updated>2016-05-12T15:14:01+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/05/12/codeforces352-div2-robin-hood</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://codeforces.com/contest/672/problem/D">Problem - D - Codeforces</a></h4><p>We all know the impressive story of Robin Hood. Robin Hood uses his archery skills and his wits to steal the money from rich, and return it to the poor. There are n citizens in Kekoland, each person has coins.</p></blockquote>
-
-
-<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
-
-
-
-
-<!-- more -->
-
-
-<p>　<script type="math/tex"> N </script>人いて，コインを <script type="math/tex"> c_i </script>枚持っている． <script type="math/tex"> k </script>回，ある人からコインを取って，ある人に挙げれる時，商人のコインの最大値と最小値の差を最小化する．</p>
-
-<hr />
-
-<p>全員が持つコインの枚数を<script type="math/tex"> 2 </script>分探索．最大値と最小値の差を最大化したいので，最大値の最小化と，最小値の最大化を取って差を取る．コインの枚数を <script type="math/tex"> mid </script>と決めた時に， <script type="math/tex"> mid </script>より(多い / 少ない)コインの枚数が <script type="math/tex"> k </script>枚以下かどうかが条件となる．<br/>
-全てのコインの合計が<script type="math/tex"> N </script>人で割り切れない時は，必ず余りが出るので，その差 <script type="math/tex"> +1 </script>が答えになる．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-int main() {
-    cin.tie(0);
-    ios::sync_with_stdio(false);
-
-    int n, k;
-    cin &gt;&gt; n &gt;&gt; k;
-
-    vector&lt;ll&gt; v(n);
-    ll lv = INF, rv = 0;
-    ll sum = 0;
-    rep(i, n) {
-        cin &gt;&gt; v[i];
-        sum += v[i];
-        lv = min(lv, v[i] - 1);
-        rv = max(rv, v[i] + 1);
-    }
-
-    sort(v.begin(), v.end());
-
-    ll l = lv, r = rv;
-    ll vmax = 0, vmin = INF;
-    while(r - l &gt; 1) {
-        ll mid = (l + r) / 2;
-        ll cnt = 0;
-        rep(i, n) {
-            if(v[i] &gt; mid) {
-                cnt += v[i] - mid;
-            }
-        }
-
-        if(cnt &lt;= k) {
-            vmin = min(vmin, mid);
-            r = mid;
-        } else {
-            l = mid;
-        }
-    }
-
-    l = lv, r = rv;
-    while(r - l &gt; 1) {
-        ll mid = (l + r) / 2;
-        ll cnt = 0;
-        rep(i, n) {
-            if(v[i] &lt; mid) {
-                cnt += mid - v[i];
-            }
-        }
-
-        if(cnt &lt;= k) {
-            vmax = max(vmax, mid);
-            l = mid;
-        } else {
-            r = mid;
-        }
-    }
-
-    if(sum % n == 0) {
-        cout &lt;&lt; max(0LL, vmin - vmax) &lt;&lt; endl;
-    } else {
-        cout &lt;&lt; max(1LL, vmin - vmax) &lt;&lt; endl;
-    }
-
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Codeforces352-div2C Recycling Bottles]]></title>
-    <link href="http://ry0u.github.io/blog/2016/05/12/codeforces352-div2-recycling-bottles/"/>
-    <updated>2016-05-12T14:55:05+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/05/12/codeforces352-div2-recycling-bottles</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://codeforces.com/contest/672/problem/C">Problem - C - Codeforces</a></h4><p>It was recycling day in Kekoland. To celebrate it Adil and Bera went to Central Perk where they can take bottles from the ground and put them into a recycling bin. We can think Central Perk as coordinate plane. There are n bottles on the ground, the i-th bottle is located at position .</p></blockquote>
-
-
-<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
-
-
-
-
-<!-- more -->
-
-
-<p>荷物は一個しか持てないので，毎回拾って戻して，拾って戻してを繰り返す．なので，まずそれぞれから <script type="math/tex"> (tx, ty) </script>から行く道と帰る道を両方張る．それから <script type="math/tex"> a </script>が最初に拾った方が良いものがあれば拾う． <script type="math/tex"> b </script>が最初に拾った方が良いものがあれば拾う．とする<br/>
-また，<script type="math/tex"> a </script>が動かず <script type="math/tex"> b </script>が全部拾う場合や， <script type="math/tex"> a </script>が動かず <script type="math/tex"> b </script>が拾う場合がある．最初に拾う点を選んでむしろ距離が増えてしまった場合は，その場に立ち止まるようにする．<br/>
-また距離の初期値のINFがオーバーフローした．制約に気を付けたい．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-#include &lt;cmath&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1LL&lt;&lt;60
-#define pb push_back
-#define mp make_pair
-#define EPS 1e-8
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-struct Point {
-    double x, y;
-
-    Point(double x=0, double y=0) : x(x), y(y) {}
-
-    Point operator+(const Point &amp;o) const { return Point(x+o.x, y+o.y); }
-
-    Point operator-(const Point &amp;o) const { return Point(x-o.x, y-o.y); }
-
-    Point operator*(const double m) const { return Point(x*m, y*m); }
-
-    Point operator/(const double d) const { return Point(x/d, y/d); }
-
-    bool operator&lt;(const Point &amp;o) const { return x != o.x ? x &lt; o.x : y &lt; o.y; }
-
-    bool operator==(const Point &amp;o) const { return fabs(x-o.x) &lt; EPS &amp;&amp; fabs(y-o.y) &lt; EPS; }
-};
-
-ostream&amp; operator &lt;&lt; (ostream&amp; os, const Point&amp; p) {
-    os &lt;&lt; "(" &lt;&lt; p.x &lt;&lt; ", " &lt;&lt; p.y &lt;&lt; ")";
-    return os;
-}
-
-double dot(Point a, Point b) { return a.x * b.x + a.y * b.y; }
-double cross(Point a, Point b) { return a.x * b.y - a.y * b.x; }
-double atan(Point p) { return atan2(p.y, p.x); }
-double norm(Point p) { return p.x * p.x + p.y * p.y; }
-double abs(Point p) { return sqrt(norm(p)); }
-double distancePP(Point p, Point o) { return sqrt(norm(o - p)); }
-
-int main() {
-    Point a, b, t;
-    cin &gt;&gt; a.x &gt;&gt; a.y &gt;&gt; b.x &gt;&gt; b.y &gt;&gt; t.x &gt;&gt; t.y;
-
-    int n;
-    cin &gt;&gt; n;
-
-    vector&lt;Point&gt; v(n);
-    rep(i, n) cin &gt;&gt; v[i].x &gt;&gt; v[i].y;
-
-    double sum = 0;
-    rep(i, n) {
-        sum += distancePP(t, v[i]) * 2;
-    }
-
-    double A = sum, B = sum;
-    {
-        double len = -INF;
-        int id = -1;
-        rep(i, n) {
-            double p = distancePP(t, v[i]);
-            double q = distancePP(a, v[i]);
-
-            if(p - q &gt; len) {
-                len = p - q;
-                id = i;
-            }
-        }
-
-        double len2 = 0;
-        int id2 = -1;
-        rep(i, n) {
-            if(i == id) continue;
-
-            double p = distancePP(t, v[i]);
-            double q = distancePP(b, v[i]);
-
-            if(p - q &gt; len2) {
-                len2 = p - q;
-                id2 = i;
-            }
-        }
-
-        // cout &lt;&lt;  " A -&gt; B" &lt;&lt; endl;
-        // cout &lt;&lt; id &lt;&lt; " " &lt;&lt; id2 &lt;&lt; endl;
-        // cout &lt;&lt; "sum:" &lt;&lt; sum &lt;&lt; endl;
-        // cout &lt;&lt; distancePP(t, v[id]) &lt;&lt; " " &lt;&lt; distancePP(a, v[id]) &lt;&lt; " " &lt;&lt; len &lt;&lt; endl;
-        // cout &lt;&lt; distancePP(t, v[id2]) &lt;&lt; " " &lt;&lt; distancePP(b, v[id2]) &lt;&lt; " " &lt;&lt; len2 &lt;&lt; endl;
-
-        if(id != -1) A -= len;
-        if(id2 != -1) A -= len2;
-    }
-    {
-        double len = -INF;
-        int id = -1;
-
-        rep(i, n) {
-            double p = distancePP(t, v[i]);
-            double q = distancePP(b, v[i]);
-
-            if(p - q &gt; len) {
-                len = p - q;
-                id = i;
-            }
-        }
-
-        double len2 = 0;
-        int id2 = -1;
-        rep(i, n) {
-            if(i == id) continue;
-
-            double p = distancePP(t, v[i]);
-            double q = distancePP(a, v[i]);
-
-            if(p - q &gt; len2) {
-                len2 = p - q;
-                id2 = i;
-            }
-        }
-
-        // cout &lt;&lt;  " B -&gt; A" &lt;&lt; endl;
-        // cout &lt;&lt; id &lt;&lt; " " &lt;&lt; id2 &lt;&lt; endl;
-        // cout &lt;&lt; "sum:" &lt;&lt; sum &lt;&lt; endl;
-        // cout &lt;&lt; distancePP(t, v[id]) &lt;&lt; " " &lt;&lt; distancePP(b, v[id]) &lt;&lt; " " &lt;&lt; len &lt;&lt; endl;
-        // cout &lt;&lt; distancePP(t, v[id2]) &lt;&lt; " " &lt;&lt; distancePP(a, v[id2]) &lt;&lt; " " &lt;&lt; len2 &lt;&lt; endl;
-
-        if(id != -1) B -= len;
-        if(id2 != -1) B -= len2;
-    }
-
-    cout &lt;&lt; fixed;
-    cout.precision(20);
-    cout &lt;&lt; min(A, B) &lt;&lt; endl;
 
     return 0;
 }
