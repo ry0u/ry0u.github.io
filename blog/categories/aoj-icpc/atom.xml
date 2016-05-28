@@ -4,7 +4,7 @@
   <title><![CDATA[Category: aoj-icpc | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/aoj-icpc/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-05-26T10:36:09+09:00</updated>
+  <updated>2016-05-28T23:45:49+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,157 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ2299 Tiles are Colorful]]></title>
+    <link href="http://ry0u.github.io/blog/2016/05/28/aoj2299-tiles-are-colorful/"/>
+    <updated>2016-05-28T23:31:22+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/05/28/aoj2299-tiles-are-colorful</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article-full"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2299">Tiles are Colorful | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>マスを叩くとその，上下左右各方向に進んでいき，最初に当たったタイルに同じ色があればそのタイルを消す．最大で何個消せるか？</p>
+
+<blockquote><p>1 ≤ M ≤ 500，1 ≤ N ≤ 500 を満たす．各アルファベット大文字は入力中に 0 個または 2 個現れる．</p></blockquote>
+
+<p>Inputの一番最後に重要なことが書いてあって最初は見逃していた．つまり各アルファベットの対が <script type="math/tex"> 1 </script>個あるかないか，という制約である．各ペアのアルファベットを消すために，どのアルファベットが消されている必要があるかを考える．特に依存関係が無ければそのタイルを消し，他のアルファベットの依存関係になっている箇所があればそこも消す．これを繰り返す．<br/>
+縦，横，斜めのパターンに分けて依存関係を調べた．斜めのパターンが結構面倒だった．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int main() {
+    int m, n;
+    cin &gt;&gt; m &gt;&gt; n;
+
+    vector&lt;string&gt; v(m);
+    rep(i, m) cin &gt;&gt; v[i];
+
+    map&lt;char, vector&lt;int&gt; &gt; x, y;
+    rep(i, m) {
+        rep(j, n) {
+            if('A' &lt;= v[i][j] &amp;&amp; v[i][j] &lt;= 'Z') {
+                y[v[i][j]].push_back(i);
+                x[v[i][j]].push_back(j);
+            }
+        }
+    }
+
+    set&lt;char&gt; st[30][2];
+    bool used[30][2];
+    memset(used, 0, sizeof(used));
+
+    rep(i, 26) {
+        char c = 'A' + i;
+        if(x[c].size() == 0) continue;
+
+        if(x[c][0] == x[c][1]) {
+            if(abs(y[c][0] - y[c][1]) == 1) continue;
+            used[i][0] = true;
+            int x1 = x[c][0];
+            int y1 = y[c][0], y2 = y[c][1];
+
+            REP(j, min(y1, y2) + 1, max(y1, y2)) {
+                if(v[j][x1] == '.') continue;
+                st[i][0].insert(v[j][x1]);
+            }
+        } else if(y[c][0] == y[c][1]) {
+            if(abs(x[c][0] - x[c][1]) == 1) continue;
+            used[i][0] = true;
+            int y1 = y[c][0];
+            int x1 = x[c][0], x2 = x[c][1];
+            REP(j, min(x1, x2) + 1, max(x1, x2)) {
+                if(v[y1][j] == '.') continue;
+                st[i][0].insert(v[y1][j]);
+            }
+        } else {
+            used[i][0] = true;
+            used[i][1] = true;
+            int x1 = x[c][0], x2 = x[c][1];
+            int y1 = y[c][0], y2 = y[c][1];
+
+            REP(j, min(x1, x2), max(x1, x2) + 1) {
+                if(v[y1][j] == '.' || v[y1][j] == c) continue;
+                st[i][0].insert(v[y1][j]);
+            }
+
+            REP(j, min(y1, y2), max(y1, y2) + 1) {
+                if(v[j][x2] == '.' || v[j][x2] == c) continue;
+                st[i][0].insert(v[j][x2]);
+            }
+
+            REP(j, min(y1, y2), max(y1, y2) + 1) {
+                if(v[j][x1] == '.' || v[j][x1] == c) continue;
+                st[i][1].insert(v[j][x1]);
+            }
+
+            REP(j, min(x1, x2), max(x1, x2) + 1) {
+                if(v[y2][j] == '.' || v[y2][j] == c) continue;
+                st[i][1].insert(v[y2][j]);
+            }
+        }
+    }
+
+    int sum = 0;
+    while(true) {
+        bool flag = true;
+        rep(i, 26) {
+            char c = 'A' + i;
+
+            rep(j, 2) {
+                if(!used[i][j]) continue;
+                if(st[i][j].size() == 0) {
+                    flag = false;
+                    used[i][j] = false;
+                    used[i][!j] = false;
+
+                    rep(k, 26) {
+                        rep(l, 2) {
+                            st[k][l].erase(c);
+                        }
+                    }
+                    sum += 2;
+                }
+            }
+        }
+
+        if(flag) break;
+    }
+
+    cout &lt;&lt; sum &lt;&lt; endl;
+
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[AOJ2320 Infinity Maze]]></title>
@@ -29,11 +180,11 @@
 <!-- more -->
 
 
-<p>向いてる方向に一歩進む．進めない場合は進めるまで{% m %} 90 {% em %}度回転して進む．この行動を{% m %} L {% em %}( {% m %} 1 \leq L \leq 10 ^18) {% em %})回行った時に最終的にはどこにどの向きでいるか．<br/>
-行動回数{% m %} L {% em %}が非常に大きいが盤面は {% m %} 100 \times 100 {% em %}なので，行動回数が多い場合は，どこかを周回</p>
+<p>向いてる方向に一歩進む．進めない場合は進めるまで<script type="math/tex"> 90 </script>度回転して進む．この行動を<script type="math/tex"> L </script>( <script type="math/tex"> 1 \leq L \leq 10 ^{18}) </script>)回行った時に最終的にはどこにどの向きでいるか．<br/>
+行動回数<script type="math/tex"> L </script>が非常に大きいが盤面は <script type="math/tex"> 100 \times 100 </script>なので，行動回数が多い場合は，どこかを周回</p>
 
-<p>{% img /images/AOJ/2320.png %}<br/>
-(赤い所をグルグル周る)感じになるので，周回する所を見つけて，後は行動回数をその周期で割り，最終的にいる場所を出す．メモするのが{% m %} (y, x, 次に向かう方向) {% em %}で答えるのが{% m %} (y, x, 現在向いてる方向) {% em %}で違うので混乱していた．周回する場所を見つけるために，次に向かう方向を持っていたので，その場所が見つかる前に行動が終わった場合は，その {% m %} 1 {% em %}個前の方向を答えなければならずWAを生やした．<br/>
+<p><img src="/images/AOJ/2320.png"><br/>
+(赤い所をグルグル周る)感じになるので，周回する所を見つけて，後は行動回数をその周期で割り，最終的にいる場所を出す．メモするのが<script type="math/tex"> (y, x, 次に向かう方向) </script>で答えるのが<script type="math/tex"> (y, x, 現在向いてる方向) </script>で違うので混乱していた．周回する場所を見つけるために，次に向かう方向を持っていたので，その場所が見つかる前に行動が終わった場合は，その <script type="math/tex"> 1 </script>個前の方向を答えなければならずWAを生やした．<br/>
 時間をめちゃくちゃかけてしまったので，もう少し早く解けるようになりたい&hellip;</p>
 
 <h1>Code</h1>
@@ -193,7 +344,7 @@ int main() {
 <!-- more -->
 
 
-<p>愚直に {% m %} k {% em %}回のシュミレーションに対して，間違う/間違わないをすると {% m %} 2 ^{30} {% em %}となる．ここで枝刈りを行う．シュミレーションが2分探索みたいな感じなので，一度解区間 {% m %} [T-E, T+E] {% em %}を外れたら，再度解区間に入ることは無いので切って良い．この枝刈りだけで {% m %} 04.91s {% em %}でACが取れた．</p>
+<p>愚直に <script type="math/tex"> k </script>回のシュミレーションに対して，間違う/間違わないをすると <script type="math/tex"> 2 ^{30} </script>となる．ここで枝刈りを行う．シュミレーションが2分探索みたいな感じなので，一度解区間 <script type="math/tex"> [T-E, T+E] </script>を外れたら，再度解区間に入ることは無いので切って良い．この枝刈りだけで <script type="math/tex"> 04.91s </script>でACが取れた．</p>
 
 <pre><code class="cpp">#include &lt;iostream&gt;
 #include &lt;vector&gt;
@@ -254,7 +405,7 @@ int main() {
 }
 </code></pre>
 
-<p>しかし，他の人の解答を見てみると{% m %} 0.0s {% em %}ばかりだった．自分の解法は {% m %} E {% em %}が十分小さい時に有効な枝刈りで， {% m %} E {% em %}が大きい場合を考えていなかった． この時は解区間が探索区間を内包しているので，この先解区間を出ることはない．よってその枝刈りを追加すると {% m %} 0.0s {% em %}とめちゃくちゃ早くなった．</p>
+<p>しかし，他の人の解答を見てみると<script type="math/tex"> 0.0s </script>ばかりだった．自分の解法は <script type="math/tex"> E </script>が十分小さい時に有効な枝刈りで， <script type="math/tex"> E </script>が大きい場合を考えていなかった． この時は解区間が探索区間を内包しているので，この先解区間を出ることはない．よってその枝刈りを追加すると <script type="math/tex"> 0.0s </script>とめちゃくちゃ早くなった．</p>
 
 <pre><code class="cpp">#include &lt;iostream&gt;
 #include &lt;vector&gt;
@@ -322,12 +473,12 @@ int main() {
 <p>まとめると，</p>
 
 <ul>
-<li>{% m %} E {% em %}が十分小さい時に，解区間から外れた場合の枝刈りが有効</li>
-<li>{% m %} E {% em %}が十分大きい時に，解区間が内包する場合の枝刈りが有効</li>
+<li><script type="math/tex"> E </script>が十分小さい時に，解区間から外れた場合の枝刈りが有効</li>
+<li><script type="math/tex"> E </script>が十分大きい時に，解区間が内包する場合の枝刈りが有効</li>
 </ul>
 
 
-<p>となって， {% m %} 2 ^{30} {% em %}にはならないで間に合う．(どのくらい減るのかよく分かっていない)</p>
+<p>となって， <script type="math/tex"> 2 ^{30} </script>にはならないで間に合う．(どのくらい減るのかよく分かっていない)</p>
 ]]></content>
   </entry>
   
@@ -347,8 +498,8 @@ int main() {
 <!-- more -->
 
 
-<p>The {% m %} slimness {% em %} of a spanning tree Tは全域木を構成する辺の最大値 {% m %} - {% em %}最小値と定義される．この値の最小値を求める．<br/>
-出来るだけコストが近いものを使った方が良いので，まず使うコストの一番小さいものを決めて，それからコストを増やしていく．全域木が構成出来た時点でのコストのminを取る． {% m %} O(nm) {% em %}．</p>
+<p>The <script type="math/tex"> slimness </script> of a spanning tree Tは全域木を構成する辺の最大値 <script type="math/tex"> - </script>最小値と定義される．この値の最小値を求める．<br/>
+出来るだけコストが近いものを使った方が良いので，まず使うコストの一番小さいものを決めて，それからコストを増やしていく．全域木が構成出来た時点でのコストのminを取る． <script type="math/tex"> O(nm) </script>．</p>
 
 <h1>Code</h1>
 
@@ -480,7 +631,7 @@ int main() {
 <!-- more -->
 
 
-<p>状態を{% m %}(ay, ax, by, bx){% em %}として幅優先探索．このようにすれば，片方が移動して片方が壁で立ち止まる場合も表現出来る．左右を逆にするのが面倒だったので，まず最初にLenの方の部屋を反転して，同じ {% m %} (dy, dx) {% em %}を使った．</p>
+<p>状態を<script type="math/tex">(ay, ax, by, bx)</script>として幅優先探索．このようにすれば，片方が移動して片方が壁で立ち止まる場合も表現出来る．左右を逆にするのが面倒だったので，まず最初にLenの方の部屋を反転して，同じ <script type="math/tex"> (dy, dx) </script>を使った．</p>
 
 <h1>Code</h1>
 
@@ -604,130 +755,6 @@ int main() {
             cout &lt;&lt; "No" &lt;&lt; endl;
         }
     }
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[AOJ1175 And Then. How Many Any There?]]></title>
-    <link href="http://ry0u.github.io/blog/2016/05/21/and-then-how-many-any-there/"/>
-    <updated>2016-05-21T01:35:44+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/05/21/and-then-how-many-any-there</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1175&lang=jp">And Then. How Many Are There? | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
-
-
-<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
-
-
-
-
-<!-- more -->
-
-
-<p>別の円盤が上に無い状態の円盤は同じ色が偶数の場合は全部消し，奇数の場合は {% m %} 1 {% em %}個消さないのを選ぶ，というやり方でやっていたが，消す順番によりそれより多く消せるパターンというのがありこれは間違いだった．<br/>
-選ぶ順番によって消せる枚数が違ってくるので，各状態毎に {% m %} (i, j) {% em %}を列挙して消せるかどうかを調べる． {% m %} n {% em %}は最大で {% m %} 4 * 6 = 24 {% em %}なので，状態数は {% m %} 2 ^{24} {% em %}．intのbitでどの円盤を使ったかを管理した． {% m %} O(2 ^n n ^2)  {% em %}．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-#include &lt;cmath&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-
-struct P {
-    int x, y, r, c;
-
-    P() : x(0), y(0), r(0), c(0) {}
-    P(int x, int y, int r, int c) : x(x), y(y), r(r), c(c) {}
-};
-
-int n, ans;
-vector&lt;P&gt; v;
-set&lt;int&gt; memo;
-
-void dfs(int S) {
-    if(memo.find(S) != memo.end()) return;
-    memo.insert(S);
-
-    ans = max(ans, __builtin_popcount(S));
-    if(ans == n) return;
-
-    bool up[50];
-    memset(up, 0, sizeof(up));
-    for(int i = n-1; i &gt;= 0; i--) {
-        if(S &amp; (1&lt;&lt;i)) continue;
-
-        bool flag = true;
-        for(int j = i-1; j &gt;= 0; j--) {
-            if(S &amp; (1&lt;&lt;j)) continue;
-            int dist = (v[j].x - v[i].x) * (v[j].x - v[i].x) + (v[j].y - v[i].y) * (v[j].y - v[i].y);
-            int len = (v[i].r + v[j].r) * (v[i].r + v[j].r);
-
-            if(dist &lt; len) {
-                flag = false;
-            }
-        }
-
-        if(!flag) up[i] = true;
-    }
-
-    set&lt;int&gt; st[5];
-    for(int i = n-1; i &gt;= 0; i--) {
-        if((S &amp; (1&lt;&lt;i)) || up[i]) continue;
-
-        bool flag = true;
-
-        for(int j = i-1; j &gt;= 0; j--) {
-            if((S &amp; (1&lt;&lt;j)) || up[j]) continue;
-
-            int dist = (v[j].x - v[i].x) * (v[j].x - v[i].x) + (v[j].y - v[i].y) * (v[j].y - v[i].y);
-            int len = (v[i].r + v[j].r) * (v[i].r + v[j].r);
-
-            if(dist &gt;= len &amp;&amp; v[i].c == v[j].c) {
-                dfs(S + (1&lt;&lt;i) + (1&lt;&lt;j));
-            }
-        }
-    }
-}
-
-int main() {
-    while(cin &gt;&gt; n &amp;&amp; n) {
-
-        v.clear();
-        memo.clear();
-
-        rep(i, n) {
-            int x, y, r, c;
-            cin &gt;&gt; x &gt;&gt; y &gt;&gt; r &gt;&gt; c;
-            v.push_back(P(x, y, r, c));
-        }
-
-        vector&lt;bool&gt; used(n);
-        rep(i, n) used[i] = false;
-
-        ans = 0;
-        int S = 0;
-        dfs(S);
-
-        cout &lt;&lt; ans &lt;&lt; endl;
-    }
-
     return 0;
 }
 </code></pre>
