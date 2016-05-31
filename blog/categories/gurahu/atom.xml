@@ -4,7 +4,7 @@
   <title><![CDATA[Category: グラフ | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/gurahu/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-05-30T22:54:16+09:00</updated>
+  <updated>2016-05-31T15:00:25+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,162 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[SRM691 D2M Sunnygraphs2]]></title>
+    <link href="http://ry0u.github.io/blog/2016/05/31/srm691-d2m-sunnygraphs2/"/>
+    <updated>2016-05-31T14:32:34+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/05/31/srm691-d2m-sunnygraphs2</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article-full"><h4><a href="https://community.topcoder.com/stat?c=problem_statement&pm=14302&rd=16730">TopCoder Statistics - Problem Statement</a></h4><p>Hero has just constructed a very specific graph. He started with n isolated vertices, labeled 0 through n-1. For each vertex i Hero then chose a vertex a[i] (other than i) and he added an edge that connected i and a[i]. This way he created a graph with n vertices and n edges.</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>　<script type="math/tex"> 0 \sim n-1 </script>の <script type="math/tex"> n </script>個の頂点で構成されるグラフがある．頂点 <script type="math/tex"> i </script>は頂点 <script type="math/tex"> a[i] </script>と接続している．新しい頂点<script type="math/tex"> n </script>を加えることを考える．グラフの部分集合<script type="math/tex"> M </script>を選び，<script type="math/tex"> e \in M </script>の <script type="math/tex"> eとa[e] </script>の結ぶ辺をカットし， <script type="math/tex"> eとn </script>を接続する．これをした時に頂点<script type="math/tex"> 0 \sim n-1 </script>が連結している部分集合<script type="math/tex"> M </script>の選び方はいくつあるか？</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">// BEGIN CUT HERE
+
+// END CUT HERE
+#line 5 "Sunnygraphs2.cpp"
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;vector&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;cstring&gt;
+#include &lt;queue&gt;
+#include &lt;set&gt;
+#include &lt;map&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+
+using namespace std;
+typedef long long ll;
+
+struct UnionFind {
+    vector&lt;int&gt; par,rank;
+    int N;
+
+    UnionFind(int n) {
+        N = n;
+        par.resize(n);
+        rank.resize(n);
+
+        rep(i,n) {
+            par[i] = i;
+            rank[i] = 0;
+        }
+    }
+
+    int find(int x) {
+        if(par[x] == x) return x;
+        else return par[x] = find(par[x]);
+    }
+
+    void unite(int x,int y) {
+        x = find(x);
+        y = find(y);
+
+        if(x == y) return;
+
+        if(rank[x] &lt; rank[y]) {
+            par[x] = y;
+        }
+        else {
+            par[y] = x;
+            if(rank[x] == rank[y]) rank[x]++;
+        }
+    }
+
+    bool same(int x,int y) {
+        return find(x) == find(y);
+    }
+
+    int size() {
+        int cnt = 0;
+        rep(i,N) if(find(i) == i) cnt++;
+        return cnt;
+    }
+};
+
+vector&lt;int&gt; g[105];
+int d[105];
+
+int dfs(int cur) {
+    rep(i, g[cur].size()) {
+        int t = g[cur][i];
+        if(d[t] != -1) {
+            return abs(d[t] - d[cur]) + 1;
+        }
+        d[t] = d[cur] + 1;
+        return dfs(t);
+    }
+    return 0;
+}
+
+class Sunnygraphs2 {
+    public:
+    long long count(vector &lt;int&gt; a) {
+        int n = a.size();
+        rep(i, 105) g[i].clear();
+
+        UnionFind uf(n);
+        rep(i, n) {
+            uf.unite(i, a[i]);
+            g[i].push_back(a[i]);
+        }
+
+        int m = uf.size();
+
+        map&lt;int, vector&lt;int&gt; &gt; ma;
+        rep(i, n) {
+            ma[uf.find(i)].push_back(i);
+        }
+
+        ll ans = 1;
+        map&lt;int, vector&lt;int&gt; &gt;::iterator ite;
+
+        for(ite = ma.begin(); ite != ma.end(); ite++) {
+            int root = ite-&gt;first;
+            vector&lt;int&gt; v = ite-&gt;second;
+
+            memset(d, -1, sizeof(d));
+            d[root] = 0;
+
+            rep(i, 105) g[i].clear();
+            rep(i, v.size()) {
+                g[v[i]].push_back(a[v[i]]);
+            }
+            int len = dfs(root);
+
+            ll cy = 1;
+            rep(i, len) cy *= 2;
+            cy--;
+
+            ll res = 1;
+            rep(i, v.size()-len) res *= 2;
+
+            cy *= res;
+            ans *= cy;
+            continue;
+        }
+
+        if(m == 1) ans++;
+        return ans;
+    }
+};
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[AOJ1280 Slim Span]]></title>
@@ -645,86 +801,6 @@ int main() {
         }
 
         ans = min(ans, res);
-    }
-
-    cout &lt;&lt; ans &lt;&lt; endl;
-
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[AOJ1347 Shopping]]></title>
-    <link href="http://ry0u.github.io/blog/2016/03/26/aoj1347-shopping/"/>
-    <updated>2016-03-26T21:44:41+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/03/26/aoj1347-shopping</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1347">Shopping | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
-
-
-<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
-
-
-
-
-<!-- more -->
-
-
-<p>まず最初に，全ての場所に行って帰ってを行うグラフを考える．</p>
-
-<p><img src="/images/AOJ/1347-1.png"></p>
-
-<p>ここから実際に戻らなければいけない区間を出して</p>
-
-<p><img src="/images/AOJ/1347-2.png"></p>
-
-<p>その区間でない場所は <script type="math/tex"> 1 </script>本あればいいので <script type="math/tex"> -2 </script>する．</p>
-
-<p><img src="/images/AOJ/1347-3.png"></p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-int main() {
-    int n, m;
-    cin &gt;&gt; n &gt;&gt; m;
-
-    vector&lt;int&gt; c(m), d(m);
-    rep(i, m) cin &gt;&gt; c[i] &gt;&gt; d[i];
-
-    int cnt[1005];
-    memset(cnt, 0, sizeof(cnt));
-
-    rep(i, m) {
-        REP(j, c[i], d[i]) {
-            cnt[j]++;
-        }
-    }
-
-    int ans = 3 * (n + 1);
-    rep(i, n + 1) {
-        if(cnt[i] == 0) {
-            ans -= 2;
-        }
     }
 
     cout &lt;&lt; ans &lt;&lt; endl;

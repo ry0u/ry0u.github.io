@@ -4,7 +4,7 @@
   <title><![CDATA[Category: topcoder | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/topcoder/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-05-30T22:54:16+09:00</updated>
+  <updated>2016-05-31T15:00:25+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,240 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[SRM691 D2M Sunnygraphs2]]></title>
+    <link href="http://ry0u.github.io/blog/2016/05/31/srm691-d2m-sunnygraphs2/"/>
+    <updated>2016-05-31T14:32:34+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/05/31/srm691-d2m-sunnygraphs2</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article-full"><h4><a href="https://community.topcoder.com/stat?c=problem_statement&pm=14302&rd=16730">TopCoder Statistics - Problem Statement</a></h4><p>Hero has just constructed a very specific graph. He started with n isolated vertices, labeled 0 through n-1. For each vertex i Hero then chose a vertex a[i] (other than i) and he added an edge that connected i and a[i]. This way he created a graph with n vertices and n edges.</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>　<script type="math/tex"> 0 \sim n-1 </script>の <script type="math/tex"> n </script>個の頂点で構成されるグラフがある．頂点 <script type="math/tex"> i </script>は頂点 <script type="math/tex"> a[i] </script>と接続している．新しい頂点<script type="math/tex"> n </script>を加えることを考える．グラフの部分集合<script type="math/tex"> M </script>を選び，<script type="math/tex"> e \in M </script>の <script type="math/tex"> eとa[e] </script>の結ぶ辺をカットし， <script type="math/tex"> eとn </script>を接続する．これをした時に頂点<script type="math/tex"> 0 \sim n-1 </script>が連結している部分集合<script type="math/tex"> M </script>の選び方はいくつあるか？</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">// BEGIN CUT HERE
+
+// END CUT HERE
+#line 5 "Sunnygraphs2.cpp"
+#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;vector&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;cstring&gt;
+#include &lt;queue&gt;
+#include &lt;set&gt;
+#include &lt;map&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+
+using namespace std;
+typedef long long ll;
+
+struct UnionFind {
+    vector&lt;int&gt; par,rank;
+    int N;
+
+    UnionFind(int n) {
+        N = n;
+        par.resize(n);
+        rank.resize(n);
+
+        rep(i,n) {
+            par[i] = i;
+            rank[i] = 0;
+        }
+    }
+
+    int find(int x) {
+        if(par[x] == x) return x;
+        else return par[x] = find(par[x]);
+    }
+
+    void unite(int x,int y) {
+        x = find(x);
+        y = find(y);
+
+        if(x == y) return;
+
+        if(rank[x] &lt; rank[y]) {
+            par[x] = y;
+        }
+        else {
+            par[y] = x;
+            if(rank[x] == rank[y]) rank[x]++;
+        }
+    }
+
+    bool same(int x,int y) {
+        return find(x) == find(y);
+    }
+
+    int size() {
+        int cnt = 0;
+        rep(i,N) if(find(i) == i) cnt++;
+        return cnt;
+    }
+};
+
+vector&lt;int&gt; g[105];
+int d[105];
+
+int dfs(int cur) {
+    rep(i, g[cur].size()) {
+        int t = g[cur][i];
+        if(d[t] != -1) {
+            return abs(d[t] - d[cur]) + 1;
+        }
+        d[t] = d[cur] + 1;
+        return dfs(t);
+    }
+    return 0;
+}
+
+class Sunnygraphs2 {
+    public:
+    long long count(vector &lt;int&gt; a) {
+        int n = a.size();
+        rep(i, 105) g[i].clear();
+
+        UnionFind uf(n);
+        rep(i, n) {
+            uf.unite(i, a[i]);
+            g[i].push_back(a[i]);
+        }
+
+        int m = uf.size();
+
+        map&lt;int, vector&lt;int&gt; &gt; ma;
+        rep(i, n) {
+            ma[uf.find(i)].push_back(i);
+        }
+
+        ll ans = 1;
+        map&lt;int, vector&lt;int&gt; &gt;::iterator ite;
+
+        for(ite = ma.begin(); ite != ma.end(); ite++) {
+            int root = ite-&gt;first;
+            vector&lt;int&gt; v = ite-&gt;second;
+
+            memset(d, -1, sizeof(d));
+            d[root] = 0;
+
+            rep(i, 105) g[i].clear();
+            rep(i, v.size()) {
+                g[v[i]].push_back(a[v[i]]);
+            }
+            int len = dfs(root);
+
+            ll cy = 1;
+            rep(i, len) cy *= 2;
+            cy--;
+
+            ll res = 1;
+            rep(i, v.size()-len) res *= 2;
+
+            cy *= res;
+            ans *= cy;
+            continue;
+        }
+
+        if(m == 1) ans++;
+        return ans;
+    }
+};
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[SRM691 D2E PlusoneGame]]></title>
+    <link href="http://ry0u.github.io/blog/2016/05/31/srm691-d2e-plusonegame/"/>
+    <updated>2016-05-31T13:50:42+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/05/31/srm691-d2e-plusonegame</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article-full"><h4><a href="https://community.topcoder.com/stat?c=problem_statement&pm=14303&rd=16730">TopCoder Statistics - Problem Statement</a></h4><p>Hero plays a game with a deck of cards and a counter. Initially, the counter is set to zero. During the game Hero must play each card in the deck exactly once. He gets to choose the order in which he plays the cards. You are given the description of the deck in the String s.</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>文字列 <script type="math/tex"> s </script>が与えられる． <script type="math/tex"> + </script>の場合はカウンターをインクリメント， <script type="math/tex"> 0 \sim 9 </script>の場合は現在のカウンターとその桁の数の差の絶対値分，ペナルティがたまる．ペナルティが最小にように文字列を並び替えたい．</p>
+
+<p>各桁を引く前にカウンターがその数と同じだけたまっている状態になっていれば，ペナルティは <script type="math/tex"> 0 </script>となる． なので，<script type="math/tex"> + </script>があるだけ<script type="math/tex"> 0+11111+2222222+333333+44444\dots </script>のように交互に並べ，足りない場合は <script type="math/tex"> + </script>無しで，余った場合は最後につけた．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;string&gt;
+#include &lt;vector&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;cstring&gt;
+#include &lt;queue&gt;
+#include &lt;set&gt;
+#include &lt;map&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+
+using namespace std;
+typedef long long ll;
+
+class Plusonegame {
+    public:
+    string getorder(string s) {
+        int n = s.size();
+        map&lt;char, int&gt; m;
+        int cnt = 0;
+
+        rep(i, n) {
+            if(s[i] == '+') cnt++;
+            else {
+                m[s[i]]++;
+            }
+        }
+
+        string ans = "";
+        rep(i, 10) {
+            char c = '0' + i;
+
+            rep(j, m[c]) {
+                ans += c;
+            }
+
+            if(cnt &gt; 0) {
+                ans += '+';
+                cnt--;
+            }
+        }
+
+        while(cnt) {
+            ans += '+';
+            cnt--;
+        }
+
+        return ans;
+    }
+};
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[SRM684D2H Autohamil]]></title>
@@ -438,151 +672,6 @@ class SubtreesCounting {
         return ans;
     }
 };
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[SRM683 D2M MoveStonesEasy]]></title>
-    <link href="http://ry0u.github.io/blog/2016/03/03/srm683-d2m-movestoneseasy/"/>
-    <updated>2016-03-03T23:54:40+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/03/03/srm683-d2m-movestoneseasy</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0"><h4><a href="https://community.topcoder.com/stat?c=problem_statement&pm=14182&rd=16653">TopCoder Statistics - Problem Statement</a></h4><p>There are n piles of stones arranged in a line. The piles are numbered 0 through n-1, in order. In other words, for each valid i, piles i and i+1 are adjacent. You are given two int[]s a and b, each with n elements.</p></blockquote>
-
-
-<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
-
-
-
-
-<!-- more -->
-
-
-<p>現在の石の山と目的の石の山が渡されるので，左から順番に目的の石の山にしていく．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">    public:
-    int get(vector &lt;int&gt; a, vector &lt;int&gt; b) {
-        int n = a.size();
-
-        ll ans = 0;
-        ll asum = 0, bsum = 0;
-
-        rep(i, n) asum += a[i];
-        rep(i, n) bsum += b[i];
-
-        if(asum != bsum) return -1;
-
-        rep(i, n) {
-            if(a[i] == b[i]) continue;
-            if(a[i] &gt; b[i]) {
-                a[i+1] += a[i] - b[i];
-                ans += a[i] - b[i];
-            } else {
-                int len = 1, j = i+1;
-                while(a[i] &lt; b[i]) {
-                    int d = b[i] - a[i];
-                    if(a[j] &gt;= d) {
-                        a[j] -= d;
-                        a[i] += d;
-                        ans += d * len;
-                    } else {
-                        a[i] += a[j];
-                        ans += a[j] * len;
-                        a[j] = 0;
-                        j++;
-                        len++;
-                    }
-                }
-            }
-        }
-
-        return ans;
-    }
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[SRM682 D2H FriendlyRobot]]></title>
-    <link href="http://ry0u.github.io/blog/2016/02/29/srm682-d2h-friendlyrobot/"/>
-    <updated>2016-02-29T01:13:10+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/02/29/srm682-d2h-friendlyrobot</id>
-    <content type="html"><![CDATA[<p>文字列<script type="math/tex"> U,D,R,L </script>の命令で動くロボットがある．この文字列を<script type="math/tex"> K </script>回書き換えられることが出来るときに，最大で何回<script type="math/tex">(0,0)</script>を通ることが出来るか．</p>
-
-<!-- more -->
-
-
-<hr />
-
-<p>移動回数が奇数回の時に<script type="math/tex"> (0,0) </script>に戻ることは出来ない．また偶数回の場合でも横方向，縦方向の移動量が共に偶数回，共に奇数回の場合のみ戻ることが出来る．<br/>
-また，<script type="math/tex"> +を-に，-を+</script>に変えることで<script type="math/tex"> 2 </script>移動量が変わる．<br/>
-そして，戻るために命令を書き換えなければならない回数も以下のように一意に求まる．
-<script type="math/tex; mode=display">
-\begin{eqnarray}
-    共に偶数回 &amp;:=&amp;  \frac{横方向}{2} + \frac{縦方向}{2} \
-    共に奇数回 &amp;:=&amp;  \frac{横方向}{2} + \frac{縦方向}{2} + 1\
-\end{eqnarray}
-</script>
-共に奇数回の場合に<script type="math/tex"> +1 </script>されるのは，例えば命令が<script type="math/tex"> UR </script>の場合に<script type="math/tex"> UD </script>に書き換えることで<script type="math/tex"> (0, 0) </script>に戻れるためである．</p>
-
-<p>これより
-<script type="math/tex; mode=display">
-    dp[i][j] := i番目までの命令列をj回変更した時の(0, 0)を訪れる最大値
-</script>
-として，総当りしてmaxを取った．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">    public:
-    int findMaximumReturns(string s, int K) {
-
-        vector&lt;int&gt; X(s.size() + 1), Y(s.size() + 1);
-        int x = 0, y = 0;
-        rep(i, s.size()) {
-            if(s[i] == 'U') y++;
-            if(s[i] == 'D') y--;
-            if(s[i] == 'R') x++;
-            if(s[i] == 'L') x--;
-
-            X[i+1] = x; Y[i+1] = y;
-        }
-
-        rep(i, s.size() + 1) {
-            rep(j, K + 1) {
-                dp[i][j] = -1;
-            }
-        }
-        dp[0][0] = 0;
-
-        rep(i, s.size() + 1) {
-            rep(j, K + 1) {
-                if(dp[i][j] == -1) continue;
-                for(int k = i + 2; k &lt; s.size() + 1; k += 2) {
-                    int s = abs(X[k] - X[i]), t = abs(Y[k] - Y[i]);
-                    int res = 0;
-
-                    if(s % 2 == 0 &amp;&amp; t % 2 == 1) continue;
-                    if(s % 2 == 1 &amp;&amp; t % 2 == 0) continue;
-                    if(s % 2 == 0 &amp;&amp; t % 2 == 0) res = s / 2 + t / 2;
-                    if(s % 2 == 1 &amp;&amp; t % 2 == 1) res = s / 2 + t / 2 + 1;
-
-                    if(j + res &gt; K) continue;
-                    dp[k][j + res] = max(dp[k][j + res], dp[i][j] + 1);
-                }
-            }
-        }
-
-        ll ans = 0;
-        rep(i, s.size() + 1) {
-            rep(j, K + 1) {
-                ans = max(ans, dp[i][j]);
-            }
-        }
-
-        return ans;
-    }
 </code></pre>
 ]]></content>
   </entry>
