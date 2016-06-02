@@ -4,7 +4,7 @@
   <title><![CDATA[Category: codeforces | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/codeforces/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-06-01T00:20:50+09:00</updated>
+  <updated>2016-06-02T15:13:50+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,175 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Codeforces355-div2C Vanya and Label]]></title>
+    <link href="http://ry0u.github.io/blog/2016/06/02/codeforces355-div2c-vanya-and-label/"/>
+    <updated>2016-06-02T14:36:16+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/06/02/codeforces355-div2c-vanya-and-label</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://codeforces.com/contest/677/problem/C">Problem - C - Codeforces</a></h4><p>While walking down the street Vanya saw a label "Hide&Seek". Because he is a programmer, he used & as a bitwise AND for these two words represented as a integers in base 64 and got new word.</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>文字列$s$と$\&amp;$を取った時に等しくなる$2$つの文字列の組み合わせいくつあるか？ $mod\ 10 ^9 + 7$で求める．</p>
+
+<p>各桁についての組み合わせを出して掛けていった．組み合わせを全探索して組み合わせ数を出した． $\&amp;と==$では$==$のほうが優先度が高いのでちゃんと括弧でくくる．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+#include &lt;bitset&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+#define MOD 1000000007
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int main() {
+    vector&lt;char&gt; v;
+    map&lt;char, int&gt; m;
+    rep(i, 10) {
+        m['0'+i] = i;
+        v.push_back('0'+i);
+    }
+
+    rep(i, 26) {
+        m['A'+i] = 10 + i;
+        m['a'+i] = 36 + i;
+
+        v.push_back('A'+i);
+        v.push_back('a'+i);
+    }
+
+    m['-'] = 62;
+    m['_'] = 63;
+    v.push_back('-');
+    v.push_back('_');
+
+    map&lt;char, ll&gt; cnt;
+    sort(v.begin(), v.end());
+
+    rep(i, v.size()) {
+        rep(j, v.size()) {
+            rep(k, v.size()) {
+                if((m[v[j]] &amp; m[v[k]]) == m[v[i]]) {
+                    cnt[v[i]]++;
+                }
+            }
+        }
+    }
+
+    ll ans = 1;
+    string s;
+    cin &gt;&gt; s;
+
+    rep(i, s.size()) {
+        ans *= cnt[s[i]];
+        ans %= MOD;
+    }
+
+    cout &lt;&lt; ans &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Codeforces355-div2B Vanya and Food Processor]]></title>
+    <link href="http://ry0u.github.io/blog/2016/06/02/codeforces355-div2b-vanya-and-food-processor/"/>
+    <updated>2016-06-02T14:00:25+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/06/02/codeforces355-div2b-vanya-and-food-processor</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://codeforces.com/contest/677/problem/B">Problem - B - Codeforces</a></h4><p>Vanya smashes potato in a vertical food processor. At each moment of time the height of the potato in the processor doesn't exceed h and the processor smashes k centimeters of potato each second. If there are less than k centimeters remaining, than during this second processor smashes all the remaining potato.</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>高さ<script type="math/tex"> h </script>，<script type="math/tex"> 1 </script>秒間に<script type="math/tex"> k </script>を潰せるフードプロセッサーがある．高さ <script type="math/tex"> a_i </script>のじゃがいもが <script type="math/tex"> n </script>個ある時に何秒で全て潰すことが出来るか？(indexの小さい順に崩していく)．<br/>
+潰す順番を変更出来ないので，単純に入れて潰す． <script type="math/tex"> mod\ k\ +\ a_i \leq h</script>の時には次のを入れて潰す．そうでないの時は潰してから入れる．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+#include &lt;stack&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int main() {
+    ll n;
+    cin &gt;&gt; n;
+
+    ll k, h;
+    cin &gt;&gt; h &gt;&gt; k;
+
+    vector&lt;ll&gt; v(n);
+    rep(i, n) cin &gt;&gt; v[i];
+
+    ll ans = 0, sum = 0;
+    rep(i, n) {
+        if(sum + v[i] &lt;= h) sum += v[i];
+        else {
+            sum = v[i];
+            ans++;
+        }
+
+        ans += sum / k;
+        sum %= k;
+    }
+
+    if(sum != 0) ans++;
+
+    cout &lt;&lt; ans &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
+
+<p>本番は順番を変更出来るものだと勘違いしていて，pretestが延々と通らずに泣いていた．順番が変更出来る場合は，大きいものから入れれるなら入れて，入りきらなくなったら潰す．を繰り返していたのですが，この貪欲はあっているのかわからない．</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Codeforces354-div2D Theseus and labyrinth]]></title>
@@ -410,190 +579,6 @@ int main() {
     }
 
     cout &lt;&lt; cnt &lt;&lt; endl;
-
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Codeforces353-div2D Tree Construction]]></title>
-    <link href="http://ry0u.github.io/blog/2016/05/17/codeforces353-div2d-tree-construction/"/>
-    <updated>2016-05-17T18:36:48+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/05/17/codeforces353-div2d-tree-construction</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://codeforces.com/contest/675/problem/D">Problem - D - Codeforces</a></h4><p>During the programming classes Vasya was assigned a difficult problem. However, he doesn't know how to code and was unable to find the solution in the Internet, so he asks you to help. You are given a sequence a, consisting of n distinct integers, that is used to construct the binary search tree.</p></blockquote>
-
-
-<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
-
-
-
-
-<!-- more -->
-
-
-<p>　<script type="math/tex"> 2 </script>分木の挿入する順番が与えられる．挿入した時の親の番号を答える．<br/>
-愚直に木を構成すると線のような木の場合に <script type="math/tex"> O(n ^2) </script>となるので間に合わない．区間をsetで管理すると次に挿入する場所が <script type="math/tex"> logn </script>で持ってこれるので，全体で <script type="math/tex"> O(n logn) </script>となる．map(<script type="math/tex">l, r </script>)に区間 <script type="math/tex"> [l, r] </script>の親を持っておくようにした．</p>
-
-<p>sample2でどのように動くかをメモしておく．(書いておかないと絶対忘れる．．．)</p>
-
-<h1>Sample 2</h1>
-
-<blockquote><p><script type="math/tex"> 5 </script><br/>
-<script type="math/tex"> 4\ 2\ 3\ 1\ 6\ </script></p></blockquote>
-
-<p>手順，挿入する数，挿入する区間 <script type="math/tex"> \to </script> 挿入した結果と書いてみた．</p>
-
-<p><script type="math/tex; mode=display">
-\begin{eqnarray}
-insert \ \ (4) \ \ [-\infty, \infty] \ \ &amp;\to&amp; \ \ [-\infty, 4], [4, \infty] \
-insert \ \ (2) \ \ [-\infty,\ \ 4] \ \ &amp;\to&amp; \ \ [-\infty, 2], [2, 4], [4, \infty]  \
-insert \ \ (3) \ \ [\,\ \ \ \ 2,\ \ 4] \ \ &amp;\to&amp; \ \ [-\infty, 2], [2, 3], [3, 4], [4, \infty] \
-insert \ \ (1) \ \ [-\infty,\ \ 2] \ \ &amp;\to&amp; \ \ [-\infty, 1], [1, 2], [2, 3], [3, 4], [4, \infty] \
-insert \ \ (6) \ \ [\,\ \ \ \ 4,\infty] \ \ &amp;\to&amp; \ \ [-\infty, 1], [1, 2], [2, 3], [3, 4], [4, 6], [6, \infty] \
-\end{eqnarray}
-</script></p>
-
-<p>後は区間<script type="math/tex"> [l, r] </script>のmapに入っている値を答えて， <script type="math/tex"> [l, v[i]], [v[i], r] </script>に <script type="math/tex"> v[i] </script>を入れておく．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-map&lt;P, int&gt; m;
-
-int main() {
-    int n;
-    cin &gt;&gt; n;
-
-    vector&lt;int&gt; v(n);
-    rep(i, n) cin &gt;&gt; v[i];
-
-    vector&lt;int&gt; ans;
-
-    set&lt;int&gt; st;
-    st.insert(INF);
-    st.insert(-INF);
-    st.insert(v[0]);
-
-    m[mp(-INF, v[0])] = v[0];
-    m[mp(v[0], INF)] = v[0];
-
-    REP(i, 1, n) {
-        set&lt;int&gt;::iterator ite = st.upper_bound(v[i]);
-        int r = *ite;
-        ite--;
-        int l = *ite;
-
-        ans.push_back(m[mp(l, r)]);
-
-        m[mp(l, v[i])] = v[i];
-        m[mp(v[i], r)] = v[i];
-        st.insert(v[i]);
-    }
-
-    rep(i, ans.size()) {
-        cout &lt;&lt; ans[i];
-
-        if(i == ans.size()-1) cout &lt;&lt; endl;
-        else cout &lt;&lt; " ";
-    }
-
-
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Codeforces353-div2C Money Transfers]]></title>
-    <link href="http://ry0u.github.io/blog/2016/05/17/codeforces353-div2c-money-transfers/"/>
-    <updated>2016-05-17T18:20:16+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/05/17/codeforces353-div2c-money-transfers</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://codeforces.com/contest/675/problem/C">Problem - C - Codeforces</a></h4><p>There are n banks in the city where Vasya lives, they are located in a circle, such that any two banks are neighbouring if their indices differ by no more than . Also, bank 1 and bank n are neighbours if n  > 1. No bank is a neighbour of itself.</p></blockquote>
-
-
-<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
-
-
-
-
-<!-- more -->
-
-
-<p>隣接した場所の値を自由に交換出来る時，数列を全部<script type="math/tex"> 0 </script>にするには最小何回で出来るか．<br/>
-円環なので，切って <script type="math/tex"> 2 </script>つ繋げて表現した．最初は累積和を取って， <script type="math/tex"> [0, 0] </script>となる区間で移動させるようにしていた．これはそれぞれの <script type="math/tex"> (区間数-1) </script>の和が答えで，つまり <script type="math/tex"> (n - 累積和が0の個数) </script>となる．<br/>
-累積和が <script type="math/tex"> 0 </script>となる場所の個数は，累積和を開始する地点による．</p>
-
-<p><img src="/images/Codeforces/353/c.png"></p>
-
-<p>上の図(適当)は，累積和をカウントしたものとする．開始地点をずらすというのは，赤の線をどこに引くか( <script type="math/tex"> 0 </script>となる基準をどこにするか)ということになる．よって，最初の累積和の数の個数を数えて，そのmaxを <script type="math/tex"> n </script>から引く．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-int main() {
-    int n;
-    cin &gt;&gt; n;
-
-    vector&lt;ll&gt; v(n);
-    rep(i, n) cin &gt;&gt; v[i];
-
-
-    ll imos[100005];
-    memset(imos, 0, sizeof(imos));
-    imos[0] = v[0];
-
-    REP(i, 1, n) {
-        imos[i] += imos[i-1] + v[i];
-    }
-
-    map&lt;ll, int&gt; m;
-    int x = 0;
-
-    rep(i, n) {
-        m[imos[i]]++;
-        x = max(x, m[imos[i]]);
-    }
-
-    cout &lt;&lt; n - x &lt;&lt; endl;
 
     return 0;
 }
