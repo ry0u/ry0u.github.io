@@ -4,7 +4,7 @@
   <title><![CDATA[Category: dijkstra | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/dijkstra/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-06-06T23:58:15+09:00</updated>
+  <updated>2016-06-07T00:25:58+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,141 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ2608 Minus One]]></title>
+    <link href="http://ry0u.github.io/blog/2016/06/06/aoj2608-minus-one/"/>
+    <updated>2016-06-06T23:24:32+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/06/06/aoj2608-minus-one</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article-full"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2608">Minus One | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>$G$に$e$を付け加えて無向グラフにおける$s$から$t$への最短路の長さより$1$だけ大きいものの個数を答える．これはつまり，パスを貼った時に最短経路長が$1$小さくなるものである．</p>
+
+<p>$s$からの最短経路長を$d[i]$，$t$からの最短経路長を$d2[i]$とする．点$a$と点$b$を結んだ場合，$s \to a \to b \to t$という経路を行くとすると，コストは$d[a] + 1 + d2[b]$となる．この時$s \to t$の最短経路長$+1$となる経路は，
+$$
+\begin{eqnarray}
+    d[t] - 1 &amp;=&amp; d[a] + 1 + d2[b] \\
+    d2[b] &amp;=&amp; d[t] - 2 - d[a]
+\end{eqnarray}
+$$
+が条件となる．愚直に$a, b$のペアを列挙して確認すると$O(n ^2)$で間に合わないが，点$a$を決めた時に，経路長$1$少なくなる$b$の選び方は$d[t] - 2 - d[a]$となる$d2[i]$の個数と決まるので，先に$d2[i]$をカウントしておくと$O(n)$で求められる．最短経路を求めるのが一番時間がかかるので全体で$O(n logn)$．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+#include &lt;queue&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+struct edge {
+    int from,to;
+    int cost;
+
+    edge(int t,int c) : to(t),cost(c) {}
+    edge(int f,int t,int c) : from(f),to(t),cost(c) {}
+
+    bool operator&lt;(const edge &amp;e) const {
+        return cost &lt; e.cost;
+    }
+};
+
+vector&lt;edge&gt; G[100005];
+int d[100005], d2[100005], cnt[100005];
+
+void dijkstra(int s) {
+    priority_queue&lt;P, vector&lt;P&gt;, greater&lt;P&gt; &gt; que;
+    rep(i, 100005) d[i] = INF;
+
+    que.push(mp(0, s));
+    d[s] = 0;
+
+    while(que.size()) {
+        P p = que.top(); que.pop();
+        int cost = p.first;
+        int v = p.second;
+
+        if(d[v] &lt; cost) continue;
+
+        rep(i, G[v].size()) {
+            edge e = G[v][i];
+            if(d[e.to] &gt; d[v] + e.cost) {
+                d[e.to] = d[v] + e.cost;
+                que.push(mp(d[e.to], e.to));
+            }
+        }
+    }
+}
+
+int main() {
+    int n, m;
+    cin &gt;&gt; n &gt;&gt; m;
+
+    int s, t;
+    cin &gt;&gt; s &gt;&gt; t;
+    s--; t--;
+
+    rep(i, m) {
+        int a, b;
+        cin &gt;&gt; a &gt;&gt; b;
+        a--; b--;
+
+        G[a].push_back(edge(b, 1));
+        G[b].push_back(edge(a, 1));
+    }
+
+    dijkstra(s);
+    rep(i, n) d2[i] = d[i];
+
+    dijkstra(t);
+    rep(i, n) swap(d[i], d2[i]);
+
+    memset(cnt, 0, sizeof(cnt));
+    rep(i, n) {
+        if(d2[i] == INF) continue;
+        cnt[d2[i]]++;
+    }
+
+    ll ans = 0;
+    rep(i, n) {
+        if(d[i] == INF || d2[i] == INF) continue;
+        int x = d[t] - 2 - d[i];
+
+        if(x &gt;= 0) {
+            ans += cnt[x];
+        }
+    }
+
+    cout &lt;&lt; ans &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[AOJ1505 Dungeon]]></title>
@@ -736,136 +871,6 @@ int main() {
     // }
 
     cout &lt;&lt; d[gy * w + gx] &lt;&lt; endl;
-
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[AOJ0616 JOI Park]]></title>
-    <link href="http://ry0u.github.io/blog/2016/03/18/aoj0616-joi-park/"/>
-    <updated>2016-03-18T16:24:27+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/03/18/aoj0616-joi-park</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0616">JOI Park | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
-
-
-<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
-
-
-
-
-<!-- more -->
-
-
-<p>まず，<script type="math/tex"> 広場0 </script>からの各広場までの最短経路を求める．次に，コストが小さい順にソートし，その場所への到達コストを仮の<script type="math/tex"> X </script>と置き，整備する場所とする．整備される場所同士は，地下道を通して行き来できるためそのコストを全体から引く．始点を到達コスト<script type="math/tex"> 0 </script>の広場と見れば整備しない場合も考慮される．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-#include &lt;queue&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1LL&lt;&lt;60
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-struct edge {
-    int from,to;
-    int cost;
-
-    edge(int t,int c) : to(t),cost(c) {}
-    edge(int f,int t,int c) : from(f),to(t),cost(c) {}
-
-    bool operator&lt;(const edge &amp;e) const {
-        return cost &lt; e.cost;
-    }
-};
-
-vector&lt;edge&gt; G[100005];
-ll d[100005];
-bool used[100005];
-
-void dijkstra(int s,int n) {
-    priority_queue&lt;P,vector&lt;P&gt;,greater&lt;P&gt; &gt; que;
-    fill(d,d+n,INF);
-
-    d[s] = 0;
-    que.push(P(0,s));
-
-    while(que.size()) {
-        P p = que.top();
-        que.pop();
-
-        int v = p.second;
-        if(d[v] &lt; p.first) continue;
-
-        rep(i,G[v].size()) {
-            edge e = G[v][i];
-            if(d[e.to] &gt; d[v] + e.cost) {
-                d[e.to] = d[v] + e.cost;
-                que.push(P(d[e.to],e.to));
-            }
-        }
-    }
-}
-
-int main() {
-    int n, m, c;
-    cin &gt;&gt; n &gt;&gt; m &gt;&gt; c;
-
-    ll sum = 0;
-    rep(i, m) {
-        int a, b, d;
-        cin &gt;&gt; a &gt;&gt; b &gt;&gt; d;
-
-        a--;
-        b--;
-        sum += d;
-
-        G[a].push_back(edge(b, d));
-        G[b].push_back(edge(a, d));
-    }
-
-    dijkstra(0, n);
-
-    vector&lt;pair&lt;ll, int&gt; &gt; v(n);
-    rep(i, n) {
-        v[i].first = d[i];
-        v[i].second = i;
-    }
-
-    sort(v.begin(), v.end());
-    memset(used, 0, sizeof(used));
-
-    ll ans = INF;
-    rep(i, v.size()) {
-        int j = v[i].second;
-        used[j] = true;
-
-        rep(k, G[j].size()) {
-            if(used[G[j][k].to]) {
-                sum -= G[j][k].cost;
-            }
-        }
-
-        ans = min(ans, d[j] * c + sum);
-    }
-
-    cout &lt;&lt; ans &lt;&lt; endl;
 
     return 0;
 }
