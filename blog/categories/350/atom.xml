@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 350 | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/350/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-06-05T02:02:13+09:00</updated>
+  <updated>2016-06-06T23:58:15+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,134 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ2608 Minus One]]></title>
+    <link href="http://ry0u.github.io/blog/2016/06/06/aoj2608-minus-one/"/>
+    <updated>2016-06-06T23:24:32+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/06/06/aoj2608-minus-one</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article-full"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2608">Minus One | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>$G$に$e$を付け加えて無向グラフにおける$s$から$t$への最短路の長さより$1$だけ大きいものの個数を答える．</p>
+
+<p>点$a$と点$b$を結んだ場合，$s \to a \to b \to t$という経路を行くとすると，$s \to a$の最短経路長$+1+b \to t$の最短経路長が全体のコストとなる．この時$s \to t$こ最短経路長$+1$となる経路は，</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+#include &lt;queue&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+struct edge {
+    int from,to;
+    int cost;
+
+    edge(int t,int c) : to(t),cost(c) {}
+    edge(int f,int t,int c) : from(f),to(t),cost(c) {}
+
+    bool operator&lt;(const edge &amp;e) const {
+        return cost &lt; e.cost;
+    }
+};
+
+vector&lt;edge&gt; G[100005];
+int d[100005], d2[100005], cnt[100005];
+
+void dijkstra(int s) {
+    priority_queue&lt;P, vector&lt;P&gt;, greater&lt;P&gt; &gt; que;
+    rep(i, 100005) d[i] = INF;
+
+    que.push(mp(0, s));
+    d[s] = 0;
+
+    while(que.size()) {
+        P p = que.top(); que.pop();
+        int cost = p.first;
+        int v = p.second;
+
+        if(d[v] &lt; cost) continue;
+
+        rep(i, G[v].size()) {
+            edge e = G[v][i];
+            if(d[e.to] &gt; d[v] + e.cost) {
+                d[e.to] = d[v] + e.cost;
+                que.push(mp(d[e.to], e.to));
+            }
+        }
+    }
+}
+
+int main() {
+    int n, m;
+    cin &gt;&gt; n &gt;&gt; m;
+
+    int s, t;
+    cin &gt;&gt; s &gt;&gt; t;
+    s--; t--;
+
+    rep(i, m) {
+        int a, b;
+        cin &gt;&gt; a &gt;&gt; b;
+        a--; b--;
+
+        G[a].push_back(edge(b, 1));
+        G[b].push_back(edge(a, 1));
+    }
+
+    dijkstra(s);
+    rep(i, n) d2[i] = d[i];
+
+    dijkstra(t);
+    rep(i, n) swap(d[i], d2[i]);
+
+    memset(cnt, 0, sizeof(cnt));
+    rep(i, n) {
+        if(d2[i] == INF) continue;
+        cnt[d2[i]]++;
+    }
+
+    ll ans = 0;
+    rep(i, n) {
+        if(d[i] == INF || d2[i] == INF) continue;
+        int x = d[t] - 2 - d[i];
+
+        if(x &gt;= 0) {
+            ans += cnt[x];
+        }
+    }
+
+    cout &lt;&lt; ans &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[AOJ2241 Usaneko Matrix]]></title>
@@ -29,7 +157,136 @@
 <!-- more -->
 
 
-<p>ビンゴゲームをやる．行，列，斜めで揃っているものが$u$，$v$以上になれば勝ちとなる．それぞれの数字がどこの座標にあったかをチェックし，引いた数の座標から，縦横斜めの該当する所を$+1$する．先にどちらかが勝った場合は後は続けなくて良いので，毎回引くごとに合計を確認した．$O(nm)$</p>
+<p>ビンゴゲームをやる．行，列，斜めで揃っているものが$u$，$v$以上になれば勝ちとなる．それぞれの数字がどこの座標にあったかをチェックし，引いた数の座標から，縦横斜めの該当する所を$+1$する．先にどちらかが勝った場合は後は続けなくて良いので，毎回引くごとに合計を確認した．$n=1$は，場合分けした．$O(nm)$</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+
+int main() {
+    int n, u, v, m;
+    cin &gt;&gt; n &gt;&gt; u &gt;&gt; v &gt;&gt; m;
+
+    map&lt;int, vector&lt;P&gt; &gt; ma[2];
+    vector&lt;vector&lt;int&gt; &gt; a(n, vector&lt;int&gt;(n)), b(n, vector&lt;int&gt;(n));
+
+    rep(i, n) {
+        rep(j, n) {
+            cin &gt;&gt; a[i][j];
+            ma[0][a[i][j]].push_back(mp(i, j));
+        }
+    }
+
+    rep(i, n) {
+        rep(j, n) {
+            cin &gt;&gt; b[i][j];
+            ma[1][b[i][j]].push_back(mp(i, j));
+        }
+    }
+
+    vector&lt;int&gt; x(m);
+    rep(i, m) cin &gt;&gt; x[i];
+
+    if(n == 1) {
+        rep(i, m) {
+            int sum[2];
+            memset(sum, 0, sizeof(sum));
+
+            rep(j, 2) {
+                vector&lt;P&gt; res = ma[j][x[i]];
+                if(res.size() &gt;= 1) sum[j]++;
+            }
+
+            bool f1 = (sum[0] &gt;= u);
+            bool f2 = (sum[1] &gt;= v);
+
+            if(f1 &amp;&amp; f2) {
+                cout &lt;&lt; "DRAW" &lt;&lt; endl;
+                return 0;
+            } else if(f1) {
+                cout &lt;&lt; "USAGI" &lt;&lt; endl;
+                return 0;
+            } else if(f2) {
+                cout &lt;&lt; "NEKO" &lt;&lt; endl;
+                return 0;
+            }
+        }
+
+        cout &lt;&lt; "DRAW" &lt;&lt; endl;
+        return 0;
+    }
+
+
+    int cy[2][505], cx[2][505], cross[2][2];
+    memset(cy, 0, sizeof(cy));
+    memset(cx, 0, sizeof(cx));
+    memset(cross, 0, sizeof(cross));
+
+    rep(i, m) {
+
+        rep(j, 2) {
+            vector&lt;P&gt; res = ma[j][x[i]];
+            rep(k, res.size()) {
+                int f = res[k].first, s = res[k].second;
+                cy[j][f]++;
+                cx[j][s]++;
+
+                if(f == s) cross[j][0]++;
+                if(f == n - 1 - s) cross[j][1]++;
+            }
+        }
+
+        int sum[2];
+        memset(sum, 0, sizeof(sum));
+
+        rep(j, 2) {
+            rep(k, 2) {
+                sum[j] += (cross[j][k] == n);
+            }
+        }
+
+        rep(j, 2) {
+            rep(k, n) {
+                sum[j] += (cy[j][k] == n);
+                sum[j] += (cx[j][k] == n);
+            }
+        }
+
+        bool f1 = (sum[0] &gt;= u), f2 = (sum[1] &gt;= v);
+        if(f1 &amp;&amp; f2) {
+            cout &lt;&lt; "DRAW" &lt;&lt; endl;
+            return 0;
+        } else if(f1) {
+            cout &lt;&lt; "USAGI" &lt;&lt; endl;
+            return 0;
+        } else if(f2) {
+            cout &lt;&lt; "NEKO" &lt;&lt; endl;
+            return 0;
+        }
+    }
+
+    cout &lt;&lt; "DRAW" &lt;&lt; endl;
+
+    return 0;
+}
+</code></pre>
 ]]></content>
   </entry>
   
@@ -349,170 +606,6 @@ int main() {
     }
 
     cout &lt;&lt; sum &lt;&lt; endl;
-
-
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[AOJ2320 Infinity Maze]]></title>
-    <link href="http://ry0u.github.io/blog/2016/05/22/aoj2320-infinity-maze/"/>
-    <updated>2016-05-22T23:54:24+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/05/22/aoj2320-infinity-maze</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2320">Infinity Maze</a></h4><p>Dr. Fukuoka has placed a simple robot in a two-dimensional maze. It moves within the maze and never goes out of the maze as there is no exit. The maze is made up of H × W grid cells as depicted below. The upper side of the maze faces north.</p></blockquote>
-
-
-<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
-
-
-
-
-<!-- more -->
-
-
-<p>向いてる方向に一歩進む．進めない場合は進めるまで<script type="math/tex"> 90 </script>度回転して進む．この行動を<script type="math/tex"> L </script>( <script type="math/tex"> 1 \leq L \leq 10 ^{18}) </script>)回行った時に最終的にはどこにどの向きでいるか．<br/>
-行動回数<script type="math/tex"> L </script>が非常に大きいが盤面は <script type="math/tex"> 100 \times 100 </script>なので，行動回数が多い場合は，どこかを周回</p>
-
-<p><img src="/images/AOJ/2320.png"><br/>
-(赤い所をグルグル周る)感じになるので，周回する所を見つけて，後は行動回数をその周期で割り，最終的にいる場所を出す．メモするのが<script type="math/tex"> (y, x, 次に向かう方向) </script>で答えるのが<script type="math/tex"> (y, x, 現在向いてる方向) </script>で違うので混乱していた．周回する場所を見つけるために，次に向かう方向を持っていたので，その場所が見つかる前に行動が終わった場合は，その <script type="math/tex"> 1 </script>個前の方向を答えなければならずWAを生やした．<br/>
-時間をめちゃくちゃかけてしまったので，もう少し早く解けるようになりたい&hellip;</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-int h, w;
-int sy, sx, dir;
-int dx[4] = {1, 0, -1, 0};
-int dy[4] = {0, 1, 0, -1};
-char dd[4] = {'E', 'S', 'W', 'N'};
-
-bool can(int y, int x) {
-    if(0 &lt;= y &amp;&amp; y &lt; h &amp;&amp; 0 &lt;= x &amp;&amp; x &lt; w) return true;
-    return false;
-}
-
-int main() {
-    ll l;
-    while(cin &gt;&gt; h &gt;&gt; w &gt;&gt; l) {
-        if(h == 0 &amp;&amp; w == 0 &amp;&amp; l == 0) break;
-
-        vector&lt;string&gt; v(h);
-        rep(i, h) cin &gt;&gt; v[i];
-
-        rep(i, h) {
-            rep(j, w) {
-                if(v[i][j] == 'E') {
-                    sy = i; sx = j;
-                    dir = 0;
-                    v[i][j] = '.';
-                }
-                else if(v[i][j] == 'S') {
-                    sy = i; sx = j;
-                    dir = 1;
-                    v[i][j] = '.';
-                }
-                else if(v[i][j] == 'W') {
-                    sy = i; sx = j;
-                    dir = 2;
-                    v[i][j] = '.';
-                }
-                else if(v[i][j] == 'N') {
-                    sy = i; sx = j;
-                    dir = 3;
-                    v[i][j] = '.';
-                }
-            }
-        }
-
-        ll d[105][105][4];
-        memset(d, -1, sizeof(d));
-
-        vector&lt;int&gt; X, Y, D;
-        int y = sy, x = sx, cnt = 0;
-
-        rep(i, 4) {
-            int ny = y + dy[(dir + i) % 4];
-            int nx = x + dx[(dir + i) % 4];
-
-            if(can(ny, nx) &amp;&amp; v[ny][nx] == '.') {
-                dir = (dir + i) % 4;
-                break;
-            }
-        }
-
-        int pdir = dir;
-        d[y][x][dir] = cnt;
-        cnt++;
-
-        while(l) {
-            y = y + dy[dir];
-            x = x + dx[dir];
-            pdir = dir;
-            l--;
-
-            rep(i, 4) {
-                int ny = y + dy[(dir + i) % 4];
-                int nx = x + dx[(dir + i) % 4];
-
-                if(can(ny, nx) &amp;&amp; v[ny][nx] == '.') {
-                    dir = (dir + i) % 4;
-                    break;
-                }
-            }
-
-            if(d[y][x][dir] == -1) {
-                d[y][x][dir] = cnt;
-                cnt++;
-            } else {
-                break;
-            }
-        }
-
-        if(l == 0) {
-            cout &lt;&lt; y + 1 &lt;&lt; " " &lt;&lt; x + 1 &lt;&lt; " " &lt;&lt; dd[pdir] &lt;&lt; endl;
-            continue;
-        }
-
-        ll len = cnt - d[y][x][dir];
-        l = l % len;
-        dir = pdir;
-
-        rep(i, l) {
-            rep(j, 4) {
-                int ny = y + dy[(dir + j) % 4];
-                int nx = x + dx[(dir + j) % 4];
-
-                if(can(ny, nx) &amp;&amp; v[ny][nx] == '.') {
-                    y = ny; x = nx;
-                    dir = (dir + j) % 4;
-                    break;
-                }
-            }
-        }
-
-        cout &lt;&lt; y + 1 &lt;&lt; " " &lt;&lt; x + 1 &lt;&lt; " " &lt;&lt; dd[dir] &lt;&lt; endl;
-    }
 
 
     return 0;
