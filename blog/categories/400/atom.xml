@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: 400 | ry0u_ydのblog]]></title>
+  <link href="http://ry0u.github.io/blog/categories/400/atom.xml" rel="self"/>
+  <link href="http://ry0u.github.io/"/>
+  <updated>2016-06-09T14:11:03+09:00</updated>
+  <id>http://ry0u.github.io/</id>
+  <author>
+    <name><![CDATA[ry0u_yd]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ2151 Brave Princess Revisited]]></title>
+    <link href="http://ry0u.github.io/blog/2016/06/09/aoj2151-brave-princess-revisited/"/>
+    <updated>2016-06-09T13:59:08+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/06/09/aoj2151-brave-princess-revisited</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article-full"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2151">Brave Princess Revisited | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>状態を(襲われる盗賊や刺客の人数, お金, 頂点番号)としてdijkstra．現在の状態から次の状態への遷移は，護衛を雇わないで盗賊に襲われる，護衛を雇い守ってもらう，の$2$つである．お金が辺の長さより少ない場合は護衛を雇えないことに注意する．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+#include &lt;queue&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+typedef pair&lt;P, int&gt; PI;
+
+struct edge {
+    int from,to;
+    int cost, res;
+
+    edge(int t,int c) : to(t),cost(c) {}
+    edge(int t,int c,int r) : to(t), cost(c), res(r) {}
+
+    bool operator&lt;(const edge &amp;e) const {
+        return cost &lt; e.cost;
+    }
+};
+
+vector&lt;edge&gt; G[105];
+int d[105][105];
+
+void dijkstra(int s, int l) {
+    rep(i, 105) rep(j, 105) d[i][j] = INF;
+    d[s][l] = 0;
+
+    priority_queue&lt;PI, vector&lt;PI&gt;, greater&lt;PI&gt; &gt; que;
+    que.push(mp(mp(0, -l), s));
+
+    while(que.size()) {
+        PI p = que.top(); que.pop();
+        int cost = p.first.first;
+        int coin = p.first.second;
+        int v = p.second;
+        coin *= -1;
+
+        if(d[v][coin] &lt; cost) continue;
+
+        rep(i, G[v].size()) {
+            edge e = G[v][i];
+
+            if(d[e.to][coin] &gt; d[v][coin] + e.res) {
+                d[e.to][coin] = d[v][coin] + e.res;
+                que.push(mp(mp(d[e.to][coin], -coin), e.to));
+            }
+
+            int nc = coin - e.cost;
+            if(nc &gt;= 0 &amp;&amp; d[e.to][nc] &gt; d[v][coin]) {
+                d[e.to][nc] = d[v][coin];
+                que.push(mp(mp(d[e.to][nc], -nc), e.to));
+            }
+        }
+
+    }
+}
+
+int main() {
+    int n, m, l;
+    while(cin &gt;&gt; n &gt;&gt; m &gt;&gt; l)  {
+        if(n == 0 &amp;&amp; m == 0 &amp;&amp; l == 0) break;
+
+        rep(i, 105) G[i].clear();
+
+        rep(i, m) {
+            int a, b, c, d;
+            cin &gt;&gt; a &gt;&gt; b &gt;&gt; c &gt;&gt; d;
+
+            a--; b--;
+
+            G[a].push_back(edge(b, c, d));
+            G[b].push_back(edge(a, c, d));
+        }
+
+        dijkstra(0, l);
+
+        int ans = INF;
+        rep(i, l+1) {
+            ans = min(ans, d[n-1][i]);
+        }
+
+        cout &lt;&lt; ans &lt;&lt; endl;
+    }
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+</feed>

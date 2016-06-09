@@ -4,7 +4,7 @@
   <title><![CDATA[Category: aoj-icpc | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/aoj-icpc/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-06-07T00:25:58+09:00</updated>
+  <updated>2016-06-09T14:11:03+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,129 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[AOJ2151 Brave Princess Revisited]]></title>
+    <link href="http://ry0u.github.io/blog/2016/06/09/aoj2151-brave-princess-revisited/"/>
+    <updated>2016-06-09T13:59:08+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/06/09/aoj2151-brave-princess-revisited</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article-full"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2151">Brave Princess Revisited | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
+
+
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+
+
+
+<!-- more -->
+
+
+<p>状態を(襲われる盗賊や刺客の人数, お金, 頂点番号)としてdijkstra．現在の状態から次の状態への遷移は，護衛を雇わないで盗賊に襲われる，護衛を雇い守ってもらう，の$2$つである．お金が辺の長さより少ない場合は護衛を雇えないことに注意する．</p>
+
+<h1>Code</h1>
+
+<pre><code class="cpp">#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;cstring&gt;
+#include &lt;algorithm&gt;
+#include &lt;sstream&gt;
+#include &lt;map&gt;
+#include &lt;set&gt;
+#include &lt;queue&gt;
+
+#define REP(i,k,n) for(int i=k;i&lt;n;i++)
+#define rep(i,n) for(int i=0;i&lt;n;i++)
+#define INF 1&lt;&lt;30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair&lt;int,int&gt; P;
+typedef pair&lt;P, int&gt; PI;
+
+struct edge {
+    int from,to;
+    int cost, res;
+
+    edge(int t,int c) : to(t),cost(c) {}
+    edge(int t,int c,int r) : to(t), cost(c), res(r) {}
+
+    bool operator&lt;(const edge &amp;e) const {
+        return cost &lt; e.cost;
+    }
+};
+
+vector&lt;edge&gt; G[105];
+int d[105][105];
+
+void dijkstra(int s, int l) {
+    rep(i, 105) rep(j, 105) d[i][j] = INF;
+    d[s][l] = 0;
+
+    priority_queue&lt;PI, vector&lt;PI&gt;, greater&lt;PI&gt; &gt; que;
+    que.push(mp(mp(0, -l), s));
+
+    while(que.size()) {
+        PI p = que.top(); que.pop();
+        int cost = p.first.first;
+        int coin = p.first.second;
+        int v = p.second;
+        coin *= -1;
+
+        if(d[v][coin] &lt; cost) continue;
+
+        rep(i, G[v].size()) {
+            edge e = G[v][i];
+
+            if(d[e.to][coin] &gt; d[v][coin] + e.res) {
+                d[e.to][coin] = d[v][coin] + e.res;
+                que.push(mp(mp(d[e.to][coin], -coin), e.to));
+            }
+
+            int nc = coin - e.cost;
+            if(nc &gt;= 0 &amp;&amp; d[e.to][nc] &gt; d[v][coin]) {
+                d[e.to][nc] = d[v][coin];
+                que.push(mp(mp(d[e.to][nc], -nc), e.to));
+            }
+        }
+
+    }
+}
+
+int main() {
+    int n, m, l;
+    while(cin &gt;&gt; n &gt;&gt; m &gt;&gt; l)  {
+        if(n == 0 &amp;&amp; m == 0 &amp;&amp; l == 0) break;
+
+        rep(i, 105) G[i].clear();
+
+        rep(i, m) {
+            int a, b, c, d;
+            cin &gt;&gt; a &gt;&gt; b &gt;&gt; c &gt;&gt; d;
+
+            a--; b--;
+
+            G[a].push_back(edge(b, c, d));
+            G[b].push_back(edge(a, c, d));
+        }
+
+        dijkstra(0, l);
+
+        int ans = INF;
+        rep(i, l+1) {
+            ans = min(ans, d[n-1][i]);
+        }
+
+        cout &lt;&lt; ans &lt;&lt; endl;
+    }
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[AOJ2608 Minus One]]></title>
@@ -145,6 +268,8 @@ int main() {
     return 0;
 }
 </code></pre>
+
+<p>経路復元とか色々していて，色々考えた後に書き直したら非常にスッキリして面白いと思った．但し解くのに時間がかかりすぎている&hellip;</p>
 ]]></content>
   </entry>
   
@@ -464,157 +589,6 @@ int main() {
         if(flag) cout &lt;&lt; "Yes" &lt;&lt; endl;
         else cout &lt;&lt; "No" &lt;&lt; endl;
     }
-    return 0;
-}
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[AOJ2299 Tiles are Colorful]]></title>
-    <link href="http://ry0u.github.io/blog/2016/05/28/aoj2299-tiles-are-colorful/"/>
-    <updated>2016-05-28T23:31:22+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/05/28/aoj2299-tiles-are-colorful</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article-full"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2299">Tiles are Colorful | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
-
-
-<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
-
-
-
-
-<!-- more -->
-
-
-<p>マスを叩くとその，上下左右各方向に進んでいき，最初に当たったタイルに同じ色があればそのタイルを消す．最大で何個消せるか？</p>
-
-<blockquote><p>1 ≤ M ≤ 500，1 ≤ N ≤ 500 を満たす．各アルファベット大文字は入力中に 0 個または 2 個現れる．</p></blockquote>
-
-<p>Inputの一番最後に重要なことが書いてあって最初は見逃していた．つまり各アルファベットの対が <script type="math/tex"> 1 </script>個あるかないか，という制約である．各ペアのアルファベットを消すために，どのアルファベットが消されている必要があるかを考える．特に依存関係が無ければそのタイルを消し，他のアルファベットの依存関係になっている箇所があればそこも消す．これを繰り返す．<br/>
-縦，横，斜めのパターンに分けて依存関係を調べた．自分の実装では斜めのパターンが結構面倒だった．</p>
-
-<h1>Code</h1>
-
-<pre><code class="cpp">#include &lt;iostream&gt;
-#include &lt;vector&gt;
-#include &lt;string&gt;
-#include &lt;cstring&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;map&gt;
-#include &lt;set&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-#define INF 1&lt;&lt;30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-
-int main() {
-    int m, n;
-    cin &gt;&gt; m &gt;&gt; n;
-
-    vector&lt;string&gt; v(m);
-    rep(i, m) cin &gt;&gt; v[i];
-
-    map&lt;char, vector&lt;int&gt; &gt; x, y;
-    rep(i, m) {
-        rep(j, n) {
-            if('A' &lt;= v[i][j] &amp;&amp; v[i][j] &lt;= 'Z') {
-                y[v[i][j]].push_back(i);
-                x[v[i][j]].push_back(j);
-            }
-        }
-    }
-
-    set&lt;char&gt; st[30][2];
-    bool used[30][2];
-    memset(used, 0, sizeof(used));
-
-    rep(i, 26) {
-        char c = 'A' + i;
-        if(x[c].size() == 0) continue;
-
-        if(x[c][0] == x[c][1]) {
-            if(abs(y[c][0] - y[c][1]) == 1) continue;
-            used[i][0] = true;
-            int x1 = x[c][0];
-            int y1 = y[c][0], y2 = y[c][1];
-
-            REP(j, min(y1, y2) + 1, max(y1, y2)) {
-                if(v[j][x1] == '.') continue;
-                st[i][0].insert(v[j][x1]);
-            }
-        } else if(y[c][0] == y[c][1]) {
-            if(abs(x[c][0] - x[c][1]) == 1) continue;
-            used[i][0] = true;
-            int y1 = y[c][0];
-            int x1 = x[c][0], x2 = x[c][1];
-            REP(j, min(x1, x2) + 1, max(x1, x2)) {
-                if(v[y1][j] == '.') continue;
-                st[i][0].insert(v[y1][j]);
-            }
-        } else {
-            used[i][0] = true;
-            used[i][1] = true;
-            int x1 = x[c][0], x2 = x[c][1];
-            int y1 = y[c][0], y2 = y[c][1];
-
-            REP(j, min(x1, x2), max(x1, x2) + 1) {
-                if(v[y1][j] == '.' || v[y1][j] == c) continue;
-                st[i][0].insert(v[y1][j]);
-            }
-
-            REP(j, min(y1, y2), max(y1, y2) + 1) {
-                if(v[j][x2] == '.' || v[j][x2] == c) continue;
-                st[i][0].insert(v[j][x2]);
-            }
-
-            REP(j, min(y1, y2), max(y1, y2) + 1) {
-                if(v[j][x1] == '.' || v[j][x1] == c) continue;
-                st[i][1].insert(v[j][x1]);
-            }
-
-            REP(j, min(x1, x2), max(x1, x2) + 1) {
-                if(v[y2][j] == '.' || v[y2][j] == c) continue;
-                st[i][1].insert(v[y2][j]);
-            }
-        }
-    }
-
-    int sum = 0;
-    while(true) {
-        bool flag = true;
-        rep(i, 26) {
-            char c = 'A' + i;
-
-            rep(j, 2) {
-                if(!used[i][j]) continue;
-                if(st[i][j].size() == 0) {
-                    flag = false;
-                    used[i][j] = false;
-                    used[i][!j] = false;
-
-                    rep(k, 26) {
-                        rep(l, 2) {
-                            st[k][l].erase(c);
-                        }
-                    }
-                    sum += 2;
-                }
-            }
-        }
-
-        if(flag) break;
-    }
-
-    cout &lt;&lt; sum &lt;&lt; endl;
-
-
     return 0;
 }
 </code></pre>
