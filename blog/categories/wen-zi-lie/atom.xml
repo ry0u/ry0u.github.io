@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 文字列 | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/wen-zi-lie/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-06-09T14:11:03+09:00</updated>
+  <updated>2016-06-10T23:32:41+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -18,55 +18,87 @@
     <link href="http://ry0u.github.io/blog/2015/07/24/srm663-abba/"/>
     <updated>2015-07-24T18:55:13+09:00</updated>
     <id>http://ry0u.github.io/blog/2015/07/24/srm663-abba</id>
-    <content type="html"><![CDATA[<p>ある文字列Iに，2つの操作が出来る．<br/>
-- 文字列の最後に"A"を足す<br/>
-- 文字列を反転して，最後に"B"を足す</p>
+    <content type="html"><![CDATA[ある文字列Iに，2つの操作が出来る．  
+- 文字列の最後に"A"を足す  
+- 文字列を反転して，最後に"B"を足す  
 
-<p>文字列Iが文字列Tになるかを判定せよ</p>
+文字列Iが文字列Tになるかを判定せよ
 
-<h1>考察</h1>
+# 考察
+愚直にIに操作していくと，2^(T.size()-I.size())で無理．しかしTから減らしていくには，一意しかない．末尾が"A"ならば，一つ前の状態をpreTとすると，T = preT+"A"となる．まと同様に，末尾が"B"ならば，T = reverse(preT) + "B"である．これを繰り返し，Iと同じsizeになった時に，同じかどうかで判定できる．
 
-<p>愚直にIに操作していくと，2<sup>T.size()-I.size()</sup>で無理．しかしTから減らしていくには，一意しかない．末尾が"A"ならば，一つ前の状態をpreTとすると，T = preT+&ldquo;A"となる．まと同様に，末尾が"B"ならば，T = reverse(preT) + "B"である．これを繰り返し，Iと同じsizeになった時に，同じかどうかで判定できる．</p>
+# Code
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#line 5 &quot;ABBA.cpp&quot;</span>
+</span><span class='line'><span class="cp">#include &lt;iostream&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;string&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;vector&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;algorithm&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;sstream&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;cstring&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;queue&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;set&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;map&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="cp">#define REP(i,k,n) for(int i=k;i&lt;n;i++)</span>
+</span><span class='line'><span class="cp">#define rep(i,n) for(int i=0;i&lt;n;i++)</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="p">;</span>
+</span><span class='line'><span class="k">typedef</span> <span class="kt">long</span> <span class="kt">long</span> <span class="n">ll</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">ABBA</span> <span class="p">{</span>
+</span><span class='line'>	<span class="k">public</span><span class="o">:</span>
+</span><span class='line'>	<span class="n">string</span> <span class="n">canObtain</span><span class="p">(</span><span class="n">string</span> <span class="n">I</span><span class="p">,</span> <span class="n">string</span> <span class="n">T</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">while</span><span class="p">(</span><span class="n">T</span> <span class="o">!=</span> <span class="n">I</span> <span class="o">&amp;&amp;</span> <span class="n">T</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">I</span><span class="p">.</span><span class="n">size</span><span class="p">())</span> <span class="p">{</span>
+</span><span class='line'>            <span class="k">if</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="n">T</span><span class="p">.</span><span class="n">size</span><span class="p">()</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="sc">&#39;A&#39;</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>                <span class="n">T</span> <span class="o">=</span> <span class="n">T</span><span class="p">.</span><span class="n">substr</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">T</span><span class="p">.</span><span class="n">size</span><span class="p">()</span><span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+</span><span class='line'>            <span class="p">}</span><span class="k">else</span> <span class="p">{</span>
+</span><span class='line'>                <span class="n">T</span> <span class="o">=</span> <span class="n">T</span><span class="p">.</span><span class="n">substr</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">T</span><span class="p">.</span><span class="n">size</span><span class="p">()</span><span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+</span><span class='line'>                <span class="n">reverse</span><span class="p">(</span><span class="n">T</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span><span class="n">T</span><span class="p">.</span><span class="n">end</span><span class="p">());</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">if</span><span class="p">(</span><span class="n">T</span> <span class="o">==</span> <span class="n">I</span><span class="p">)</span> <span class="k">return</span> <span class="s">&quot;Possible&quot;</span><span class="p">;</span>
+</span><span class='line'>        <span class="k">return</span> <span class="s">&quot;Impossible&quot;</span><span class="p">;</span>
+</span><span class='line'>	<span class="p">}</span>
+</span><span class='line'><span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure>
 
-<h1>Code</h1>
-
-<pre><code class="cpp">#line 5 "ABBA.cpp"
-#include &lt;iostream&gt;
-#include &lt;string&gt;
-#include &lt;vector&gt;
-#include &lt;algorithm&gt;
-#include &lt;sstream&gt;
-#include &lt;cstring&gt;
-#include &lt;queue&gt;
-#include &lt;set&gt;
-#include &lt;map&gt;
-
-#define REP(i,k,n) for(int i=k;i&lt;n;i++)
-#define rep(i,n) for(int i=0;i&lt;n;i++)
-
-using namespace std;
-typedef long long ll;
-
-class ABBA {
-    public:
-    string canObtain(string I, string T) {
-
-        while(T != I &amp;&amp; T.size() &gt; I.size()) {
-            if(T[T.size()-1] == 'A') {
-                T = T.substr(0,T.size()-1);
-            }else {
-                T = T.substr(0,T.size()-1);
-                reverse(T.begin(),T.end());
-            }
-        }
-
-        if(T == I) return "Possible";
-        return "Impossible";
-    }
-};
-</code></pre>
-
-<p>コードを短く，シンプルにかける．本番中は誤読をしていて死んでいた．このある状態を目的の状態にする問題で，逆からやると上手くいく系はすぐ解けるようになりたい．</p>
+コードを短く，シンプルにかける．本番中は誤読をしていて死んでいた．このある状態を目的の状態にする問題で，逆からやると上手くいく系はすぐ解けるようになりたい．
 ]]></content>
   </entry>
   
