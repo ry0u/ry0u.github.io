@@ -1,0 +1,1107 @@
+---
+layout: post
+title: "最近解いた問題"
+date: 2016-01-07 14:55:41 +0900
+comments: true
+categories: [動的計画法, しゃくとり法，dijkstra, 座標圧縮]
+---
+
+最近，AOJのVolume5を解いてる．解法をまとめないとすぐに忘れるのでメモ
+
+<!-- more -->
+
+## 0515 School Road
+
+http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0515  
+工事現場有りの経路列挙DP．工事現場に向かう遷移と工事現場から出てくる遷移を無くす．
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+int main() {
+	int w, h, n, a, b;
+	while(cin >> w >> h) {
+		if(w == 0 && h == 0) break;
+
+		ll dp[50][50];
+		memset(dp, 0, sizeof(dp));
+
+		cin >> n;
+		rep(i, n) {
+			cin >> a >> b;
+			dp[b][a] = -1;
+		}
+
+		REP(i, 1, w + 1) {
+			if(dp[1][i] == -1) break;
+			dp[1][i] = 1;
+		}
+
+		REP(i, 1, h + 1) {
+			if(dp[i][1] == -1) break;
+			dp[i][1] = 1;
+		}
+
+		REP(i, 2, h + 1) {
+			REP(j, 2, w + 1) {
+				if(dp[i][j] == -1) continue;
+
+				if(dp[i-1][j] != -1) dp[i][j] += dp[i-1][j];
+				if(dp[i][j-1] != -1) dp[i][j] += dp[i][j-1];
+			}
+		}
+
+		cout << dp[h][w] << endl;
+	}
+
+	return 0;
+}
+```
+
+## 0516 Maximum Sum
+
+http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0516  
+k個までの最大部分和．しゃくとり法．
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+int main() {
+	int n, k;
+	while(cin >> n >> k) {
+		if(n == 0 && k == 0) break;
+
+		vector<int> v(n);
+		rep(i, n) cin >> v[i];
+
+		int l = v[0], a = 0;
+		rep(i, k) a += v[i];
+
+		ll ans = a;
+		REP(i, k, n) {
+			a -= l;
+			a += v[i];
+
+			ans = max(ans, (ll)a);
+			l = v[i - k + 1];
+		}
+
+		cout << ans << endl;
+	}
+
+	return 0;
+}
+```
+
+## 0517 Longest Steps
+
+http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0517  
+連続している区間で持つ．  
+- 0がないなら，それぞれの区間の長さの最大  
+- 0があるなら，区間の前後が+1のみずれている場合にくっつけられるので，それが可能かどうか判定  
+
+全体でO(n)
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+int main() {
+	int n, k;
+	while(cin >> n >> k) {
+		if(n == 0 && k == 0) break;
+
+		vector<int> v;
+		bool flag = false;
+		rep(i, k) {
+			int x;
+			cin >> x;
+
+			if(x == 0) {
+				flag = true;
+			} else {
+				v.push_back(x);
+			}
+		}
+
+		sort(v.begin(), v.end());
+
+		vector<P> p;
+		int left = -1, right = -1;
+		rep(i, v.size()) {
+			left = v[i];
+			right = v[i];
+			REP(j, i+1, v.size()) {
+				if(right + 1 == v[j]) {
+					right = v[j];
+					i++;
+				} else break;
+			}
+
+			p.push_back(mp(left, right));
+		}
+
+		int ans = 0;
+		rep(i, p.size()) {
+			ans = max(ans, p[i].second - p[i].first + 1);
+		}
+
+		if(flag) {
+			REP(i, 1, p.size()) {
+				if(p[i].first - p[i-1].second == 2) {
+					ans = max(ans, p[i].second - p[i-1].first + 1);
+				}
+			}
+		}
+
+		cout << ans << endl;
+	}
+
+	return 0;
+}
+
+```
+
+## 0518 The Oldest Site
+
+http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0518  
+最大の正方形を探す．2点を選んだ時に，その2点を結ぶ線を一辺とした時の正方形を考える．  
+選んだ2点をv[i], v[j]とした時にp = v[j] - v[i]と定めると，もう2つの点は  
+
+* v[i] + (p.y, -p.x) と v[i] + (p.x + p.y, p.y - p.x)
+* v[i] + (-p.y, p.x) と v[i] + (p.x - p.y, p.y + p.x)
+
+の2パターンとなる．その点が存在するかどうかをsetに持たせて判定し，最大値を求める．O(n^2 logn)．
+
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+#include <cmath>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+#define EPS 1e-8
+#define equals(a,b) fabs((a) - (b)) < EPS
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+struct Point {
+	double x, y;
+
+	Point(double x=0, double y=0) : x(x), y(y) {}
+
+	Point operator+(const Point &o) const { return Point(x+o.x, y+o.y); }
+
+	Point operator-(const Point &o) const { return Point(x-o.x, y-o.y); }
+
+	Point operator*(const double m) const { return Point(x*m, y*m); }
+
+	Point operator/(const double d) const { return Point(x/d, y/d); }
+
+	bool operator<(const Point &o) const { return x != o.x ? x < o.x : y < o.y; }
+
+	bool operator==(const Point &o) const { return fabs(x-o.x) < EPS && fabs(y-o.y) < EPS; }
+
+	double cross(const Point &o) const { return x * o.y - y * o.x; }
+
+	double dot(const Point &o) const { return x * o.x + y * o.y; }
+
+	double atan() const { return atan2(y, x); }
+
+	double norm() const { return sqrt(dot(*this)); }
+
+	double distance(const Point &o) const { return (o - (*this)).norm(); }
+
+	double area(const Point &a,const Point &b) {
+		Point p = a - (*this), p2 = b - (*this); 
+		return p.cross(p2);
+	}
+
+	double area_abs(const Point &a,const Point &b) const {
+		Point p = a - (*this), p2 = b - (*this);
+		return fabs(p.cross(p2)) / 2.0;
+	}	
+
+	//線分abが自身に含まれているのかどうか判断する
+	int between(const Point &a,const Point &b) {
+		if(area(a,b) != 0) return 0;
+
+		if(a.x != b.x)  return ((a.x <= x) && (x <= b.x)) || ((a.x >= x) && (x >= b.x));
+		else return ((a.y <= y) && (y <= b.y)) || ((a.y >= y) && (y >= b.y));
+	}      
+
+	double distance_seg(const Point& a,const Point& b) {
+		if((b-a).dot(*this-a) < EPS) {
+			return (*this-a).norm();
+		}
+		if((a-b).dot(*this-b) < EPS) {
+			return (*this-b).norm();
+		}
+		return abs((b-a).cross(*this-a)) / (b-a).norm();
+	}
+
+	bool hitPolygon(const Point& a,const Point& b,const Point& c) {
+		double t = (b-a).cross(*this-b);
+		double t2 = (c-b).cross(*this-c);
+		double t3 = (a-c).cross(*this-a);	
+
+		if((t > 0 && t2 > 0 && t3 > 0) || ( t < 0 && t2 < 0 && t3 < 0)) {
+			return true;
+		}
+
+		return false;
+	}
+};
+
+ostream& operator << (ostream& os, const Point& p) {
+	os << "(" << p.x << ", " << p.y << ")";
+	return os;
+}
+
+int main() {
+	int n;
+	while(cin >> n && n) {
+		vector<Point> v(n);
+		set<Point> st;
+		rep(i, n) {
+			cin >> v[i].x >> v[i].y;
+			st.insert(v[i]);
+		}
+
+		int ans = 0;
+		rep(i, n) {
+			REP(j, i+1, n) {
+				Point p = v[j] - v[i];
+				Point a = v[i] + Point(p.y, -p.x);
+				Point b = v[i] + Point(p.x + p.y, p.y - p.x);
+
+				if(st.find(a) != st.end() && st.find(b) != st.end()) {
+					ans = max(ans, (int) p.dot(p));
+				}
+
+				Point c = v[i] + Point(-p.y, p.x);
+				Point d = v[i] + Point(p.x - p.y, p.y + p.x);
+
+				if(st.find(c) != st.end() && st.find(d) != st.end()) {
+					ans = max(ans, (int) p.dot(p));
+				}
+			}
+		}
+
+		cout << ans << endl;
+	}
+	return 0;
+}
+```
+
+## 0524 Searching Constellation
+
+http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0524  
+目的の星座，写真の星それぞれpairで持ってソート．目的の星座を0番目からそれくらいずれているかを持っておく．1つの点を選んだ時に，その点を0番目の点と仮定した時に，ずれた点が存在するかどうかで星座判定を行う．
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+int main() {
+	int n, m;
+	while(cin >> n && n) {
+		vector<P> v(n);
+		rep(i, n) cin >> v[i].first >> v[i].second;
+
+		cin >> m;
+		vector<P> p(m);
+		rep(i, m) cin >> p[i].first >> p[i].second;
+
+		sort(v.begin(), v.end());
+		sort(p.begin(), p.end());
+
+		vector<P> d(n);
+		rep(i, n) {
+			d[i].first = v[i].first - v[0].first;
+			d[i].second = v[i].second - v[0].second;
+		}
+
+		int a = 0, b = 0;
+		rep(i, m) {
+			bool flag = true;
+
+			rep(j, n) {
+				P t(p[i].first + d[j].first, p[i].second + d[j].second);
+				if(binary_search(p.begin(), p.end(), t)) continue;
+				flag = false;
+			}
+
+			if(flag) {
+				a = p[i].first - v[0].first;
+				b = p[i].second - v[0].second;
+			}
+		}
+
+		cout << a << " " << b << endl;
+	}
+
+	return 0;
+}
+```
+
+## 0525 Osenbei
+
+http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0525  
+ヒントにもあるとおり10行しかないので，どの行を反転させたかは高々2^nで全列挙出来る．次に列は0と1の多いほう(1が多いならそのまま，0が多いなら反転)で決まる．全体でO(2^R * RC)．
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+int main() {
+	int h, w;
+	while(cin >> h >> w) {
+		if(h == 0 && w == 0) break;
+
+		vector< vector< int > > v(h, vector<int>(w));
+		rep(i, h) {
+			rep(j, w) cin >> v[i][j];
+		}
+
+		int ans = 0;
+		rep(i, 1 << h) {
+			vector< vector<int> > t(v.begin(), v.end());
+			rep(j, h) {
+				if(i & (1 << j)) {
+					rep(k, w) t[j][k] = !t[j][k];
+				}
+			}
+
+			int res = 0;
+			rep(j, w) {
+				int cnt = 0;
+				rep(k, h) cnt += t[k][j];
+				res += max(cnt, h - cnt);
+			}
+
+			ans = max(ans, res);
+		}
+
+		cout << ans << endl;
+	}
+	return 0;
+}
+```
+
+## 0526 Boat Travel
+
+http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0526  
+辺を追加しながら，注文票のクエリが来た時にdijkstra．辺を追加する時に，既にその町と町を結ぶ辺があればコストが安いほうを採用する．O(k * n^2 log(n))．  
+0-indexedにしていないのに初期化をn-1までしかしていないことに全く気づかずWAを大量生産した．
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+#include <queue>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1LL<<62
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+struct edge {
+	int from,to;
+	int cost;
+
+	edge(int t,int c) : to(t),cost(c) {}
+	edge(int f,int t,int c) : from(f),to(t),cost(c) {}
+
+	bool operator<(const edge &e) const {
+		return cost < e.cost;
+	}
+};
+
+vector<edge> G[105];
+ll d[105];
+
+void dijkstra(int s,int n) {
+	priority_queue<P,vector<P>,greater<P> > que;
+	fill(d,d+n,INF);
+
+	d[s] = 0;
+	que.push(P(0,s));
+
+	while(que.size()) {
+		P p = que.top();
+		que.pop();
+
+		int v = p.second;
+		if(d[v] < p.first) continue;
+
+		rep(i,G[v].size()) {
+			edge e = G[v][i];
+			if(d[e.to] > d[v] + e.cost) {
+				d[e.to] = d[v] + e.cost;
+				que.push(P(d[e.to],e.to));
+			}
+		}
+	}
+}
+
+int main() {
+	int n, m;
+	while(cin >> n >> m) {
+		if(n == 0 && m == 0) break;
+
+		rep(i, n + 1) G[i].clear();
+
+		rep(i, m) {
+			int q, a, b, c;
+			cin >> q;
+
+			if(q == 0) {
+				cin >> a >> b;
+
+				a--;
+				b--;
+				
+				dijkstra(a, n);
+
+				if(d[b] == INF) cout << -1 << endl;
+				else cout << d[b] << endl;
+			} else {
+				cin >> a >> b >> c;
+				
+				a--;
+				b--;
+
+				bool flag = true;
+				rep(j, G[a].size()) {
+					if(G[a][j].to == b) {
+						flag = false;
+						G[a][j].cost = min(G[a][j].cost, c);
+					}
+				}
+
+				rep(j, G[b].size()) {
+					if(G[b][j].to == a) {
+						flag = false;
+						G[b][j].cost = min(G[b][j].cost, c);
+					}
+				}
+				
+				if(flag) {
+					G[a].push_back(edge(b, c));
+					G[b].push_back(edge(a, c));
+				}
+			}
+		}
+	}
+
+	return 0;
+}
+```
+
+## 0527 Setting Go Stones
+
+http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0527  
+偶奇．ひっくり返すときに同じ色の場所までしかしない．場所をstackに入れておいて  
+
+- 白をひっくり返す時は，一個前に白と黒をpopして今見てる場所と+1，白のpopした場所を-1
+- 黒をひっくり返す時は，一個前に白と黒をpopして今見てる場所と+1，黒のpopした場所を-1
+
+この処理をした後にimosして偶奇を見て反転．
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+#include <stack>
+#include <iomanip>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+int n, cnt[100005];
+
+int main() {
+	while(cin >> n && n) {
+		memset(cnt, 0, sizeof(cnt));
+
+		vector<int> v(n+1);
+		rep(i, n) cin >> v[i+1];
+
+		stack<int> w, b;
+		REP(i, 1, n+1) {
+			if(i % 2 == 0 && v[i] != v[i-1]) {
+				cnt[i-1]++;
+				if(v[i] == 0) {
+					if(w.size()) {
+						int p = w.top();
+						w.pop();
+						cnt[p]--;
+
+					}
+
+					if(b.size()) b.pop();
+				} else {
+					if(b.size()) {
+						int p = b.top();
+						b.pop();
+						cnt[p]--;
+
+					}
+
+					if(w.size()) w.pop();
+				}
+			}
+
+			if(v[i] == 0) {
+				if(w.size() && w.top() + 1 == i) {
+					w.pop();
+				}
+				w.push(i);
+			}
+			else {
+				if(b.size() && b.top() + 1 == i) {
+					b.pop();
+				}
+				b.push(i);
+			}
+
+		}
+		
+		for(int i = n; i >= 1; i--) {
+			cnt[i-1] += cnt[i];
+		}
+
+
+		REP(i, 1, n+1) {
+			if(cnt[i]%2 == 0) continue;
+			v[i] = !v[i];
+		}
+
+		int ans = 0;
+		REP(i, 1, n+1) {
+			ans += !v[i];
+		}
+
+		cout << ans << endl;
+	}
+	return 0;
+}
+```
+
+## 0528 Common Sub-String
+
+http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0528  
+このでの部分文字列とは連続した文字列なので，LCSの等しくない時に右から来る遷移と上のから来る遷移を消す．
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+int c[4005][4005];
+
+int lcs(string s, string s2) {
+	int m = s.size();
+	int n = s2.size();
+	int ret = 0;
+
+	memset(c, 0, sizeof(c));
+	s = ' ' + s;
+	s2 = ' ' + s2;
+
+	REP(i,1,m+1) c[i][0] = 0;
+	REP(j,1,n+1) c[0][j] = 0;
+
+	REP(i,1,m+1) {
+		REP(j,1,n+1) {
+			if(s[i] == s2[j]) c[i][j] = c[i-1][j-1] + 1;
+			ret = max(ret,c[i][j]);
+	    }
+    }
+
+	return ret;
+}
+
+int main() {
+	string a, b;
+	while(cin >> a >> b) {
+		cout << lcs(a, b) << endl;
+	}
+	return 0;
+}
+```
+
+## 0529 Darts
+
+http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0529  
+4本まで投げれるので愚直にやるとn^4．しかし4本までの組み合わせは1本，2本，1本 + 2本, 2本 + 2本なので最初に列挙する．p[i]を選んだ時に選べる最大はm-p[i]なのでm-p[i]を超えない最大のものを持ってくる．O(n^2 logn)
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+int main() {
+	int n, m;
+	while(cin >> n >> m) {
+		if(n == 0 && m == 0) break;
+
+		vector<ll> v(n);
+		rep(i, n) cin >> v[i];
+
+		vector<ll> p;
+		rep(i, n) p.push_back(v[i]);
+
+		rep(i, n) {
+			REP(j, i, n) {
+				p.push_back(v[i] + v[j]);
+			}
+		}
+
+		sort(p.begin(), p.end());
+		ll ans = 0;
+		rep(i, p.size()) {
+			int id = upper_bound(p.begin(), p.end(), m - p[i]) - p.begin();
+			if(id == 0) {
+				if(p[i] <= m) ans = max(ans, p[i]);
+			}
+			else ans = max(ans, p[i] + p[id-1]);
+		}
+
+		cout << ans << endl;
+	}
+
+	return 0;
+}
+```
+
+## 0530 Pyon-Pyon River Crossing
+
+http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0530  
+辺の重みを危険度にしてdijkstra．一個飛ばしの辺を予め追加しておきその辺のflagをtrueにしておく．後は，半額チケット有りdijkstraと同様に，その辺を使うなら+1して次の状態へいき，m枚以上使えないようにすれば良い．
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+#include <queue>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+int n, m;
+
+struct edge {
+	int from,to;
+	int cost;
+	bool sp;
+
+	edge(int t,int c) : to(t),cost(c) {}
+	edge(int t,int c,bool f) : to(t), cost(c), sp(f) {}
+
+	bool operator<(const edge &e) const {
+		return cost < e.cost;
+	}
+};
+
+vector<edge> G[2000];
+int d[2000][2000];
+
+void dijkstra(int s) {
+	// cost ticket place
+	priority_queue<pair<int, pair<int, int> >, vector< pair<int, pair<int, int> > >, greater< pair<int, pair<int, int> > > > que;
+	rep(i, 2000) rep(j, 2000) d[i][j] = INF;
+	d[s][0] = 0;
+	que.push(mp(0, mp(0,s)));
+	
+	while(que.size()) {
+		int c = que.top().first;
+		P p = que.top().second;
+
+		que.pop();
+		int t = p.first;
+		int v = p.second;
+
+		if(d[v][t] < c) continue;
+	
+		rep(i,G[v].size()) {
+			edge e = G[v][i];
+			if(e.sp) {
+				if(t + 1 <= m && d[e.to][t+1] > d[v][t] + e.cost) {
+					d[e.to][t+1] = d[v][t] + e.cost;
+					que.push(mp(d[e.to][t+1], mp(t+1, e.to)));
+				}
+			}
+			else {
+				if(d[e.to][t] > d[v][t] + e.cost) {
+					d[e.to][t] = d[v][t] + e.cost;
+					que.push(mp(d[e.to][t], mp(t, e.to)));
+				}
+			}
+		}
+	}
+}
+
+int main() {
+	while(cin >> n >> m) {
+		if(n == 0 && m == 0) break;
+
+		rep(i, 2000) G[i].clear();
+
+		vector<pair<P, int> > v[n];
+		int id = 1;
+		rep(i, n) {
+			int k;
+			cin >> k;
+
+			rep(j, k) {
+				int a, b;
+				cin >> a >> b;
+				v[i].push_back(mp(mp(a, b), id));
+				id++;
+			}
+		}
+
+		rep(i, v[0].size()) {
+			P p = v[0][i].first;
+			int a = v[0][i].second;
+			G[0].push_back(edge(a, 0, false));
+		}
+
+		if(n >= 2) {
+			rep(i, v[1].size()) {
+				P p = v[1][i].first;
+				int a = v[1][i].second;
+				G[0].push_back(edge(a, 0, true));
+			}
+		}
+
+		rep(i, n-1) {
+			rep(j, v[i].size()) {
+				P p = v[i][j].first;
+				int a = v[i][j].second;
+				
+				rep(k, v[i+1].size()) {
+					P q = v[i+1][k].first;
+					int b = v[i+1][k].second;
+					int c = (p.second + q.second) * abs(p.first - q.first);
+
+					G[a].push_back(edge(b, c, false));
+				}
+
+				if(i >= n-2) continue;
+
+				rep(k, v[i+2].size()) {
+					P q = v[i+2][k].first;
+					int b = v[i+2][k].second;
+					int c = (p.second + q.second) * abs(p.first - q.first);
+
+					G[a].push_back(edge(b, c, true));
+				}
+			}
+		}
+
+		if(n >= 2) {
+			rep(i, v[n-2].size()) {
+				P p = v[n-2][i].first;
+				int b = v[n-2][i].second;
+				G[b].push_back(edge(id, 0, true));
+			}
+		}
+
+		rep(i, v[n-1].size()) {
+			P p = v[n-1][i].first;
+			int b = v[n-1][i].second;
+			G[b].push_back(edge(id, 0, false));
+		}
+
+		dijkstra(0);
+
+		int ans = INF;
+		rep(i, m + 1) {
+			ans = min(ans, d[id][i]);
+		}
+		
+		cout << ans << endl;
+	}
+	return 0;
+}
+```
+
+## 0531 Paint Color
+
+http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0531  
+問題文を勘違いして最初意味不明なことをしていた．問題文を理解すると蟻本の座標圧縮と同じだと思い実装する．ベニヤ板全体の大きさが与えられるので，圧縮する時に端(0とW-1，0とH-1)も追加しておく．
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+#include <queue>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+int W, H, n;
+
+int compress(vector<int> &x1, vector<int> &x2, int w) {
+	vector<int> xs;
+
+	rep(i, n) {
+		for(int d = -1; d <= 1; d++) {
+			int tx1 = x1[i] + d, tx2 = x2[i] + d;
+			if(1 <= tx1 && tx1 < w) xs.push_back(tx1);
+			if(1 <= tx2 && tx2 < w) xs.push_back(tx2);
+		}
+	}
+
+	xs.push_back(0);
+	xs.push_back(w-1);
+
+	sort(xs.begin(), xs.end());
+	xs.erase(unique(xs.begin(),xs.end()),xs.end());
+
+	rep(i, n) {
+		x1[i] = lower_bound(xs.begin(), xs.end(), x1[i]) - xs.begin();
+		x2[i] = lower_bound(xs.begin(), xs.end(), x2[i]) - xs.begin();
+	}
+
+	return xs.size();
+}
+
+bool used[1000 * 6 + 5][1000 * 6 + 5];
+int dx[4] = {1, 0, -1, 0};
+int dy[4] = {0, 1, 0, -1};
+
+bool can(int y,int x) {
+	if(0 <= y && y < H && 0 <= x && x < W) return true;
+	return false;
+}
+
+int main() {
+
+	while(cin >> W >> H) {
+		if(W == 0 && H == 0) break;
+		cin >> n;
+
+		vector<int> x1(n), x2(n), y1(n), y2(n);
+		rep(i, n) {
+			cin >> x1[i] >> y1[i] >> x2[i] >> y2[i];
+		}
+
+		W = compress(x1, x2, W);
+		H = compress(y1, y2, H);
+
+		memset(used, 0, sizeof(used));
+		rep(i, n) {
+			REP(y, y1[i], y2[i]) {
+				REP(x, x1[i], x2[i]) {
+					used[y][x] = true;
+				}
+			}
+		}
+
+		int ans = 0;
+		rep(i, H) {
+			rep(j, W) {
+				if(used[i][j]) continue;
+				ans++;
+
+				queue<P> que;
+				que.push(mp(i, j));
+				used[i][j] = true;
+
+				while(que.size()) {
+					P p = que.front();
+					que.pop();
+
+					rep(k, 4) {
+						int ny = p.first + dy[k];
+						int nx = p.second + dx[k];
+
+						if(can(ny, nx) && !used[ny][nx]) {
+							used[ny][nx] = true;
+							que.push(mp(ny, nx));
+						}
+					}
+				}
+			}
+		}
+
+		cout << ans << endl;
+	}
+
+	return 0;
+}
+```

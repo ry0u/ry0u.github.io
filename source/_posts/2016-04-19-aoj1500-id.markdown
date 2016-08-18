@@ -1,0 +1,102 @@
+---
+layout: post
+title: "AOJ1500 ID"
+date: 2016-04-19 23:41:11 +0900
+comments: true
+categories: [AOJ, Vol15, 全探索]
+---
+
+<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1500">ID | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+<!-- more -->
+
+'?'に入る{% m %} a_i {% em %}を全探索．'?'の数が小さいので十分間に合う．stringstream最初使ってて，やっぱり遅い...となった．
+
+# Code
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+int f(int x, bool f) {
+	int ret = 0;
+	if(f) x *= 2;
+	while(x) {
+		ret += (x % 10);
+		x /= 10;
+	}
+	return ret;
+}
+
+vector<int> id, a;
+int n, m;
+int cnt = 0;
+
+void dfs(int i, int res) {
+	if(i == id.size()) {
+		if(res % 10 == 0) {
+			cnt++;
+		}
+		return;
+	}
+
+	rep(j, m) {
+		if((n - id[i]) % 2 == 0) {
+			dfs(i + 1, res + f(a[j], true));
+		} else {
+			dfs(i + 1, res + f(a[j], false));
+		}
+	}
+}
+
+int main() {
+	cin >> n;
+
+	string s;
+	cin >> s;
+
+	cin >> m;
+
+	a.resize(m);
+	rep(i, m) cin >> a[i];
+	sort(a.begin(), a.end());
+
+	int sum = 0;
+	rep(i, n) {
+		if(s[i] =='*') {
+			id.push_back(i);
+		} else {
+			if((n - i) % 2 == 0) {
+				sum += f(s[i] - '0', true);
+			} else {
+				sum += f(s[i] - '0' , false);
+			}
+		}
+	}
+
+	cnt = 0;
+	dfs(0, sum);
+
+	cout << cnt << endl;
+
+	return 0;
+}
+```
+

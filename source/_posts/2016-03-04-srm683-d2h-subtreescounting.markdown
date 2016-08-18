@@ -1,0 +1,146 @@
+---
+layout: post
+title: "SRM683 D2H SubtreesCounting"
+date: 2016-03-04 16:38:35 +0900
+comments: true
+categories: [Topcoder, SRM, 木]
+---
+
+<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="https://community.topcoder.com/stat?c=problem_statement&pm=14179&rd=16653">TopCoder Statistics - Problem Statement</a></h4><p>You are given an undirected tree T. (The input format is specified below.) The vertices of the tree are numbered 0 through n-1. A subtree of T is any subgraph of T that is connected. The size of a subtree is the number of vertices it contains.</p></blockquote>
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+<!-- more -->
+
+### Sample1
+
+Sample1で構成される木は
+{% img /images/SRM/683d2h-0.png %}
+である．この木の全ての部分木の頂点数は
+
+頂点数 {% m %} 1 \to {% em %}
+{% img /images/SRM/683d2h-1.png %}
+{% img /images/SRM/683d2h-2.png %}
+{% img /images/SRM/683d2h-3.png %}
+  
+頂点数 {% m %} 2 \to {% em %}
+{% img /images/SRM/683d2h-4.png %}
+{% img /images/SRM/683d2h-5.png %}
+  
+頂点数 {% m %} 3 \to {% em %}
+{% img /images/SRM/683d2h-6.png %}
+  
+よって{% m %} 1 + 1 + 1 + 2 + 2 + 3 = 10 {% em %}である．  
+
+---
+
+頂点{% m %} i {% em %}を根とする木に頂点{% m %} j {% em %}を根とする木を付け加える場合を考える．  
+{% img /images/SRM/683d2h-7.png %}
+を
+{% img /images/SRM/683d2h-8.png %}
+としたい．  
+この時，
+{% math %}
+\begin{eqnarray}
+	dp[i] &:=& iを根とする全ての部分木の頂点数の和 \\
+	num[i] &:=& iを根とする部分木の個数
+\end{eqnarray}
+{% endmath %}
+とすると，頂点数{% m %}dp[i]はdp[j] * num[i] + dp[i] * num[j] {% em %}だけ増加する．
+
+* {% m %} dp[j] * num[i] {% em %}  
+	{% img /images/SRM/683d2h-9.png %}
+	{% img /images/SRM/683d2h-10.png %}
+	{% img /images/SRM/683d2h-11.png %}
+	{% img /images/SRM/683d2h-12.png %}
+* {% m %} dp[i] * num[j] {% em %}  
+	{% img /images/SRM/683d2h-12.png %}
+	{% img /images/SRM/683d2h-13.png %}
+	{% img /images/SRM/683d2h-14.png %}
+	{% img /images/SRM/683d2h-15.png %}
+	{% img /images/SRM/683d2h-16.png %}
+	{% img /images/SRM/683d2h-17.png %}
+	{% img /images/SRM/683d2h-18.png %}
+	{% img /images/SRM/683d2h-19.png %}
+	{% img /images/SRM/683d2h-20.png %}
+
+
+同様に部分木の個数{% m %} num[i]はnum[i] * num[j] {% em %}だけ増加する．適当に根を決め，潜って元の頂点に戻る時に足していく．自分の全ての子を潜り終わったらそれ以上変更があることはないので数える．
+
+# Code
+
+```cpp
+struct edge {
+	int from,to;
+	int cost;
+
+	edge(int t,int c) : to(t),cost(c) {}
+	edge(int f,int t,int c) : from(f),to(t),cost(c) {}
+
+	bool operator<(const edge &e) const {
+		return cost < e.cost;
+	}
+};
+
+vector<edge> G[100005];
+ll dp[100005], num[100005], cnt[100005];
+bool used[100005];
+
+void dfs(int cur) {
+	used[cur] = true;
+	dp[cur] = 1;
+	num[cur] = 1;
+	
+	rep(i, G[cur].size()) {
+		int to = G[cur][i].to;
+	
+		if(!used[to]) {
+			dfs(to);
+
+			dp[cur] += (dp[cur] * num[to]) + (dp[to] * num[cur]);
+			num[cur] += num[cur] * num[to];
+	
+			dp[cur] %= MOD;
+			num[cur] %= MOD;
+		}
+	}
+	
+	cnt[cur] = dp[cur];
+}
+
+class SubtreesCounting {
+	public:
+	int sumOfSizes(int n, int a0, int b, int c, int m) {
+
+		rep(i, 100005) G[i].clear();
+
+		vector<ll> v(n);
+		v[0] = a0;
+
+		REP(i, 1, n-1) {
+			v[i] = (b * v[i-1]) % m + c;
+			v[i] %= m;
+		}
+
+		REP(i, 1, n) {
+			int j = v[i-1] % i;
+			G[i].push_back(edge(j, 1));
+			G[j].push_back(edge(i, 1));
+		}
+
+		memset(dp, 0, sizeof(dp));
+		memset(num, 0, sizeof(num));
+		memset(cnt, 0, sizeof(cnt));
+		memset(used, 0, sizeof(used));
+
+		dfs(0);
+
+		ll ans = 0;
+		rep(i, n) {
+			ans += cnt[i];
+			ans %= MOD;
+		}
+
+		return ans;
+	}
+};
+```

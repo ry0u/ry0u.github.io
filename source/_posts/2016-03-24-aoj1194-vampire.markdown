@@ -1,0 +1,76 @@
+---
+layout: post
+title: "AOJ1194 Vampire"
+date: 2016-03-24 00:28:29 +0900
+comments: true
+categories: [AOJ-ICPC, 300, 幾何]
+---
+
+<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1194">Vampire</a></h4><p>Mr. C is a vampire. If he is exposed to the sunlight directly, he turns into ash. Nevertheless, last night, he attended to the meeting of Immortal and Corpse Programmers Circle, and he has to go home in the near dawn.</p></blockquote>
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+<!-- more -->
+
+ある点 {% m %} (x, y) {% em %}を端として決めると距離が決まる．Sample Input3を考えると下図のケースが最大である．  
+{% img /images/AOJ/1194.png %}
+
+緑の線の長さは {% m %} {\rm sqrt} (r ^2 - x ^2) {% em %}になるので，求めたい赤の線の長さが {% m %} r + y - {\rm sqrt}(r ^2 - x ^2) {% em %}となる．建物が重なっている場所は一番大きい所を見て， {% m %} {\rm min}(H[i-1], H[i]) {% em %}が建物の角となり，その点を端として決めて一番短いものを答える．
+
+# Code
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+#include <cmath>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+int main() {
+	int r, n;
+	while(cin >> r >> n) {
+
+		if(r == 0 && n == 0) break;
+
+		vector<pair<int, P> > v(n);
+		rep(i, n) cin >> v[i].second.first >> v[i].second.second >> v[i].first;
+
+		int H[60], GETA = 30;
+		memset(H, 0, sizeof(H));
+
+		rep(i, n) {
+			int h = v[i].first, x1 = v[i].second.first, x2 = v[i].second.second;
+
+			REP(j, x1, x2) {
+				H[j + GETA] = max(H[j + GETA], h);
+			}
+		}
+
+		double ans = INF;
+		REP(i, -r+1, r) {
+			double res = r + min(H[i + GETA], H[i - 1 + GETA]);
+			ans = min(ans, res - sqrt(r*r - i*i));
+		}
+
+		cout << fixed;
+		cout.precision(4);
+		cout << ans << endl;
+	}
+
+	return 0;
+}
+```
+

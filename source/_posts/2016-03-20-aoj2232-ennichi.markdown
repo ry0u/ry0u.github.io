@@ -1,0 +1,204 @@
+---
+layout: post
+title: "AOJ2232 Ennichi"
+date: 2016-03-20 23:05:17 +0900
+comments: true
+categories: [AOJ-ICPC, 250, 実装]
+---
+
+<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2232">Ennichi | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+<!-- more -->
+
+ぷよぷよ？みたいなやつ．横に隣り合うマスを実際に入れ替えてシュミレーションする．空きマスと交換すると，最初に落下処理をしなければならないことになかなか気付けなかった．
+
+# Code
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+int h, w, n;
+
+int sx,sy,gx,gy;
+int dx[4] = {1,-1, 0, 0};
+int dy[4] = {0, 0, 1,-1};
+vector<string> s;
+bool used[35][35], used2[35][35];
+
+bool can(int y,int x) {
+	if(0 <= y && y < h && 0 <= x && x < w) return true;
+	return false;
+}
+
+bool func(vector<string> t) {
+
+	for(int i = h - 1; i >= 0; i--) {
+		for(int j = w - 1; j >= 0; j--) {
+			if(t[i][j] == '.') continue;
+
+			int k = i;
+			while(can(k+1, j) && t[k+1][j] == '.') {
+				swap(t[k][j], t[k+1][j]);
+				k++;
+			}
+		}
+	}
+
+	while(true) {
+		bool flag = false;
+		memset(used, 0, sizeof(used));
+		memset(used2, 0, sizeof(used2));
+
+		for(int i = h-1; i >= 0; i--) {
+			for(int j = w-1; j >= 0; j--) {
+				if(t[i][j] == '.') continue;
+
+				if(!used[i][j]) {
+					int len = 1;
+					int k = j+1;
+					while(can(i, k) && t[i][k] == t[i][j]) {
+						len++;
+						k++;
+					}
+
+					k = j-1;
+					while(can(i, k) && t[i][k] == t[i][j]) {
+						len++;
+						k--;
+					}
+
+					if(len >= n) {
+						flag = true;
+						used[i][j] = true;
+						k = j + 1;
+						while(can(i, k) && t[i][k] == t[i][j]) {
+							used[i][k] = true;
+							k++;
+						}
+
+						k = j - 1;
+						while(can(i, k) && t[i][k] == t[i][j]) {
+							used[i][k] = true;
+							k--;
+						}
+					}
+				}
+
+				if(!used2[i][j]) {
+					int len = 1;
+					int k = i + 1;
+					while(can(k, j) && t[k][j] == t[i][j]) {
+						len++;
+						k++;
+					}
+
+					k = i - 1;
+					while(can(k, j) && t[k][j] == t[i][j]) {
+						len++;
+						k--;
+					}
+
+					if(len >= n) {
+						flag = true;
+						used2[i][j] = true;
+						k = i + 1;
+						while(can(k, j) && t[k][j] == t[i][j]) {
+							used2[k][j] = true;
+							k++;
+						}
+
+						k = i - 1;
+						while(can(k, j) && t[k][j] == t[i][j]) {
+							used2[k][j];
+							k++;
+						}
+					}
+				}
+			}
+		}
+
+		rep(i, h) {
+			rep(j, w) {
+				if(used[i][j] || used2[i][j]) t[i][j] = '.';
+			}
+		}
+
+		for(int i = h - 1; i >= 0; i--) {
+			for(int j = w - 1; j >= 0; j--) {
+				if(t[i][j] == '.') continue;
+
+				int k = i;
+				while(can(k+1, j) && t[k+1][j] == '.') {
+					swap(t[k][j], t[k+1][j]);
+					k++;
+				}
+			}
+		}
+
+		if(flag) continue;
+		else break;
+	}
+
+	rep(i, h) {
+		rep(j, w) {
+			if(t[i][j] == '.') continue;
+			return false;
+		}
+	}
+	return true;
+}
+
+int main() {
+	cin >> h >> w >> n;
+
+	s.resize(h);
+	rep(i, h) cin >> s[i];
+
+	bool flag = false;
+	rep(i, h) {
+		rep(j, w) {
+			if(s[i][j] == '.') continue;
+
+			if(j == 0) {
+				swap(s[i][j], s[i][j+1]);
+				flag |= func(s);
+				swap(s[i][j], s[i][j+1]);
+			} else if(j == w-1) {
+				swap(s[i][j], s[i][j-1]);
+				flag |= func(s);
+				swap(s[i][j], s[i][j-1]);
+			} else {
+				swap(s[i][j], s[i][j+1]);
+				flag |= func(s);
+				swap(s[i][j], s[i][j+1]);
+				swap(s[i][j], s[i][j-1]);
+				flag |= func(s);
+				swap(s[i][j], s[i][j-1]);
+			}
+		}
+	}
+
+	if(flag) cout << "YES" << endl;
+	else cout << "NO" << endl;
+
+	return 0;
+}
+```

@@ -1,0 +1,121 @@
+---
+layout: post
+title: "AOJ0534 Chain"
+date: 2016-02-09 15:14:15 +0900
+comments: true
+categories: [AOJ, シュミレーション]
+---
+
+問題文  
+http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0534
+
+<!-- more -->
+
+まず，色を変えるのを選ぶ．変える色は前後のどちらかの色にする．次に色を変えた状態で何個残るかをシュミレーションする．  
+シュミレーションは上から見て行く．同じ色の塊で(色，個数)をstackに積んでいく．もし4つ以上連続している場合はstackには積まない(消える)．stackのtopと現在見てる個数が4を超えればpopして，超えない場合はpushすることで連鎖を表現出来る．{% m %} O(N\^2) {% em %}
+
+# Code
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+#include <stack>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+int func(vector<int>& v) {
+	stack<P> st;
+	int n = v.size(), ret = 0;
+
+	rep(i, n) {
+		int len = 1, c = v[i];
+		REP(j, i+1, n) {
+			if(c == v[j]) {
+				i++;
+				len++;
+				continue;
+			} else break;
+		}
+
+		if(len >= 4) continue;
+		else {
+			if(st.size() == 0) {
+				st.push(mp(c, len));
+				ret += len;
+			} else {
+				P p = st.top();
+				if(p.first == c) {
+					if(p.second + len < 4) {
+						st.top().second += len;
+						ret += len;
+					} else {
+						st.pop();
+						ret -= p.second;
+					}
+				} else {
+					st.push(mp(c, len));
+					ret += len;
+				}
+			}
+		}
+	}
+
+	return ret;
+}
+
+int main() {
+	int n;
+	while(cin >> n && n) {
+
+		vector<int> v(n);
+		rep(i, n) cin >> v[i];
+
+		int ans = n + 1;
+		rep(i, n) {
+			int t = v[i];
+
+			v[i] = 1;
+			if(i == 0) {
+				v[i] = v[i+1];
+				ans = min(ans, func(v));
+			} else if(i == n-1) {
+				v[i] = v[i-1];
+				ans = min(ans, func(v));
+			} else {
+				if(v[i+1] == v[i-1]) {
+					v[i] = v[i+1];
+					ans = min(ans, func(v));
+				} else {
+					v[i] = v[i-1];
+					ans = min(ans, func(v));
+
+					v[i] = v[i+1];
+					ans = min(ans, func(v));
+				}
+			}
+
+			v[i] = t;
+		}
+
+		cout << ans << endl;
+	}
+
+	return 0;
+}
+```
+
+制限時間が結構厳しかった．TLEを連発して0.96secまで落とした．

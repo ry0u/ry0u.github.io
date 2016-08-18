@@ -1,0 +1,118 @@
+---
+layout: post
+title: "Codeforces335-div2D Lazy Student"
+date: 2015-12-15 11:04:47 +0900
+comments: true
+categories: [Codeforces, graph]
+---
+
+グラフの頂点数{% m %}N{% em %}，辺の数{% m %}M{% em %}，
+最小全域木を構築する辺とそれ以外の辺が与えられる．そのようなグラフが存在すればその一例を，そうでない場合は-1を出力する．
+
+# 考察
+最小全域木を構築する辺をコストの小さい順に一本につなげる．Sample 1では次のようにする．
+{% img /images/Codeforces/335/g.png %}
+
+後は最小全域木を壊さないように辺を追加する．2つの辺を選び，その端を結ぶことを考えるとその選び方は2乗通りある．
+{% img /images/Codeforces/335/g2.png %}
+
+しかし，最小全域木を壊さないということは，選んだ2つの辺のコストよりも大きい辺を追加すれば良いので，小さい順に見ていけばよい．一本の線にする時に小さい順にしているので，前から見ていくことで，追加する辺の個数回で済む．  
+{% img /images/Codeforces/335/g3.png %}
+
+
+# Code
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+int main() {
+	int n, m;
+	cin >> n >> m;
+
+	vector<pair<pair<int,int>, int> > v;
+	rep(i, m) {
+		int a, b;
+		cin >> a >> b;
+		v.push_back(mp(mp(a, b), i));
+	}
+
+	sort(v.begin(), v.end());
+
+	vector<int> e;
+	vector<P> q;
+	vector<pair<int,pair<int,int> > > ans;
+	int t = 0;
+	rep(i, m) {
+		int cost = v[i].first.first;
+		int f = v[i].first.second;
+		int j = v[i].second;
+
+		if(f == 1) {
+			e.push_back(cost);
+			ans.push_back(mp(j, mp(t, t+1)));
+			t++;
+		}
+		else if(f == 0) {
+			q.push_back(mp(cost, j));
+		}
+	}
+
+	bool flag = true;
+	int from = 0, to = 1;
+	for(int i = 0; i < q.size(); i++) {
+		if(to == e.size()) {
+			flag = false;
+			break;
+		}
+
+		if(e[from] <= q[i].first && e[to] <= q[i].first) {
+			ans.push_back(mp(q[i].second, mp(from, to+1) ));
+		} else {
+			P p = q.back();
+			if(e[from] <= p.first && e[to] <= p.first) {
+				ans.push_back(mp(p.second, mp(from, to+1)));
+				q.pop_back();
+			}
+			i--;
+		}
+
+		if(from == to - 1) {
+			from = 0;
+			to++;
+		} else {
+			from++;
+		}
+	}
+
+	if(flag) {
+		sort(ans.begin(), ans.end());
+		rep(i, ans.size()) {
+			cout << ans[i].second.first+1 << " " << ans[i].second.second+1 << endl;
+		}
+	} else {
+		cout << -1 << endl;
+	}
+
+	return 0;
+}
+
+```
+
+選んだ辺のコストを超えないようにするということは，まず１つの辺を選んだ時に，それより小さい辺を見なければいけなかったが，大きい方の辺をずらしていくという意味の分からないことをしていてWAを連発した．

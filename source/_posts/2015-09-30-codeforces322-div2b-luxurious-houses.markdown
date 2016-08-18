@@ -1,0 +1,162 @@
+---
+layout: post
+title: "Codeforces322-div2B Luxurious Houses"
+date: 2015-09-30 15:26:14 +0900
+comments: true
+categories: [Codeforces,RMQ]
+---
+
+http://codeforces.com/contest/581/problem/B  
+
+建物の高さが与えられる．自分から見て，右側の建物より高くなるために必要な高さを答えよ．  
+
+# 考察
+
+CodeFestival予選練習会で  
+http://code-festival-2014-qualb.contest.atcoder.jp/tasks/code_festival_qualB_d  
+を解いたばかりである．これはRMQだ，と思って実装した．  
+しかし，そんなことをする必要は無く，右から見ていき，現在見た所までの最大の高さを持っているだけで出来た．この方法は思いつかなかった．
+
+# Code
+
+RMQ
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+struct RMQ {
+    int n;
+    vector<int> dat;
+
+    RMQ(int n_) {
+        n = 1;
+        while(n < n_) n *= 2;
+
+        dat.resize(n*4);
+        rep(i,n*4) dat[i] = -INF;
+    }
+
+    void update(int k,int a) {
+        int i = k+n-1;
+        dat[i] = a;
+
+        while(i > 0) {
+            i = (i-1) / 2;
+            dat[i] = max(dat[i*2+1],dat[i*2+2]);
+        }
+    }
+
+    //[a,b)
+    //query(a,b,0,0,n)
+    int _query(int a,int b,int k,int l,int r)
+    {
+        if(r <= a || b <= l) return -INF;
+
+        if(a <= l && r <= b) return dat[k];
+        else { 
+            int vl = _query(a,b,k*2+1,l,(l+r)/2);
+            int vr = _query(a,b,k*2+2,(l+r)/2,r);
+            return max(vl,vr);
+        }
+    }
+
+    //[a,b)
+    int query(int a,int b) {
+        return _query(a,b,0,0,n);
+    }
+
+};
+
+int main() {
+    int n;
+    cin >> n;
+
+    vector<int> v(n);
+    RMQ rmq(n);
+    rep(i,n) {
+        cin >> v[i];
+        rmq.update(i,v[i]);
+    }
+
+    rep(i,n) {
+        int d = rmq.query(i,n+1);
+        int d2 = rmq.query(i+1,n+1);
+
+        if(d == v[i] && v[i] != d2) cout << 0;
+        else cout << d+1 - v[i];
+
+        if(i == n-1) cout << endl;
+        else cout << " ";
+    }
+
+    return 0;
+}
+```
+
+右から見て行く．
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+int main() {
+    int n;
+    cin >> n;
+
+    vector<int> v(n);
+    rep(i,n) cin >> v[i];
+
+    int vmax = 0;
+    vector<int> ans(n);
+    for(int i=n-1; i>=0; i--) {
+        if(vmax < v[i]) ans[i] = 0;
+        else ans[i] = vmax+1 - v[i];
+
+        vmax = max(vmax,v[i]);
+    }
+
+    rep(i,n) {
+        cout << ans[i];
+
+        if(i ==n -1) cout << endl;
+        else cout << " ";
+    }
+
+    return 0;
+}
+```
+
+実装量がかなり違うので，出来るだけ実装が軽い方法を思いつけるようになりたい．

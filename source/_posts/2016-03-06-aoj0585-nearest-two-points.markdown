@@ -1,0 +1,137 @@
+---
+layout: post
+title: "AOJ0585 Nearest Two Points"
+date: 2016-03-06 00:21:37 +0900
+comments: true
+categories: [AOJ, 最近点対問題]
+---
+
+<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0585">Nearest Two Points | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+<!-- more -->
+
+分からなかった．解法を調べた．
+
+<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0"><h4><a href="http://www.ioi-jp.org/joi/2005/2006-m1-prob_and_sol/2006-m1-t4-review.html">JOI 2006 模擬試験１ 問題４解説</a></h4><p>この問題の単純な解法は，2 点の組すべてについて距離を求めて，その最も小さい値の 2 乗を答として返す方法である．この方法では入力サイズ n の 2 乗のステップ数がかかる．n がそれ程大きくない場合，例えば n≦100 のときはこの方法でも十分であるが，n が問題の範囲内にある 10 万，100 万，1000 万，1 億となってくるとそれぞれ 10 の 10 乗，10 の 12 乗，10 の 14 乗，10 の 16 乗となり，処理に非常に時間がかかる可能性が出て来る．</p></blockquote>
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+このように最悪{% m %} O(n ^2) {% em %}の枝刈りをしてみるとACした．
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+int main() {
+	int n;
+	cin >> n;
+
+	vector<int> x(n), y(n);
+	vector<P> v(n);
+	rep(i, n) {
+		cin >> x[i] >> y[i];
+		v[i].first = x[i];
+		v[i].second = y[i];
+	}
+
+	sort(v.begin(), v.end());
+
+	int ans = INF;
+	rep(i, n) {
+		REP(j, i+1, n) {
+			int x = v[i].first, y = v[i].second;
+			int x2 = v[j].first, y2 = v[j].second;
+			int d = (x2 - x) * (x2 - x) + (y2 - y) * (y2 - y);
+			if((x2 - x) * (x2 - x) > ans) break;
+			ans = min(ans, d);
+		}
+	}
+
+	cout << ans << endl;
+
+	return 0;
+}
+```
+
+蟻本に分割統治で{% m %} O(n log n) {% em %}の解法がのっていたので写した．
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+P A[500005];
+
+bool compare_y(P a, P b) {
+	return a.second < b.second;
+}
+
+int closest_pair(P *a, int n) {
+	if(n <= 1) return INF;
+	int m = n / 2;
+
+	int x = a[m].first;
+	int d = min(closest_pair(a, m), closest_pair(a + m, n - m));
+	inplace_merge(a, a + m, a + n, compare_y);
+
+	vector<P> b;
+	rep(i, n) {
+		if(abs(a[i].first - x) >= d) continue;
+
+		rep(j, b.size()) {
+			int x = a[i].first - b[b.size() - 1 - j].first;
+			int y = a[i].second - b[b.size() - 1 - j].second;
+
+			if(y >= d) break;
+			d = min(d, x * x + y * y);
+		}
+		b.push_back(a[i]);
+	}
+
+	return d;
+}
+
+int main() {
+	int n;
+	cin >> n;
+
+	rep(i, n) {
+		cin >> A[i].first >> A[i].second;
+	}
+
+	cout << closest_pair(A, n) << endl;
+
+	return 0;
+}
+```

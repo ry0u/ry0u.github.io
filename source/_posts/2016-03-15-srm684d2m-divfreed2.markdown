@@ -1,0 +1,98 @@
+---
+layout: post
+title: "SRM684D2M DivFreed2"
+date: 2016-03-15 23:11:13 +0900
+comments: true
+categories: [srm, topcoder, 動的計画法]
+---
+
+<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="https://community.topcoder.com/stat?c=problem_statement&pm=14186&rd=16688">TopCoder Statistics - Problem Statement</a></h4><p>This problem statement is the exclusive and proprietary property of TopCoder, Inc. Any unauthorized use or reproduction of this information without the prior written consent of TopCoder, Inc. is strictly prohibited. (c)2010, TopCoder, Inc. All rights reserved.</p></blockquote>
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+<!-- more -->
+
+数列の隣り合う全ての要素{% m %} A(1 \leq A \leq k), B(1 \leq B \leq k) {% em %}が
+
+* {% m %} A \leq B {% em %}
+* {% m %} A \ \rm{mod} \  B \neq 0 {% em %}
+
+のどちらかを満たす数列の数を{% m %} \rm{mod} \ 10 ^9 + 7 {% em %} で求める．
+
+---
+
+{% math %}
+	dp[i][j] := i番目にjを選んだ時の数列の数
+{% endmath %}
+
+とする．数列に追加する可能なものを選ぶので{% m %} B {% em %}から考えると，{% m %} B {% em %}より大きい，または{% m %} AがB {% em %}を約数に持たなければ良い．基本的に全て遷移可能として({% m %} dp\[i+1\]\[j\] += \sum_{l = 1} ^{k} dp\[i\]\[l\]{% em %})，後に約数の場所の遷移を無かったことにすれば良い．
+
+# Code
+
+```cpp
+ll dp[15][100005];
+vector<ll> d[100005];
+
+vector<ll> divisor(ll n) {
+	vector<ll> res;
+	for(ll i = 2; i*i <= n; i++) {
+		if(n % i == 0) {
+			res.push_back(i);
+			if(i != n/i) res.push_back(n/i);
+		}
+	}
+	return res;
+}
+
+class DivFreed2 {
+	public:
+	int count(int n, int k) {
+		memset(dp, 0, sizeof(dp));
+
+		rep(i, k + 1) {
+			d[i].clear();
+		}
+
+		REP(i, 2, k + 1) {
+			vector<ll> ret = divisor(i);
+			ret.push_back(1);
+
+			d[i].resize(ret.size());
+			rep(j, ret.size()) {
+				d[i][j] = ret[j];
+			}
+		}
+
+		REP(i, 1, k + 1) {
+			dp[1][i] = 1;
+		}
+
+		REP(i, 1, n) {
+			ll sum = 0;
+			REP(j, 1, k + 1) {
+				sum += dp[i][j];
+				sum %= MOD;
+			}
+
+			REP(j, 1, k + 1) {
+				dp[i+1][j] += sum;
+				dp[i+1][j] %= MOD;
+			}
+
+			REP(j, 1, k + 1) {
+				rep(l, d[j].size()) {
+					dp[i+1][d[j][l]] -= dp[i][j];
+				}
+			}
+		}
+
+		ll ans = 0;
+		rep(j, k + 1) {
+			ans += dp[n][j];
+			ans %= MOD;
+		}
+
+		return ans;
+	}
+};
+```
+

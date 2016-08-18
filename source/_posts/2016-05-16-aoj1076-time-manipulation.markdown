@@ -1,0 +1,124 @@
+---
+layout: post
+title: "AOJ1076 Time Manipulation"
+date: 2016-05-16 08:03:29 +0900
+comments: true
+categories: [AOJ, Vol10, 包除原理]
+---
+
+<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1076">Time Manipulation | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+<!-- more -->
+
+　{% m %}1〜n{% em %}の中で {% m %} p\_i {% em %}の倍数で無い数の {% m %} \frac{和}{個数} {% em %}を求める．包除原理を用いて， {% m %} p\_i {% em %}の倍数である数の個数，和をそれぞれ求めて引いて計算するようにした．  
+包除原理は，まずbitで状態を全列挙し，立っているbitの個数が偶数の時に減算，奇数の時に加算する．和は等比数列の和の公式を用いた．(初項{% m %} p\_i {% em %}，公差 {% m %} p\_i {% em %}，項数 {% m %} \frac{n}{p\_i} {% em %}の等差数列の和)．
+
+# Code
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+#include <bitset>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+ll n, m;
+ll c;
+
+ll lcm(ll m, ll n) {
+	if(m == 0 || n == 0) return 0;
+	return ((m / __gcd(m,n)) * n);
+}
+
+ll f(vector<ll> v) {
+	int k = v.size();
+	c = 0;
+	ll ret = 0;
+	rep(i, 1<<k) {
+		ll x = 1;
+		int cnt = 0;
+		bool ch = false;
+		rep(j, k) {
+			if(i & (1<<j)) {
+				x = lcm(x, v[j]);
+				cnt++;
+			}
+
+			if(x > n) {
+				ch = true;
+				break;
+			}
+		}
+
+		if(x == 1LL) continue;
+		if(ch) continue;
+
+		ll o = n / x, s;
+
+		if(o % 2 == 0) {
+			s = (o / 2) * (2 * x + (o - 1) * x);
+		} else {
+			s = o * (x + (o - 1) * x / 2);
+		}
+
+		if(cnt % 2 == 0) {
+			ret -= s;
+			c -= o;
+		} else {
+			ret += s;
+			c += o;
+		}
+	}
+
+	return ret;
+}
+
+int main() {
+	while(cin >> n >> m) {
+		if(n == 0 && m == 0) break;
+
+		bool flag = false;
+		vector<ll> v(m);
+		rep(i, m) {
+			cin >> v[i];
+			if(v[i] == 1) {
+				flag = true;
+			}
+		}
+
+		if(flag) {
+			cout << fixed;
+			cout.precision(20);
+			cout << 0.0 << endl;
+			continue;
+		}
+
+		ll sum = n * (n + 1) / 2;
+		ll ret = f(v);
+		ll res = sum - ret;
+		double cnt = n - c;
+
+		cout << fixed;
+		cout.precision(20);
+		cout << res / cnt << endl;
+	}
+
+	return 0;
+}
+```
+

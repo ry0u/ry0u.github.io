@@ -1,0 +1,257 @@
+---
+layout: post
+title: "ACM-ICPC 2016 国内予選参加記"
+date: 2016-06-26 00:11:32 +0900
+comments: true
+categories: [icpc, 参加記]
+---
+
+<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-image="http://icpc.iisf.or.jp/past-icpc/domestic2016/poster.png" data-card-type="article"><h4><a href="http://icpc.iisf.or.jp/2016-tsukuba/domestic/?lang=ja">ACM-ICPC 2016 Asia Tsukuba Regional</a></h4><p>2016年の ACM-ICPC 国内インターネット予選 (Japan Online First-Round Contest) の情報をお伝えします。</p></blockquote>
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+<!-- more -->
+
+ACM-ICPC $2016$国内予選に自分(@ry0u_yd), ちょるさん, ふじひろさんでチームkogとして参加して$4$完$37$位でした．自分以外が$4$年生ということもあり，このチームで出場するのが最後だろうと思い，めちゃくちゃ緊張しました．
+
+# 前日
+ライブラリや今まで解いた問題の中で考え方が重要だったりした問題を印刷した．結果からすると印刷した紙を見ることはなかったが，この印刷する仮定で復習などが出来た．とても良かった．
+
+# 当日
+部屋は開始の$1$時間前ぐらいから借りていたが思ったより準備に時間がかかり，ギリギリだった．この時に前回の模擬予選の反省として，チームで問題を分けたりせず$1$問ずつ全員で解いていくことに決めた．
+
+# 開始
+
+時間は$2$個目のファイル提出時の時間を出しています．
+
+## A
+問題文も短いし，今までのA問に比べると簡単な方に思えた．チームの方からsort解が出て，自分の誤読を疑ったがそんなことはなく大丈夫だった．
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+#define REP(i, k, n) for(int i = k; i < n; i++) 
+#define rep(i, n) for(int i = 0; i < n; i++) 
+#define INF 1<<29
+using namespace std;
+
+int main() {
+	int n;
+	while(cin >> n && n) {
+		vector<int> v(n);
+		rep(i ,n) cin >> v[i];
+
+		int ans = INF;
+		rep(i, n) {
+			REP(j, i + 1, n) {
+				ans = min(ans, abs(v[i] - v[j]));
+			}
+		}
+
+		cout << ans << endl;
+	}
+	return 0;
+}
+```
+
+16:34
+
+## B
+$i$番目まで表を入れた時に
+$$
+1番多い獲得数 > (n - (i + 1) ) + 2番目に多い獲得数
+$$
+を満たす時，$1$番多い数獲得した人が勝つ．これが分かるまで時間がかかった．また実装でもsortを降順にしてないミスをなかなか見つけられなくて(チームの方に指摘してもらいました)時間を溶かした．
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <string>
+#include <cstring>
+#include <sstream>
+
+#define REP(i, k, n) for(int i = k; i < n; i++) 
+#define rep(i, n) for(int i = 0; i < n; i++) 
+#define INF 1<<29
+
+using namespace std;
+
+int main() {
+	int n;
+	while(cin >> n && n) {
+		int cnt[30];
+		memset(cnt, 0, sizeof(cnt));
+
+		vector<char> t(n);
+		rep(i, n) cin >> t[i];
+
+		vector<int> v(n);
+		rep(i, n) {
+			v[i] = t[i] - 'A';
+		}
+
+		bool flag = true;
+
+		rep(i, n) {
+			cnt[ v[i] ]++;
+			
+			vector<pair<int, int> > v(26);
+			rep(j, 26) {
+				v[j].first = cnt[j];
+				v[j].second = j;
+			}
+
+			sort(v.begin(), v.end(), greater<pair<int, int> >());
+
+			if(v[0].first > (n - (i + 1) + v[1].first)) {
+				flag = false;
+				cout << char('A' + v[0].second) << " " << i + 1 << endl;
+				break;
+			}
+		}
+
+		if(flag) cout << "TIE" << endl;
+	}
+
+	return 0;
+}
+```
+
+16:54
+
+## C
+使った数の倍数を消していく．問題文にやさしくて最大値が書いてあったのでそこまでやった．回している時は結構時間かかったけどICPCなので大丈夫な感じだった(?)．$m$と$n$の順番に混乱した．
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <string>
+#include <cstring>
+#include <sstream>
+
+#define REP(i, k, n) for(int i = k; i < n; i++) 
+#define rep(i, n) for(int i = 0; i < n; i++) 
+#define INF 1<<29
+#define MAX_N 8000000
+using namespace std;
+
+bool used[MAX_N];
+
+int main() {
+	int m, n;
+	while(cin >> m >> n) {
+		if(m == 0 && n == 0) break;
+
+		memset(used, 0, sizeof(used));
+
+		int cnt = 0;
+		REP(i, m, MAX_N) {
+			if(used[i]) continue;
+			used[i] = true;
+
+			REP(j, 1, MAX_N) {
+				if(i * j >= MAX_N) break;
+				used[i * j] = true;
+			}
+
+			cnt++;
+			if(cnt == n + 1) {
+				cout << i << endl;
+				break;
+			}
+		}
+
+	}
+
+	return 0;
+}
+```
+
+17:15
+
+## D
+
+$$
+memo[i][j] := 区間[i, j)の中で消せていないものの個数
+$$
+
+としてメモ化再帰．単純に区間$[i, j)$を$[i, k)$と$[k, j)$に分ける方法を全通り試し，また$v[i]とv[j-1]$で消せるかつ，$[i+1, j-1)$が全て消せる場合との最小値を取った．  
+この解法に辿り着くまでにかなりの時間がかかってしまった．時間ギリギリでACすることが出来た．
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <string>
+#include <cstring>
+#include <sstream>
+#include <cstdio>
+
+#define REP(i, k, n) for(int i = k; i < n; i++) 
+#define rep(i, n) for(int i = 0; i < n; i++) 
+#define INF 1<<29
+using namespace std;
+
+int memo[500][500];
+vector<int> v;
+
+int dfs(int i, int j) {
+	if(memo[i][j] != -1) return memo[i][j];
+
+	int res = INF;
+
+	REP(k, i+1, j) {
+		res = min(res, dfs(i, k) + dfs(k, j));
+	}
+
+	if(abs(v[i] - v[j-1]) <= 1) {
+		if(dfs(i+1, j - 1) == 0) {
+			res = min(res, memo[i+1][j-1]);
+		}
+	}
+
+	return memo[i][j] = res;
+}
+
+int main() {
+	int n;
+	while(cin >> n && n) {
+		v.clear();
+		v.resize(n);
+			
+		rep(i, n) cin >> v[i];
+
+		memset(memo, -1, sizeof(memo));
+
+		rep(i, n) {
+			memo[i][i] = 0;
+			memo[i][i+1] = 1;
+
+			if(abs(v[i] - v[i+1]) <= 1) {
+				memo[i][i+2] = 0;
+			} else {
+				memo[i][i+2] = 2;
+			}
+		}
+
+		cout << n - memo[0][n] << endl;
+	}
+	return 0;
+}
+```
+
+19:20
+
+## まとめ
+
+* $4$完で$37$位
+* $0$WAで良かった
+* チーム戦は楽しい
+* 緊張しすぎてかなりタイプミスした．手が震えていた
+* チームの方に本当に助けられました．ありがとうございました
+* 終了後
+
+{% oembed https://twitter.com/ry0u_yd/status/746388045125943296 %}

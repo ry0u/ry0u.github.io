@@ -1,0 +1,127 @@
+---
+layout: post
+title: "GraphvizとかVimとか"
+date: 2015-10-25 04:45:42 +0900
+comments: true
+categories: [Graphviz, Vim]
+---
+
+基本的に物事をすぐに忘れるので簡単なことでもメモ．
+
+# Graphvizとか
+[Graphviz](http://www.graphviz.org/)  
+基本的に，  
+[Graghvizでグラフ構造からグラフを描画する](http://qiita.com/tmsanrinsha/items/d54bee11193b2c6ea71b)  
+にめちゃ詳しく書いてある．  
+ただコマンドによっては使えない属性があるので  
+http://www.graphviz.org/doc/info/attrs.html  
+で確認．  
+
+### ノードの形
+ノードの形はデフォルトにしていたけど，pointがいい感じに思える．
+{% m %} K_{3,4} {% em %}
+{% img /images/etc/img.png %}
+{% img /images/etc/img2.png %}  
+
+```sh
+node [ shape = point];
+```
+
+ノードにlabelが欲しい場合は，defaultに戻す．
+
+### 閉路を書きたい
+
+``dot``ではなく，``cicro``がいいかも
+
+{% img /images/etc/img3.png %}  
+
+### 細かい調整
+rankでsame，max，min，source，sinkを指定出来る．
+
+```sh
+{rank = same; hoge; hogehoge;}
+```
+
+見えない辺で調整とか．グラフは同型なんだけど，そうじゃない，という時．  
+例えば，下のグラフの左下のノードを上に持って行きたい．  
+{% img /images/etc/img4.png %}  
+
+辺を作って，rankを合わせる．作った辺を消す．  
+{% img /images/etc/img5.png %} 
+{% img /images/etc/img6.png %}  
+
+```sh
+graph g {
+    node [
+        shape = point;
+    ];
+
+    a [fixedsize = true, width = 0.01, height = 0.01, shape = point,color="#00000000"];
+    b [fixedsize = true, width = 0.01, height = 0.01, shape = point,color="#00000000"];
+    c [fixedsize = true, width = 0.01, height = 0.01, shape = point,color="#00000000"];
+    d [fixedsize = true, width = 0.01, height = 0.01, shape = point,color="#00000000"];
+
+    a -- b -- c -- d [style = invis];
+
+    1 -- 3;
+    1 -- 4;
+    2 -- 3 -- 5;
+    2 -- 4 -- 5;
+	3 -- 4;
+
+    {rank = same; a; 1;}
+    {rank = same; b; 2;}
+    {rank = same; c; 3; 4;}
+    {rank = same; d; 5;}
+}
+```
+
+### 表
+動的計画法とかの状態遷移をgraphvizで書きたい（DPの練習問題が本当にたまたま解けたので，メモを残すの必死）．``patchwork``とかいいと思ったけど，辺が書けないみたいなので，``osage``でshapeをsquareに  
+{% img /images/etc/g.png %}  
+
+### グラフ理論の講義ノートを綺麗に
+{% img /images/etc/img10.png %}  
+{% img /images/etc/img11.png %}  
+{% img /images/etc/img12.png %}  
+
+# Vimとか
+毎回，毎回 ``dot -Tpng hoge.dot -o hoge.png`` するのは面倒．quirkrunの設定に書く．
+
+```vim
+let g:quickrun_config['dot'] = {
+\	'command': 'dot',
+\	'exec': ['%c -T png %s -o %s:r.png', 'display %s:r.png']
+\}
+```
+  
+この設定で満足と思っていたが，こんな記事を見つけた．  
+[emacsのgraphviz用モードをインストールする](http://d.hatena.ne.jp/n9d/20080419/1208614482)  
+emacsでは，pngのviewが出来る．これをしたい．  
+
+[そうだ Vim で画像を表示させよう](http://d.hatena.ne.jp/osyo-manga/20130203/1359896048)を読む．この記事通りに設定して，
+{% img /images/etc/img7.png %}  
+無事描画できた．この記事には
+>本来であれば XPM を用いて画像ファイルの描画を行うと Vim がかなり重くなるんですが、今回は別に起動している Vim で描画を行なっているのでレスポンスの重さはあまり気になりません。
+
+とある．Vimが重くなることを考慮しなければファイル描画が可能？ココロオドル  
+helpを読むと，gvimの起動オプションを指定出来るみたいなので，
+```vim
+let g:sugarpot_gvim_cmd_option = '--serverlist GVIM --remote-tab-silent .'
+```
+的なことをして無理やり，dotをいじっているgvimに突っ込んでみる．フリーズする．ごめんなさい．sourceを読んでも全くわからないので諦める．  
+  
+次に[afterimage.vim](https://github.com/tpope/vim-afterimage)を見つける．画像を開いてみる．
+{% img /images/etc/img8.png %}  
+いつものフォントサイズで描画されてしまうので，小さく指定する．
+{% img /images/etc/img9.png %}  
+そうすると，dotを書いているほうまで小さくなる（そりゃそうだ）．頭を悩ます．バッファごとにフォントサイズを変更出来たりしないか調べるがよく分からず．  
+
+[TweetVim](https://github.com/basyura/TweetVim)とか[vimfiler でファイルのアイコンを表示させてみた](http://d.hatena.ne.jp/osyo-manga/20120720/1342770437)見て，iconの表示をやってる所を見たら参考になるかも，と思いコードを読むも何一つ分からず．  
+
+# まとめ
+* Graphvizいい感じだ
+* Vimでquickrunの設定した
+* 画像表示をいい感じに出来ず
+
+***モウダメダ（完）***

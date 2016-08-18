@@ -1,0 +1,88 @@
+---
+layout: post
+title: "AOJ0614 Railroad Trip"
+date: 2016-03-18 15:49:20 +0900
+comments: true
+categories: [AOJ, imos法]
+---
+
+<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0614">Railroad Trip | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+<!-- more -->
+
+移動が終わった時に，各鉄道に何回乗ったか知りたい．imosで累積和を求めた後に，各鉄道に対して，切符を買って乗るか，その鉄道のICカードを書いICカードで乗るか，安い方を選んだ．  
+
+* 切符で乗る {% m %} \to cnt[i] \cdot a[i] {% em %}
+* ICカードを買う + ICカードで乗る {% m %} \to cnt[i] \cdot b[i] + c[i] {% em %}
+
+# Code
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+ll cnt[100005];
+vector<ll> p, a, b, c;
+
+int main() {
+	int n, m;
+	cin >> n >> m;
+
+	p.resize(m);
+	rep(i, m) {
+		cin >> p[i];
+		p[i]--;
+	}
+
+	a.resize(n-1);
+	b.resize(n-1);
+	c.resize(n-1);
+
+	rep(i, n-1) {
+		cin >> a[i] >> b[i] >> c[i];
+	}
+
+	rep(i, m-1) {
+		if(p[i] == p[i+1]) continue;
+
+		if(p[i] < p[i+1]) {
+			cnt[p[i]]++;
+			cnt[p[i+1]]--;
+		} else {
+			cnt[p[i+1]]++;
+			cnt[p[i]]--;
+		}
+	}
+
+	rep(i, 100005) {
+		cnt[i+1] += cnt[i];
+	}
+
+	ll ans = 0;
+	rep(i, n-1) {
+		ans += min(cnt[i] * a[i], cnt[i] * b[i] + c[i]);
+	}
+
+	cout << ans << endl;
+
+	return 0;
+}
+```
+

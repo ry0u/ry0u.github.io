@@ -1,0 +1,121 @@
+---
+layout: post
+title: "AOJ0611 Silk Road"
+date: 2016-03-18 01:27:54 +0900
+comments: true
+categories: [AOJ, 動的計画法]
+---
+
+<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0611">Silk Road | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+<!-- more -->
+
+{% math %}
+	dp[i][j] := 都市iにj日目に到達した時に疲労度の最小値
+{% endmath %}
+
+とする．{% m %} 都市i-1 {% em %}に{% m %} j日未満に {% em %}到達している時の最小値から移動するのが，都市{% m %} i {% em %}に {% m %} j {% em %}日目に到達する時の最小となる．これを繰り返す．{% m %} O(nm log m) {% em %}．
+
+# Code
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+struct RMQ {
+	int n;
+	vector<ll> dat;
+
+	RMQ(int n_) {
+		n = 1;
+		while(n < n_) n *= 2;
+
+		dat.resize(n*4);
+		rep(i,n*4) dat[i] = INF;
+	}
+
+	void update(int k,ll a) {
+		int i = k+n-1;
+		dat[i] = a;
+
+		while(i > 0) {
+			i = (i-1) / 2;
+			dat[i] = min(dat[i*2+1],dat[i*2+2]);
+		}
+	}
+
+	//[a,b)
+	//query(a,b,0,0,n)
+	ll _query(int a,int b,int k,int l,int r) {
+		if(r <= a || b <= l) return INF;
+
+		if(a <= l && r <= b) return dat[k];
+		else { 
+			ll vl = _query(a,b,k*2+1,l,(l+r)/2);
+			ll vr = _query(a,b,k*2+2,(l+r)/2,r);
+			return min(vl,vr);
+		}
+	}
+
+	//[a,b)
+	ll query(int a,int b) {
+		return _query(a,b,0,0,n);
+	}
+};
+
+ll dp[1005][1005], d[1005][1005];
+
+int main() {
+	int n, m;
+	cin >> n >> m;
+
+	vector<ll> D(n), C(m);
+	rep(i, n) cin >> D[i];
+	rep(i, m) cin >> C[i];
+
+	rep(i, n) {
+		rep(j, m) dp[i][j] = INF;
+	}
+
+	rep(i, n) {
+		rep(j, m) d[i][j] = D[i] * C[j];
+	}
+
+	rep(j, m) dp[0][j] = D[0] * C[j];
+
+	REP(i, 1, n) {
+		RMQ rmq(m);
+		rep(j, m) rmq.update(j, dp[i-1][j]);
+
+		rep(j, m) {
+			dp[i][j] = rmq.query(0, j) + d[i][j];
+		}
+	}
+
+	ll ans = INF;
+	rep(j, m) {
+		ans = min(ans, dp[n-1][j]);
+	}
+
+	cout << ans << endl;
+
+	return 0;
+}
+```

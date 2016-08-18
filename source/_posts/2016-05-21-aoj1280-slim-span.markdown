@@ -1,0 +1,130 @@
+---
+layout: post
+title: "AOJ1280 Slim Span"
+date: 2016-05-21 02:41:52 +0900
+comments: true
+categories: [AOJ-ICPC, 350, グラフ, 全域木]
+---
+
+<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1280">Slim Span</a></h4><p>Given an undirected weighted graph G, you should find one of spanning trees specified as follows. A spanning tree T is a tree (a connected subgraph without cycles) which connects all the n vertices with n - 1 edges.</p></blockquote>
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+<!-- more -->
+
+The {% m %} slimness {% em %} of a spanning tree Tは全域木を構成する辺の最大値 {% m %} - {% em %}最小値と定義される．この値の最小値を求める．  
+出来るだけコストが近いものを使った方が良いので，まず使うコストの一番小さいものを決めて，それからコストを増やしていく．全域木が構成出来た時点でのコストのminを取る． {% m %} O(nm) {% em %}．
+
+
+# Code
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+struct UnionFind {
+	vector<int> par,rank;
+	int N;
+
+	UnionFind(int n) {
+		N = n;
+		par.resize(n);
+		rank.resize(n);
+
+		rep(i,n) {
+			par[i] = i;
+			rank[i] = 0;
+		}
+	}
+
+	int find(int x) {
+		if(par[x] == x) return x;
+		else return par[x] = find(par[x]);
+	}
+
+	void unite(int x,int y) {
+		x = find(x);
+		y = find(y);
+
+		if(x == y) return;
+
+		if(rank[x] < rank[y]) {
+			par[x] = y;
+		}
+		else {
+			par[y] = x;
+			if(rank[x] == rank[y]) rank[x]++;
+		}
+	}
+
+	bool same(int x,int y) {
+		return find(x) == find(y);
+	}
+
+	int size() {
+		int cnt = 0;
+		rep(i,N) if(find(i) == i) cnt++;
+		return cnt;
+	}
+};
+
+int main() {
+	int n, m;
+
+	while(cin >> n >> m) {
+		if(n == 0 && m == 0) break;
+
+		vector<int> a(m), b(m), c(m);
+		map<int, vector<P> > es;
+		rep(i, m) {
+			cin >> a[i] >> b[i] >> c[i];
+			a[i]--; b[i]--;
+
+			es[c[i]].push_back(P(a[i], b[i]));
+		}
+
+		int ans = INF;
+
+		REP(i, 1, 10001) {
+			if(es[i].size() == 0) continue;
+			UnionFind uf(n);
+			REP(j, i, 10001) {
+				if(es[j].size() == 0) continue;
+				rep(k, es[j].size()) {
+					int a = es[j][k].first;
+					int b = es[j][k].second;
+
+					if(uf.same(a, b)) continue;
+					uf.unite(a, b);
+				}
+
+				if(uf.size() == 1) {
+					ans = min(ans, j - i);
+					break;
+				}
+			}
+		}
+
+		if(ans == INF) cout << -1 << endl;
+		else cout << ans << endl;
+	}
+
+	return 0;
+}
+```
+

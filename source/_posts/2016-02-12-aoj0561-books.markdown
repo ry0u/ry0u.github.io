@@ -1,0 +1,125 @@
+---
+layout: post
+title: "AOJ0561 Books"
+date: 2016-02-12 03:04:14 +0900
+comments: true
+categories: [AOJ, 動的計画法]
+---
+
+問題文  
+http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0561
+
+<!-- more -->
+
+割とすぐにDPだろうと思ったけど，どう遷移していいか分からない分からないとずっと悩んでいた．試しに値段，(ジャンルの個数，値段)の貪欲をして**WA**を連発した
+
+---
+
+{% math %}
+\begin{eqnarray}
+	d[i][j] &:=& i番目のジャンルの本をj冊選んだ時のコスト \\
+	dp[i][j] &:=& i番目以降のジャンルからj冊以下の時の最大コスト
+\end{eqnarray}
+{% endmath %}
+
+とした．5冊まで同じジャンルを売った時にプラスされる値段を見ると
+{% math %}
+\begin{eqnarray}
+	1冊 &\to& 0 \\
+	2冊 &\to& 1 + 1  = 2\\
+	3冊 &\to& 2 + 2 + 2 = 6 \\
+	4冊 &\to& 3 + 3 + 3 + 3 = 12\\
+	5冊 &\to& 4 + 4 + 4 + 4 + 4 = 20
+\end{eqnarray}
+{% endmath %}
+
+となるので同じジャンルを売った時にプラスされる値段は，冊数を{% m %}i{% em %}とすると，{% m %}i-1{% em %}増えるのがされるのが{% m %}1{% em %}個，{% m %}1{% em %}増えるのが{% m %}i-1{% em %}個あるので{% m %}(i-1)*2{% em %}となる．  
+また{% m %} j {% em %}冊選んだ時のコストは大きい順に取ればそれが最大となるので事前にソートしておくことで{% m %} d {% em %}が求まる．  
+これが求まると，冊数を重さと見ると，{% m %}K{% em %}冊を超えないナップサックになる．  
+
+青を遷移先とする．普通のナップサック?(蟻本p.52)はその品物を使わない遷移と使う遷移の2種類がある  
+{% img /images/AOJ/0561-1.png %}  
+
+今回の場合は，そのジャンルの本数文，遷移があるので下図のような状況になる．  
+{% img /images/AOJ/0561-2.png %}  
+
+この遷移のmaxを取れば{% m %} dp\[i]\[j]が求まるので最終的に dp\[ジャンル数]\[K冊]{% em %}が答えとなった．
+
+
+# Code
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+ll d[15][2005], dp[15][2005];
+
+int main() {
+	int n, K;
+	cin >> n >> K;
+
+	vector<int> id, v[2005];
+
+	rep(i, n) {
+		int a, b;
+		cin >> a >> b;
+
+		id.push_back(b-1);
+		v[b-1].push_back(a);
+	}
+
+	sort(id.begin(), id.end());
+	id.erase(unique(id.begin(),id.end()),id.end());
+
+	rep(i, id.size()) {
+		int j = id[i];
+		sort(v[j].begin(), v[j].end(), greater<int>() );
+	}
+
+	memset(d, 0, sizeof(d));
+
+	rep(i, id.size()) {
+		int j = id[i];
+
+		REP(k, 1, v[j].size()+1) {
+			d[j][k] += d[j][k-1] + v[j][k-1] + (k-1) * 2;
+		}
+	}
+
+	memset(dp, 0, sizeof(dp));
+
+	rep(i, id.size()) {
+		rep(j, K + 1) {
+			ll res = dp[i][j];
+			rep(k, v[id[i]].size() + 1) {
+				if(j >= k) {
+					res	= max(res, dp[i][j - k] + d[id[i]][k]);
+				}
+			}
+
+			dp[i+1][j] = res;
+		}
+	}
+
+	cout << dp[ id.size()][K] << endl;
+
+	return 0;
+}
+```
+

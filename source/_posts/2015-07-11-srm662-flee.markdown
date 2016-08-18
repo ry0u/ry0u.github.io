@@ -1,0 +1,221 @@
+---
+layout: post
+title: "SRM662 Flee"
+date: 2015-07-11 22:34:20 +0900
+comments: true
+categories: [topcoder,SRM,幾何]
+---
+
+(0,0)から(10^100,0)に行きたい．最大3つまで警備員の場所が与えられる．目的地に行くことが出来る最大の距離を求める．
+  
+Sample0  
+{% img /images/SRM662/sample1.png %}  
+右にそのまま行く
+
+Sample1  
+{% img /images/SRM662/sample2.png %}  
+これ以上大きくすると原点を覆ってしまう.また同じ点が与えられることもある
+
+Sample2  
+{% img /images/SRM662/sample3.png %}  
+右の道は行けないけど左上を通ればよい
+
+Sample3  
+{% img /images/SRM662/sample4.png %}  
+これもSample0と同様右でよい
+
+# 考察
+場合分けして考えた.  
+- n = 1の時は，原点との距離が最大の距離である  
+- n = 2の時は，原点との距離が小さい方が最大の距離である  
+- n = 3の時は，その3点で構成される三角形に内包されているかいないかに分ける  
+
+### 内包されていない場合
+具体的に内包されていないとは次のような場合である
+{% img /images/SRM662/image1.png %}  
+このような場合は原点を覆わないようにすればよいので，原点との距離が最小となる距離を選べばよい
+{% img /images/SRM662/image2.png %}  
+
+### 内包されている場合
+Sample0を考える．この場合の原点との距離が最小なのは5.09...である．しかしこの距離を採用すると，これでは目的地に行くことが出来ない．
+{% img /images/SRM662/image3.png %}  
+ここで答えの5は(1,5)と(1,-5)との距離の半分である．つまり原点を覆わずに，円が重ならない場所が1つでもあればよい．
+{% img /images/SRM662/image4.png %}  
+
+# Code
+内包されている場合は各頂点と原点との距離の最小値と，各頂点間の距離の半分の中から条件を満たす最大値を返す．また距離を考える場合,ルートを取らずに自乗和を比較した(sampleで死んだ)．
+
+```cpp
+#include <iostream>
+#include <string>
+#include <vector>
+#include <algorithm>
+#include <sstream>
+#include <cstring>
+#include <queue>
+#include <set>
+#include <map>
+#include <cmath>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define EPS 1e-9
+#define INF 1<<30
+
+using namespace std;
+typedef long long ll;
+
+struct Point {
+    double x, y;
+
+    Point(double x=0, double y=0) : x(x), y(y) {}
+
+    Point operator+(const Point &o) const { return Point(x+o.x, y+o.y); }
+
+    Point operator-(const Point &o) const { return Point(x-o.x, y-o.y); }
+
+    Point operator*(const double m) const { return Point(x*m, y*m); }
+
+    Point operator/(const double d) const { return Point(x/d, y/d); }
+
+    bool operator<(const Point &o) const { return x != o.x ? x < o.x : y < o.y; }
+
+    bool operator==(const Point &o) const { return fabs(x-o.x) < EPS && fabs(y-o.y) < EPS; }
+
+    double cross(const Point &o) const { return x * o.y - y * o.x; }
+
+    double dot(const Point &o) const { return x * o.x + y * o.y; }
+
+    double atan() const { return atan2(y, x); }
+
+    double norm() const { return sqrt(dot(*this)); }
+
+    double distance(const Point &o) const { return (o - (*this)).norm(); }
+
+    double area(const Point &a,const Point &b) {
+        Point p = a - (*this), p2 = b - (*this); 
+        return p.cross(p2);
+    }
+
+    double area_abs(const Point &a,const Point &b) const {
+        Point p = a - (*this), p2 = b - (*this);
+        return fabs(p.cross(p2)) / 2.0;
+    }	
+
+    // //線分abが自身に含まれているのかどうか判断する
+    // int between(const Point &a,const Point &b) {
+    //     if(area(a,b) != 0) return 0;
+    //
+    //     if(a.x != b.x)  return ((a.x <= x) && (x <= b.x) || (a.x >= x) && (x >= b.x));
+    //     else return ((a.y <= y) && (y <= b.y) || (a.y >= y) && (y >= b.y));
+    // }      
+
+    double distance_seg(const Point& a,const Point& b) {
+        if((b-a).dot(*this-a) < EPS) {
+            return (*this-a).norm();
+        }
+        if((a-b).dot(*this-b) < EPS) {
+            return (*this-b).norm();
+        }
+        return abs((b-a).cross(*this-a)) / (b-a).norm();
+    }
+
+    bool hitPolygon(const Point& a,const Point& b,const Point& c) {
+        double t = (b-a).cross(*this-b);
+        double t2 = (c-b).cross(*this-c);
+        double t3 = (a-c).cross(*this-a);	
+
+        if((t > 0 && t2 > 0 && t3 > 0) || ( t < 0 && t2 < 0 && t3 < 0)) {
+            return true;
+        }
+
+        return false;
+    }
+};
+
+class Flee {
+	public:
+	double maximalSafetyLevel(vector <int> x, vector <int> y) {
+        int n = x.size();
+
+        vector<Point> v;
+        map<pair<int,int>,bool > m;
+        rep(i,n) {
+            pair<int,int> p = make_pair(x[i],y[i]);
+            if(m[p]) continue;
+
+            v.push_back(Point(x[i],y[i]));
+            m[p] = true;
+        }
+
+        double ans = 0;
+    
+        if(v.size() == 1) {
+            ans = v[0].norm();
+        }
+        else if(v.size() == 2) {
+            ans = min(v[0].norm(),v[1].norm());
+        }else {
+            vector<int> d;
+            int res = INF;
+            rep(i,v.size()) {
+                res = min(res,(int)(v[i]*2).dot(v[i]*2));
+            }
+
+            d.push_back(res);
+
+            Point p(0,0);
+            if(p.hitPolygon(v[0],v[1],v[2])) {
+                rep(i,v.size()) {
+                    rep(j,v.size()) {
+                        if(i == j) continue;
+                        
+                        Point p(v[i]-v[j]);
+                        if(p.dot(p) < res) {
+                            d.push_back(p.dot(p));
+                        }
+                    }
+                }
+
+                sort(d.begin(),d.end(),greater<double>());
+                d.erase(unique(d.begin(),d.end()),d.end());
+
+                rep(k,d.size()) {
+                    int len = d[k];
+                    bool flag = false;
+                    Point p1(v[0].x-v[1].x, v[0].y-v[1].y);
+                    Point p2(v[0].x-v[2].x, v[0].y-v[2].y);
+                    Point p3(v[1].x-v[2].x, v[1].y-v[2].y);
+
+                    int r = (int)p1.x*p1.x + p1.y*p1.y;
+                    int r2 = (int)p2.x*p2.x + p2.y*p2.y;
+                    int r3 = (int)p3.x*p3.x + p3.y*p3.y;
+
+                    if(r >= len) {
+                        flag = true;
+                    }
+                    if(r2 >= len) {
+                        flag = true;
+                    }
+                    if(r3 >= len) {
+                        flag = true;
+                    }
+
+                    if(flag) {
+                        ans = sqrt(d[k])/2.0;
+                        break;
+                    }
+                }
+            }else {
+                sort(d.begin(),d.end());
+                ans = sqrt(d[0])/2.0;
+            }
+        }
+
+        return ans;
+	}
+};
+```
+
+内包判定は外積を見れば良い．何かbetweenはコンパイル通らなくてコメントアウトが原因がよく分からない．とりあえずSystemTestは通ったけど，Pointを使わなくても，更に言えば場合分けをしなくても上手く書けそう．   
+今回は3点しかないが，これがn点になっても凸包を作って同じことをすれば良さそうに思える．

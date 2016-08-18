@@ -1,0 +1,203 @@
+---
+layout: post
+title: "ABC013C 節制"
+date: 2016-04-03 17:31:07 +0900
+comments: true
+categories: [ABC, AtCoder, 動的計画法, 2分探索]
+---
+
+<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://abc013.contest.atcoder.jp/tasks/abc013_3">C: 節制 - AtCoder Beginner Contest 013 | AtCoder</a></h4><p>(null)</p></blockquote>
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+<!-- more -->
+
+### 部分点 1
+
+{% math %}
+	dp[i][j] := i日目に満足度jの時の食費の最小値
+{% endmath %}
+として動的計画法．
+
+* 普通の食事 : {% m %} dp[i+1][j+b] = {\rm max} (dp[i+1][j+b], dp[i][j] + a) {% em %}
+* 質素の食事 : {% m %} dp[i+1][j+d] = {\rm max} (dp[i+1][j+d], dp[i][j] + c) {% em %}
+* 食事抜き : {% m %} dp[i+1][j-e] = {\rm max} (dp[i+1][j-e], dp[i][j]) {% em %}
+
+この {% m %} 3 {% em %}つの遷移がある．食事抜きの場合に{% m %} j-e {% em %}が {% m %} 0 {% em %}より大きい場合に限ることに注意する．
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+ll dp[55][100005];
+
+int main() {
+	ll n, h;
+	cin >> n >> h;
+
+	ll a, b, c, d, e;
+	cin >> a >> b >> c >> d >> e;
+
+	rep(i, 55) {
+		rep(j, 100005) {
+			dp[i][j] = INF;
+		}
+	}
+	dp[0][h] = 0;
+
+	rep(i, n) {
+		rep(j, 100005) {
+			if(dp[i][j] == INF) continue;
+
+			if(dp[i+1][j+b] == -1) {
+				dp[i+1][j+b] = dp[i][j] + a;
+			} else {
+				dp[i+1][j+b] = min(dp[i+1][j+b], dp[i][j] + a);
+			}
+
+			if(dp[i+1][j+d] == -1) {
+				dp[i+1][j+d] = dp[i][j] + c;
+			} else {
+				dp[i+1][j+d] = min(dp[i+1][j+d], dp[i][j] + c);
+			}
+
+			if(j - e > 0) {
+				if(dp[i+1][j-e] == -1) {
+					dp[i+1][j-e] = dp[i][j];
+				} else {
+					dp[i+1][j-e] = min(dp[i+1][j-e], dp[i][j]);
+				}
+			}
+		}
+	}
+
+	ll ans = INF;
+	rep(i, 100005) {
+		ans = min(ans, dp[n][i]);
+	}
+
+	cout << ans << endl;
+
+	return 0;
+}
+```
+
+### 部分点2
+普通の食事の回数と，質素な食事の回数を決めれば，残りの日にちが食事抜きとなる．これが {% m %} 0 {% em %}より大きければ，そのペアは存在する．その中で{% m %} 普通の食事の回数 * a + 質素な食事の回数 * b {% em %}の最小を取る．
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+int main() {
+	ll n, h;
+	cin >> n >> h;
+
+	ll a, b, c, d, e;
+	cin >> a >> b >> c >> d >> e;
+	
+	ll ans = INF;
+	rep(i, n + 1) {
+		rep(j, n + 1) {
+			if(i + j > n) continue;
+			int k = n - i - j;
+
+			// cout << h << " " << i * b << " " << j * d << " " << k * e << "  ->  " << h + i * b + j * d - k * e << endl;
+			if(h + i * b + j * d - k * e > 0) {
+				ans = min(ans, i * a + j * c);
+			}
+		}
+	}
+
+	cout << ans << endl;
+
+	return 0;
+}
+```
+
+### 満点解法
+普通の食事の回数を決めれば，後は満足度は単調増加数列になる．この数列の中で初めて {% m %} 0 {% em %}を超える時が，その普通の食事の回数の場合の最小金額である． {% m %} O(N logN) {% em %}．
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1LL<<60
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+int main() {
+	int n;
+	ll h;
+	cin >> n >> h;
+
+	ll a, b, c, d, e;
+	cin >> a >> b >> c >> d >> e;
+	
+	ll ans = INF;
+	for(ll i = 0; i < n + 1; i++) {
+		ll l = -1, r = n - i;
+		while(r - l > 1) {
+			ll j = (l + r) / 2;
+			ll k = n - i - j;
+
+			if(h + i * b + j * d - k * e > 0) {
+				r = j;
+			} else {
+				l = j;
+			}
+		}
+
+		ll res = i * a + (l + 1) * c;
+		ans = min(ans, res);
+	}
+
+	cout << ans << endl;
+
+	return 0;
+}
+```
+

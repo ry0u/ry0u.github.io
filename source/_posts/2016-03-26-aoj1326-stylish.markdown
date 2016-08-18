@@ -1,0 +1,134 @@
+---
+layout: post
+title: "AOJ1326 Stylish"
+date: 2016-03-26 21:21:31 +0900
+comments: true
+categories: [AOJ-ICPC, 300, 実装]
+---
+
+<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1326">Stylish</a></h4><p>Stylish is a programming language whose syntax comprises names, that are sequences of Latin alphabet letters, three types of grouping symbols, periods ('.'), and newlines. Grouping symbols, namely round brackets ('(' and ')'), curly brackets ('{' and '}'), and square brackets ('[' and ']'), must match and be nested properly.</p></blockquote>
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+<!-- more -->
+
+i番目までの括弧の量を先に計算しておく．{% m %} R {% em %}, {% m %} C {% em %}, {% m %} S {% em %}を総当りしてインデントが合う組み合わせを見つける． {% m %} 2 {% em %}つ以上ある場合は {% m %} -1 {% em %}にする．
+
+# Code
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+int main() {
+	int n, m;
+	while(cin >> n >> m) {
+		if(n == 0 && m == 0) break;
+
+		vector<string> v(n), v2(m);
+		rep(i, n) cin >> v[i];
+		rep(i, m) cin >> v2[i];
+
+		int r[105], c[105], s[105];
+		memset(r, 0, sizeof(r));
+		memset(c, 0, sizeof(c));
+		memset(s, 0, sizeof(s));
+
+		REP(i, 1, n) {
+			r[i] = r[i-1];
+			c[i] = c[i-1];
+			s[i] = s[i-1];
+			rep(j, v[i-1].size()) {
+				char ch = v[i-1][j];
+				if(ch == '(') r[i]++;
+				if(ch == ')') r[i]--;
+				if(ch == '{') c[i]++;
+				if(ch == '}') c[i]--;
+				if(ch == '[') s[i]++;
+				if(ch == ']') s[i]--;
+			}
+		}
+
+		int r2[105], c2[105], s2[105];
+		memset(r2, 0, sizeof(r2));
+		memset(c2, 0, sizeof(c2));
+		memset(s2, 0, sizeof(s2));
+
+		REP(i, 1, m) {
+			r2[i] = r2[i-1];
+			c2[i] = c2[i-1];
+			s2[i] = s2[i-1];
+			rep(j, v2[i-1].size()) {
+				char ch = v2[i-1][j];
+				if(ch == '(') r2[i]++;
+				if(ch == ')') r2[i]--;
+				if(ch == '{') c2[i]++;
+				if(ch == '}') c2[i]--;
+				if(ch == '[') s2[i]++;
+				if(ch == ']') s2[i]--;
+			}
+		}
+
+		int d[105];
+		memset(d, 0, sizeof(d));
+
+		rep(i, n) {
+			rep(j, v[i].size()) {
+				if(v[i][j] != '.') {
+					d[i] = j;
+					break;
+				}
+			}
+		}
+
+		vector<int> ans(m);
+		rep(i, m) ans[i] = INF;
+
+		REP(i, 1, 21) {
+			REP(j, 1, 21) {
+				REP(k, 1, 21) {
+					bool flag = true;
+
+					rep(l, n) {
+						if(d[l] == i * r[l] + j * c[l] + k * s[l]) continue;
+						flag = false;
+					}
+
+					if(flag) {
+						rep(l, m) {
+							int d = i * r2[l] + j * c2[l] + k * s2[l];
+
+							if(ans[l] == INF) ans[l] = d;
+							else if(ans[l] != d) ans[l] = -1;
+						}
+					}
+				}
+			}
+		}
+
+		rep(i, m) {
+			cout << ans[i];
+			if(i == m-1) cout << endl;
+			else cout << " ";
+		}
+	}
+
+	return 0;
+}
+```
+

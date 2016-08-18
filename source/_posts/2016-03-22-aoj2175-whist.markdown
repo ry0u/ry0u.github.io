@@ -1,0 +1,123 @@
+---
+layout: post
+title: "AOJ2175 Whist"
+date: 2016-03-22 17:19:16 +0900
+comments: true
+categories: [AOJ-ICPC, 250]
+---
+
+<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2175">Whist</a></h4><p>Whist is a game played by four players with a standard deck of playing cards. The players seat around a table, namely, in north, east, south, and west. This game is played in a team-play basis: the players seating opposite to each other become a team.</p></blockquote>
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+<!-- more -->
+
+優先順位がスペシャルカード，親のカード，カード番号でそのターンの勝者を決める．東西チーム，南北チームのどちらかが勝ったかを出力し， {% m %} 勝ち数 - 6 {% em %}を出力する．（差を出すと思っていて死んでいた）
+
+# Code
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+map<char, int> m;
+
+int judge(char c1, char c2, vector<string> v) {
+	int id = -1, res = -1;
+
+	rep(i, v.size()) {
+		if(v[i][1] == c1) {
+			if(res < m[v[i][0]]) {
+				res = m[v[i][0]];
+				id = i;
+			}
+		}
+	}
+
+	if(id != -1) return id;
+
+	rep(i, v.size()) {
+		if(v[i][1] == c2) {
+			if(res < m[v[i][0]]) {
+				res = m[v[i][0]];
+				id = i;
+			}
+		}
+	}
+
+	if(id != -1) return id;
+
+	rep(i, v.size()) {
+		if(res < m[v[i][0]]) {
+			res = m[v[i][0]];
+			id = i;
+		}
+	}
+	return id;
+}
+
+int main() {
+	char c;
+	vector<vector<string> > v(4, vector<string>(13));
+
+	REP(i, 1, 10) {
+		m['0'+i] = i;
+	}
+
+	m['T'] = 10;
+	m['J'] = 11;
+	m['Q'] = 12;
+	m['K'] = 13;
+	m['A'] = 14;
+
+	while(cin >> c) {
+		if(c == '#') break;
+
+		rep(i, 4) {
+			rep(j, 13) {
+				cin >> v[i][j];
+			}
+		}
+
+		int a = 0, b = 0, id = 0;
+		rep(i, 13) {
+			vector<string> t;
+			rep(j, 4) {
+				t.push_back(v[j][i]);
+			}
+
+			id = judge(c, v[id][i][1], t);
+			if(id & 1) {
+				b++;
+			} else {
+				a++;
+			}
+		}
+
+		if(a > b) {
+			cout << "NS " << a - 6 << endl;
+		} else {
+			cout << "EW " << b - 6 << endl;
+		}
+	}
+
+
+	return 0;
+}
+```
+

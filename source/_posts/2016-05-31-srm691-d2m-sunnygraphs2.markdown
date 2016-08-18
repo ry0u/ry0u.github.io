@@ -1,0 +1,152 @@
+---
+layout: post
+title: "SRM691 D2M Sunnygraphs2"
+date: 2016-05-31 14:32:34 +0900
+comments: true
+categories: [topcoder, srm, unionfind, 閉路, グラフ]
+---
+
+<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article-full"><h4><a href="https://community.topcoder.com/stat?c=problem_statement&pm=14302&rd=16730">TopCoder Statistics - Problem Statement</a></h4><p>Hero has just constructed a very specific graph. He started with n isolated vertices, labeled 0 through n-1. For each vertex i Hero then chose a vertex a[i] (other than i) and he added an edge that connected i and a[i]. This way he created a graph with n vertices and n edges.</p></blockquote>
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+<!-- more -->
+
+　{% m %} 0 \sim n-1 {% em %}の {% m %} n {% em %}個の頂点で構成されるグラフがある．頂点 {% m %} i {% em %}は頂点 {% m %} a[i] {% em %}と接続している．新しい頂点{% m %} n {% em %}を加えることを考える．グラフの部分集合{% m %} M {% em %}を選び，{% m %} e \in M {% em %}の {% m %} eとa[e] {% em %}の結ぶ辺をカットし， {% m %} eとn {% em %}を接続する．これをした時に頂点{% m %} 0 \sim n-1 {% em %}が連結している部分集合{% m %} M {% em %}の選び方はいくつあるか？  
+  
+{% img /images/SRM/691d2m.png %}
+  
+連結成分ごとで考える．全てを繋げたいので，それぞれの連結成分の中の組み合わせを掛けていけばよい．また，各頂点から必ず {% m %} 1 {% em %}本のみ結ぶ辺が出ているので，連結成分は必ず {% m %} 1 {% em %}つの閉路を持つので，各連結成分の組み合わせの数は， {% m %} (2 ^{サイクル長} - 1) \times 2 ^{連結成分の頂点数-サイクル長} {% em %}となる(サイクルの方の組み合わせはサイクル全てを選ばないと全てが連結でなくなるので {% m %} -1 {% em %})．unionfindで連結成分を調べて，各連結成分ごとにdfsしてサイクル長を出した．
+
+# Code
+
+```cpp
+#include <iostream>
+#include <string>
+#include <vector>
+#include <algorithm>
+#include <sstream>
+#include <cstring>
+#include <queue>
+#include <set>
+#include <map>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+
+using namespace std;
+typedef long long ll;
+
+struct UnionFind {
+	vector<int> par,rank;
+	int N;
+
+	UnionFind(int n) {
+		N = n;
+		par.resize(n);
+		rank.resize(n);
+
+		rep(i,n) {
+			par[i] = i;
+			rank[i] = 0;
+		}
+	}
+
+	int find(int x) {
+		if(par[x] == x) return x;
+		else return par[x] = find(par[x]);
+	}
+
+	void unite(int x,int y) {
+		x = find(x);
+		y = find(y);
+
+		if(x == y) return;
+
+		if(rank[x] < rank[y]) {
+			par[x] = y;
+		}
+		else {
+			par[y] = x;
+			if(rank[x] == rank[y]) rank[x]++;
+		}
+	}
+
+	bool same(int x,int y) {
+		return find(x) == find(y);
+	}
+
+	int size() {
+		int cnt = 0;
+		rep(i,N) if(find(i) == i) cnt++;
+		return cnt;
+	}
+};
+
+vector<int> g[105];
+int d[105];
+
+int dfs(int cur) {
+	rep(i, g[cur].size()) {
+		int t = g[cur][i];
+		if(d[t] != -1) {
+			return abs(d[t] - d[cur]) + 1;
+		}
+		d[t] = d[cur] + 1;
+		return dfs(t);
+	}
+	return 0;
+}
+
+class Sunnygraphs2 {
+	public:
+	long long count(vector <int> a) {
+		int n = a.size();
+		rep(i, 105) g[i].clear();
+
+		UnionFind uf(n);
+		rep(i, n) {
+			uf.unite(i, a[i]);
+			g[i].push_back(a[i]);
+		}
+
+		int m = uf.size();
+
+		map<int, vector<int> > ma;
+		rep(i, n) {
+			ma[uf.find(i)].push_back(i);
+		}
+
+		ll ans = 1;
+		map<int, vector<int> >::iterator ite;
+
+		for(ite = ma.begin(); ite != ma.end(); ite++) {
+			int root = ite->first;
+			vector<int> v = ite->second;
+
+			memset(d, -1, sizeof(d));
+			d[root] = 0;
+
+			rep(i, 105) g[i].clear();
+			rep(i, v.size()) {
+				g[v[i]].push_back(a[v[i]]);
+			}
+			int len = dfs(root);
+
+			ll cy = 1;
+			rep(i, len) cy *= 2;
+			cy--;
+
+			ll res = 1;
+			rep(i, v.size()-len) res *= 2;
+
+			cy *= res;
+			ans *= cy;
+			continue;
+		}
+
+		if(m == 1) ans++;
+		return ans;
+	}
+};
+```
+

@@ -1,0 +1,91 @@
+---
+layout: post
+title: "AOJ0615 Cake2"
+date: 2016-03-18 16:03:17 +0900
+comments: true
+categories: [AOJ, メモ化再帰]
+---
+
+<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0615">Cake 2 | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+<!-- more -->
+
+左端と右端を持ってdpだろうとずっと考えていたけど全く分からなかった．調べた．
+
+<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://lattemalta.hatenablog.jp/entry/2015/09/07/220749">aoj0615:Cake2 - らての精進日記</a></h4><p>問題文 http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0615</p></blockquote>
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+非常に分かりやすかった．左端と右端を持つ区間DPを初めて書いた（写経）．バームクーヘンとかの時は円環を配列を繋げて表現する時に2つを繋げれば良かったが，とり方によってどっちにずれるかわからないので，真ん中を基準として左に1個，右に1個つなげる．  
+
+* 区間の偶奇でどちらの順番かがわかる
+* 左端から一個取る {% m %} \to \rm{dfs}(l-1, r) + A[l]{% em %} 
+* 右端から一個取る {% m %} \to \rm{dfs}(l, r-1) + A[r]{% em %}
+* memoに代入するのを忘れない
+
+# Code
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+#include <queue>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<ll,ll> P;
+
+int n;
+vector<ll> v;
+ll memo[4005][6005];
+
+ll dfs(int l, int r) {
+	if(memo[l][r] != -1) return memo[l][r];
+
+	int turn = r - l - 1;
+
+	if(turn == n) return memo[l][r] = 0;
+	else if(turn % 2 == 1) {
+		if(v[l] < v[r]) {
+			return memo[l][r] = dfs(l, r+1);
+		} else {
+			return memo[l][r] = dfs(l-1, r);
+		}
+	} else {
+		return memo[l][r] = max(dfs(l-1, r) + v[l], dfs(l, r+1) + v[r]);
+	}
+}
+
+int main() {
+	cin >> n;
+
+	v.resize(n*3);
+	rep(i, n) { 
+		cin >> v[i];
+		v[i+n] = v[i];
+		v[i+n+n] = v[i];
+	}
+
+	ll ans = 0;
+	memset(memo, -1, sizeof(memo));
+
+	rep(i, n) {
+		ans = max(ans, dfs(i-1+n, i+1+n) + v[i]);
+	}
+
+	cout << ans << endl;
+
+	return 0;
+}
+```

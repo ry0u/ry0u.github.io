@@ -1,0 +1,94 @@
+---
+layout: post
+title: "AOJ2321 Butterfly"
+date: 2016-03-22 18:12:20 +0900
+comments: true
+categories: [AOJ-ICPC, 250, 動的計画法]
+---
+
+<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2321">Butterfly</a></h4><p>Claire is a man-eater. She's a real man-eater. She's going around with dozens of guys. She's dating all the time. And one day she found some conflicts in her date schedule. D'oh! So she needs to pick some dates and give the others up. The dates are set by hours like 13:00 to 15:00.</p></blockquote>
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+<!-- more -->
+
+デートのもっとも満足度の高くなるスケジュールを組む． {% m %} 6時を0 {% em %}ビットに当てて，デートの時間をビット集合{% m %} S {% em %}と考える．
+
+{% math %}
+	dp[i][j] := i番目までの男と時間jにデート可能な時の満足度の最大値
+{% endmath %}
+とする．時間 {% m %} j {% em %}と {% m %} S[i] {% em %}の積集合が無い場合， 遷移可能({% m %} dp\[i\]\[j\] + L[i] {% em %})．
+
+# Code
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+#include <bitset>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+ll dp[105][1 << 16];
+ll L[105], S[105];
+
+int main() {
+	int n;
+	while(cin >> n && n) {
+
+		memset(L, 0, sizeof(L));
+		memset(S, 0, sizeof(S));
+
+		rep(i, n) {
+			int m;
+			cin >> m >> L[i];
+
+			rep(j, m) {
+				int s, t;
+				cin >> s >> t;
+
+				REP(k, s, t) {
+					S[i] |= 1 << (k-6);
+				}
+			}
+		}
+
+		memset(dp, 0, sizeof(dp));
+
+		rep(i, n) {
+			rep(j, 1<<16) {
+				dp[i+1][j] = max(dp[i+1][j], dp[i][j]);
+			}
+
+			rep(j, 1<<16) {
+				if(j & S[i]) continue;
+				dp[i+1][j | S[i]] = max(dp[i+1][j | S[i]], dp[i][j] + L[i]);
+			}
+		}
+
+		ll ans = 0;
+		rep(i, n + 1) {
+			rep(j, 1<<16) {
+				ans = max(ans, dp[i][j]);
+			}
+		}
+		
+		cout << ans << endl;
+	}
+
+	return 0;
+}
+```
+

@@ -1,0 +1,119 @@
+---
+layout: post
+title: "AOJ2151 Brave Princess Revisited"
+date: 2016-06-09 13:59:08 +0900
+comments: true
+categories: [AOJ-ICPC, 400, グラフ, dijkstra]
+---
+
+<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article-full"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2151">Brave Princess Revisited | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+<!-- more -->
+
+状態を(襲われる盗賊や刺客の人数, お金, 頂点番号)としてdijkstra．現在の状態から次の状態への遷移は，護衛を雇わないで盗賊に襲われる，護衛を雇い守ってもらう，の$2$つである．お金が辺の長さより少ない場合は護衛を雇えないことに注意する．
+
+# Code
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+#include <queue>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+typedef pair<P, int> PI;
+
+struct edge {
+	int from,to;
+	int cost, res;
+
+	edge(int t,int c) : to(t),cost(c) {}
+	edge(int t,int c,int r) : to(t), cost(c), res(r) {}
+
+	bool operator<(const edge &e) const {
+		return cost < e.cost;
+	}
+};
+
+vector<edge> G[105];
+int d[105][105];
+
+void dijkstra(int s, int l) {
+	rep(i, 105) rep(j, 105) d[i][j] = INF;
+	d[s][l] = 0;
+
+	priority_queue<PI, vector<PI>, greater<PI> > que;
+	que.push(mp(mp(0, -l), s));
+
+	while(que.size()) {
+		PI p = que.top(); que.pop();
+		int cost = p.first.first;
+		int coin = p.first.second;
+		int v = p.second;
+		coin *= -1;
+
+		if(d[v][coin] < cost) continue;
+		
+		rep(i, G[v].size()) {
+			edge e = G[v][i];
+
+			if(d[e.to][coin] > d[v][coin] + e.res) {
+				d[e.to][coin] = d[v][coin] + e.res;
+				que.push(mp(mp(d[e.to][coin], -coin), e.to));
+			}
+
+			int nc = coin - e.cost;
+			if(nc >= 0 && d[e.to][nc] > d[v][coin]) {
+				d[e.to][nc] = d[v][coin];
+				que.push(mp(mp(d[e.to][nc], -nc), e.to));
+			}
+		}
+
+	}
+}
+
+int main() {
+	int n, m, l;
+	while(cin >> n >> m >> l)  {
+		if(n == 0 && m == 0 && l == 0) break;
+
+		rep(i, 105) G[i].clear();
+
+		rep(i, m) {
+			int a, b, c, d;
+			cin >> a >> b >> c >> d;
+
+			a--; b--;
+
+			G[a].push_back(edge(b, c, d));
+			G[b].push_back(edge(a, c, d));
+		}
+
+		dijkstra(0, l);
+
+		int ans = INF;
+		rep(i, l+1) {
+			ans = min(ans, d[n-1][i]);
+		}
+
+		cout << ans << endl;
+	}
+
+	return 0;
+}
+```
+

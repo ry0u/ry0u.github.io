@@ -1,0 +1,142 @@
+---
+layout: post
+title: "ABC009D 漸化式"
+date: 2016-04-03 14:48:07 +0900
+comments: true
+categories: [ABC, AtCoder, 行列類乗]
+---
+
+<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article-full"><h4><a href="http://abc009.contest.atcoder.jp/tasks/abc009_4">D: 漸化式 - AtCoder Beginner Contest 009 | AtCoder</a></h4><p>(null)</p></blockquote>
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+<!-- more -->
+
+はじめに決まっている項数{% m %} K {% em %}が小さく，数列の求める項の番号{% m %} M {% em %}が大きいので，上手く遷移行列を作れれば行列累乗で行けそうと思った．どういう遷移になるかイマイチよく分からず行列を自分で作ることが出来なかった．解説を見た．  
+
+http://www.slideshare.net/chokudai/abc009
+
+解説通りに遷移行列を
+{% math %}
+	\left(
+		\begin{array}{ccccc}
+			C_1 & C_2 & ...& C_{K-1} & C_K \\
+			1 & 0 & ... & 0 & 0 \\
+			0 & 1 & ... & 0 & 0 \\
+			... & ... & ... & ... & ... \\
+			0 & ... & 0 & 1 & 0 \\
+		\end{array}
+	\right)
+{% endmath %}
+として
+{% math %}
+	\left(
+		\begin{array}{ccccc}
+			C_1 & C_2 & ...& C_{K-1} & C_K \\
+			1 & 0 & ... & 0 & 0 \\
+			0 & 1 & ... & 0 & 0 \\
+			... & ... & ... & ... & ... \\
+			0 & ... & 0 & 1 & 0 \\
+		\end{array}
+	\right) ^{M-K} \cdot \left(
+						\begin{array}{c}
+							A_{K} \\
+							A_{K-1} \\
+							A_{K-2} \\
+							... \\
+							A_{1} \\
+						\end{array}
+					\right)
+{% endmath %}
+を計算する．単位元の {% m %} 1 {% em %}は {% m %} 32ビットの11\cdots1 {% em %}である(単位行列と {% m %} A  {% em %}が {% m %} A {% em %}にならずに気付いた)．
+
+# Code
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+ll S = 0;
+
+struct Mat {
+	vector<vector<ll> > dat;
+	int n;
+
+	Mat(int n) : n(n), dat(n, vector<ll>(n)) {}
+
+	Mat(vector<vector<ll> > dat) : n(dat.size()), dat(dat) {}
+
+	Mat I(int n) {
+		Mat ret(n);
+		rep(i, n) ret.dat[i][i] = S;
+		return ret;
+	}
+
+	Mat mul(Mat &b) {
+		Mat ret(n);
+		rep(i, n) rep(j, n) rep(k, n) (ret.dat[i][j] ^= (dat[i][k] & b.dat[k][j]));
+		return ret;
+	}
+
+	Mat pow(ll b) {
+		Mat ret = I(n);
+		for (Mat A = *this; b > 0; A = A.mul(A) , b /= 2) if (b & 1) ret = A.mul(ret);
+		return ret;
+	}
+};
+
+int main() {
+	int n, m;
+	cin >> n >> m;
+
+	vector<ll> a(n), c(n);
+	rep(i, n) cin >> a[i];
+	rep(i, n) cin >> c[i];
+
+	rep(i, 32) {
+		S += (1LL << i);
+	}
+
+	if(m <= n) {
+		cout << a[m-1] << endl;
+	} else {
+
+		Mat mat(n);
+		rep(i, n) mat.dat[0][i] = c[i];
+		REP(i, 1, n) mat.dat[i][i-1] = S;
+
+		Mat ret = mat.pow(m - n);
+		// rep(i, n) {
+		// 	rep(j, n) {
+		// 		cout << ret.dat[i][j] << " ";
+		// 	}
+		// 	cout << endl;
+		// }
+
+		ll ans = 0;
+		rep(i, n) {
+			ans ^= (ret.dat[0][i] & a[n-1-i]);
+		}
+
+		cout << ans << endl;
+	}
+
+	return 0;
+}
+```
+

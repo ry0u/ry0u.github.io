@@ -1,0 +1,113 @@
+---
+layout: post
+title: "AOJ1144 Curling 2.0"
+date: 2016-03-22 22:22:58 +0900
+comments: true
+categories: [AOJ-ICPC, 300, シュミレーション, 深さ優先]
+---
+
+<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=1144">Curling 2.0</a></h4><p>On Planet MM-21, after their Olympic games this year, curling is getting popular. But the rules are somewhat different from ours. The game is played on an ice game board on which a square mesh is marked. They use only a single stone.</p></blockquote>
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+<!-- more -->
+
+実際に石を滑らせてシュミレーションする．滑らした途中にゴールがあっても大丈夫にようになってなくてWAをたくさん出した．
+
+# Code
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <queue>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+
+using namespace std;
+typedef long long ll;
+
+int w,h,x,y;
+int sx,sy,gx,gy;
+int dx[4] = {1,0,-1,0};
+int dy[4] = {0,1,0,-1};
+int ans = 0;
+bool f[25][25];
+
+bool can(int y,int x) {
+    if(0 <= y && y < h && 0 <= x && x < w) return true;
+    return false;
+}
+
+void dfs(int y, int x, int cnt) {
+	if(cnt >= 10) return;
+
+	rep(i, 4) {
+		int ny = y;
+		int nx = x;
+		bool flag = false;
+
+		while(can(ny + dy[i], nx + dx[i]) && f[ny + dy[i]][nx + dx[i]]) {
+			ny += dy[i];
+			nx += dx[i];
+
+			if(ny == gy && nx == gx) {
+				flag = true;
+				break;
+			}
+		}
+
+		if(flag) {
+			ans = min(ans, cnt + 1);
+			return;
+		}
+
+		if(ny == y && nx == x) continue;
+		if(!can(ny + dy[i], nx + dx[i])) continue;
+
+
+		f[ny + dy[i]][nx + dx[i]] = true;
+		dfs(ny, nx, cnt + 1);
+		f[ny + dy[i]][nx + dx[i]] = false;
+	}
+}
+
+int main() {
+
+    while(cin >> w >> h) {
+        if(w == 0 && h == 0) break;
+
+		memset(f, 0, sizeof(f));
+		ans = INF;
+
+        rep(i, h) {
+            rep(j, w) {
+                int x;
+                cin >> x;
+
+				if(x == 0)  f[i][j] = true;
+                if(x == 2) {
+                    sy = i;
+                    sx = j;
+					f[i][j] = true;
+                }
+                if(x == 3) {
+                    gy = i;
+                    gx = j;
+					f[i][j] = true;
+                }
+            }
+        }
+
+		dfs(sy, sx, 0);
+
+		if(ans == INF) cout << -1 << endl;
+		else cout << ans << endl;
+    }
+    return 0;
+}
+```
+

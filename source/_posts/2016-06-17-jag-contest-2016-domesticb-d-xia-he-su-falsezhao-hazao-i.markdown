@@ -1,0 +1,145 @@
+---
+layout: post
+title: "JAG Contest 2016 DomesticB D 夏合宿の朝は早い"
+date: 2016-06-17 17:13:18 +0900
+comments: true
+categories: [模擬予選, グラフ, 強連結成分分解, 確立]
+---
+
+<!-- more -->
+
+強連結成分分解した後，各連結成分の始点が全て起きている確立の積を求める．始点が起きている確立は，$1 - $その強連結成分のノード番号に属するノードが全員起きていない確立で求まる．始点かどうかは，強連結成分分解後のグラフのノードの自分に向いている辺の個数が$0$であればよいのでカウントしていった．
+
+# Code
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <set>
+
+#define REP(i, k, n) for(int i = k; i < n; i++)
+#define rep(i, n) for(int i = 0; i < n; i++)
+
+using namespace std;
+
+struct SCC {
+	int n;
+	vector<vector<int> > g, rg, ng, scc;
+	vector<int> res;
+	bool used[105];
+
+	SCC(int _n) {
+		n = _n;
+		g.resize(n); rg.resize(n); scc.resize(n); res.resize(n);
+	}
+
+	void add(int i, int j) {
+		g[i].push_back(j);
+		rg[j].push_back(i);
+	}
+
+	vector<int> vs;
+	void dfs(int v) {
+		used[v] = true;
+		rep(i, g[v].size()) {
+			if(!used[ g[v][i] ]) dfs(g[v][i]);
+		}
+		vs.push_back(v);
+	}
+
+	void rdfs(int v, int k) {
+		used[v] = true;
+		res[v] = k;
+		scc[k].push_back(v);
+
+		rep(i, rg[v].size()) {
+			if(!used[ rg[v][i] ]) rdfs(rg[v][i], k);
+		}
+	}
+
+	void ng_make(int k) {
+		ng.resize(k);
+
+		rep(i, n) {
+			set<int> S;
+			rep(j, g[i].size()) {
+				int to = g[i][j];
+				if(res[i] == res[to]) continue;
+				if(S.find(res[to]) != S.end()) continue;
+				ng[res[i]].push_back(res[to]);
+				S.insert(res[to]);
+			}
+		}
+	}
+
+	int build() {
+		memset(used, 0, sizeof(used));
+		rep(i, n) {
+			if(!used[i]) dfs(i);
+		}
+
+		memset(used, 0, sizeof(used));
+		int k = 0;
+		for(int i = vs.size()-1; i >= 0; i--) {
+			if(!used[vs[i]]) rdfs(vs[i], k++);
+		}
+
+		ng_make(k);
+		return k;
+	}
+};
+
+int main() {
+	int n;
+	while(cin >> n && n) {
+		vector<double> v(n);
+		SCC scc(n);
+
+		rep(i, n) {
+			int x;
+			cin >> v[i] >> x;
+
+			rep(j, x) {
+				int a;
+				cin >> a;
+				
+				a--;
+				scc.add(i, a);
+			}
+		}
+
+		int k = scc.build();
+		vector<vector<int> > g = scc.ng;
+
+		int cnt[105];
+		memset(cnt, 0, sizeof(cnt));
+
+		rep(i, k) {
+			rep(j, g[i].size()) {
+				cnt[g[i][j]]++;
+			}
+		}
+
+		double ans = 1.0;
+		rep(i, k) {
+			if(cnt[i] != 0) continue;
+			double t = 1.0;
+			rep(j, scc.scc[i].size()) {
+				int u = scc.scc[i][j];
+				t *= v[u];
+			}
+
+			ans *= (1.0 - t);
+		}
+
+		cout << fixed;
+		cout.precision(20);
+		cout << ans << endl;
+	}
+
+	return 0;
+}
+```
+

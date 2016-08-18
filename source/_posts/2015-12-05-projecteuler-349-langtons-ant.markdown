@@ -1,0 +1,164 @@
+---
+layout: post
+title: "ProjectEuler 349 Langton's ant"
+date: 2015-12-05 19:57:23 +0900
+comments: true
+categories: [ProjectEuler]
+---
+
+https://projecteuler.net/problem=349  
+
+行動回数を{% m %}N{% em %}としてとりあえずシュミレーションしてみる．
+
+{% m %}N = 10{% em %}  
+{% img /images/ProjectEuler/349/10.png %}
+
+{% m %}N = 20{% em %}  
+{% img /images/ProjectEuler/349/20.png %}
+
+{% m %}N = 50{% em %}  
+{% img /images/ProjectEuler/349/50.png %}
+
+{% m %}N = 100{% em %}  
+{% img /images/ProjectEuler/349/100.png %}
+
+結果だけ見ても良くわからないので，動きを見てみた．
+
+{% m %}N = 200{% em %}  
+{% img /images/ProjectEuler/349/200.gif %}
+
+もっと大きな数をやった
+{% m %}N = 1000{% em %}  
+{% img /images/ProjectEuler/349/1000.png %}
+
+{% m %}N = 10000{% em %}  
+{% img /images/ProjectEuler/349/10000.png %}
+
+{% m %}N = 20000{% em %}  
+{% img /images/ProjectEuler/349/20000.png %}
+
+!!!!!!!  
+めっちゃびっくりした．直線になるらしい  
+周期的になるだろうと思い10000から100ずつぐらいずらして数えた差を取ってみた  
+{% img /images/ProjectEuler/349/img.png %}
+
+どうやら10000から始めると26で一周期になっているようだ．実際に2600ずつずらしてみた．  
+{% img /images/ProjectEuler/349/img2.png %}
+
+後はpythonで計算した．
+
+```python
+720 + (10 ** 18 - 10000) / 2600 * 300
+=> 115384615384614720
+(10 ** 18 - 10000) % 2600
+=> 2000
+```
+後は100ずつずらした時の20番目までを足した
+
+{% math %}
+115384615384614720 + 232 = 115384615384614952
+{% endmath %}
+
+submitしたら合ってた．良かった．  
+  
+シュミレーションするコード
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+int dy[4] = {-1, 0, 1, 0};
+int dx[4] = { 0, 1, 0, -1};
+
+vector< int > v[5005][5005];
+const int GETA = 1000;
+int N = 0;
+
+void dfs(int y, int x, int dir, int c) {
+	if(c == N) return;
+
+	int n = v[y][x].size();
+	v[y][x].push_back(c);
+
+	int ndir = 0;
+	if(n % 2 == 0) {
+		ndir = (dir + 1) % 4;
+	} else {
+		ndir = (dir + 3) % 4;
+	}
+
+	int ny = y + dy[ndir];
+	int nx = x + dx[ndir];
+
+	dfs(ny, nx, ndir, c+1);
+	return;
+}
+
+void print(int x) {
+	REP(i, GETA-x, GETA+x+1) {
+		REP(j, GETA-x, GETA+x+1) {
+			cout << v[i][j].size() << " ";
+		}
+		cout << endl;
+	}
+}
+
+void print2(int x) {
+	REP(i, GETA-x, GETA+x+1) {
+		REP(j, GETA-x, GETA+x+1) {
+			if(v[i][j].size() % 2 == 0) {
+				cout << " ";
+			} else {
+				cout << "O";
+			}
+		}
+		cout << endl;
+	}
+}
+
+int main() {
+	vector<int> t;
+	rep(k, 10) {
+		N = k * 100 + 10000;
+		rep(i, 2005) rep(j, 2005) v[i][j].clear();
+		dfs(GETA, GETA, 0, 0);
+	
+		ll cnt = 0;
+		rep(i, 5005) {
+			rep(j, 5005) {
+				if(v[i][j].size() % 2 == 1) {
+					cnt++;
+				}
+			}
+		}
+	
+		t.push_back(cnt);
+		cout << cnt << endl;
+	}
+	
+	rep(i, t.size()-1) {
+		cout << t[i+1] - t[i] << " ";
+	}
+	cout << endl;
+
+	return 0;
+}
+
+```
+

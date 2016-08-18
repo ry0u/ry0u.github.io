@@ -1,0 +1,706 @@
+---
+layout: post
+title: "Year End's Hack Day 2015参加記"
+date: 2015-12-20 23:02:45 +0900
+comments: true
+categories: [yehd2015]
+---
+
+明治大学NCC主催 Year End's Hack Day 2015に参加しました  
+http://eventdots.jp/event/576488  
+
+<!--more-->
+
+むっちゃ適当に箇条書き．  
+  
+* 会場が広いし綺麗で最高だった．
+* 開始後，CTFの問題を少し見るも，何も出来ず
+* 競プロでWAをたくさん生やす
+* 最終scoreは2930（競プロ問題の配点が高すぎた?）
+* 解説の時間が短かったのがちょっと残念
+* CTFの解説は何を言ってるのかワケワカメ状態．精進したい
+* 懇親会が最高and最高
+
+参加者の方々，特に運営の方々はお疲れ様でした．非常に楽しいイベントでした．ありがとうございました．  
+  
+以下，問題とコード
+
+## A : クリスマス
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+int main() {
+	ll a, b;
+	cin >> a >> b;
+
+	if(a <= b) {
+		cout << 1 << endl;
+		return 0;
+	}
+
+	ll ans =  a / b;
+
+	if(a % b == 0) {
+		cout << ans << endl;
+	} else {
+		cout << ans + 1 << endl;
+	}
+
+	return 0;
+}
+```
+
+## B : Decode Me
+問題名は果たしてこれであっているのでしょうか．まず問題文に辿りつけずﾁｰﾝ．  
+
+## C : 優勝者
+それぞれソート
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+int main() {
+	int n;
+	cin >> n;
+
+	vector<pair<int, string> > a, b, c;
+
+	rep(i, n) {
+		string s;
+		int d, e;
+
+		cin >> s >> d >> e;
+
+		if(d == 0) {
+			bool flag = false;
+			rep(j, a.size()) {
+				if(a[j].second == s) {
+					flag = true;
+					a[j].first += e;
+					break;
+				}
+			}
+
+			if(!flag) a.push_back(make_pair(e, s));
+		} else if(d == 1) {
+			bool flag = false;
+			rep(j, b.size()) {
+				if(b[j].second == s) {
+					flag = true;
+					b[j].first += e;
+				}
+			}
+
+			if(!flag) b.push_back(make_pair(e, s));
+		}
+
+		bool flag = false;
+		rep(j, c.size()) {
+			if(c[j].second == s) {
+				flag = true;
+				c[j].first += e;
+			}
+		}
+		if(!flag) c.push_back(make_pair(e, s));
+	}
+
+	sort(a.rbegin(), a.rend());
+	sort(b.rbegin(), b.rend());
+	sort(c.rbegin(), c.rend());
+
+	if(a.size() == 0) cout << -1 << endl;
+	else cout << a[0].second << " " << a[0].first << endl;
+
+	if(b.size() == 0) cout << -1 << endl;
+	else cout << b[0].second << " " << b[0].first << endl;
+
+	if(c.size() == 0) cout << -1 << endl;
+	else cout << c[0].second << " " << c[0].first << endl;
+
+	return 0;
+}
+```
+
+## D : ナイト
+場合分け．{% m %} N  = 4{% em %}の時の正しい値が出せなくてWAをたくさん生やした
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+int main() {
+	int n;
+	cin >> n;
+
+	if(n == 1) {
+		cout << 0 << endl;
+	} else if(n == 2 || n == 3) {
+		cout << -1 << endl;
+	} else if(n == 4) {
+		cout << 16 << endl;
+	} else cout << n * n - 1 << endl;
+
+	return 0;
+}
+```
+
+## E : 1cm = 1cm
+まずlcm取ったのを約数列挙して，その約数同士のlcmが一致するか見た．重複がないようにsetにぶっこんだ．
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+ll lcm(ll m,ll n) {
+	if(m == 0 || n == 0) return 0;
+	return ((m / __gcd(m,n)) * n);
+}
+
+vector<ll> divisor(ll n) {
+	vector<ll> res;
+	for(ll i = 2; i*i <= n; i++) {
+		if(n % i == 0) {
+			res.push_back(i);
+			if(i != n/i) res.push_back(n/i);
+		}
+	}
+	return res;
+}
+
+int main() {
+	ll a, b;
+	cin >> a >> b;
+
+	ll d = lcm(a, b);
+	vector<ll> v = divisor(d);
+
+	v.push_back(1);
+	v.push_back(d);
+
+	sort(v.begin(), v.end());
+	set<ll> st;
+
+	ll ans = 0;
+	rep(i, v.size()) {
+		rep(j, v.size()) {
+			ll e = lcm(v[i], v[j]);
+			if(st.find(e) == st.end()) {
+				if(d == e) ans++;
+			}
+
+			if(v[i] == v[j]) {
+				st.insert(v[i]);
+			}
+		}
+	}
+	cout << ans << endl;
+	return 0;
+}
+```
+
+## F : TomoriNao
+コピペしたら問題文が見れた．結局カットした木の葉を数えないようにすればよい．根が複数あることに気づかず，これもWAを生やした．
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+vector<int> G[100005];
+vector<int> roots;
+bool used[100005];
+
+int ans = 0;
+void dfs(int cur) {
+	if(!used[cur] && G[cur].size() != 0) {
+		ans++;
+	}
+
+	used[cur] = true;
+	rep(i, G[cur].size()) {
+		if(!used[G[cur][i]]) {
+			dfs(G[cur][i]);
+		}
+	}
+}
+
+int main() {
+	int n;
+	cin >> n;
+
+	vector<int> v(n);
+	rep(i, n) cin >> v[i];
+
+	int k;
+	cin >> k;
+
+	rep(i, n) {
+		if(v[i] == -1) {
+			roots.push_back(i);
+		} else {
+			if(v[i] == k) continue;
+			G[v[i]].push_back(i);
+		}
+	}
+
+	memset(used, 0, sizeof(used));
+
+	rep(i, roots.size()) {
+		dfs(roots[i]);
+	}
+
+	cout << ans << endl;
+	return 0;
+}
+```
+
+## G : RGB-Query
+愚直にやったらダメなんだろうなとか思いつつ出したら（出すな）ACが取れた．解説でも愚直にやると間に合わなくて...とか言ってし，どうなんですか
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+
+int R[100005],G[100005],B[100005],P[100005];
+
+int main() {
+	int n;
+	cin >> n;
+
+	rep(i, n) {
+		cin >> R[i] >> G[i] >> B[i] >> P[i];
+	}
+
+	int q;
+	cin >> q;
+
+	rep(i, q) {
+		int a, b, c, d, e, f;
+		cin >> a >> b >> c >> d >> e >> f;
+		int cnt = 0;
+
+		rep(j, n) {
+			if(a <= R[j] && R[j] <= b && c <= G[j] && G[j] <= d && e <= B[j] && B[j] <= f) {
+				cnt += P[j];
+			}
+		}
+		
+		cout << cnt << endl;
+	}
+
+	return 0;
+}
+```
+
+## H : 逆転時計
+終了時間する時間が早い順にとる区間スケジューリング．これをm個超えるまで取り続ければ終わり．
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+int main() {
+	int n, m;
+	cin >> n >> m;
+
+	vector<P> v(n);
+	rep(i, n) {
+		cin >> v[i].second >> v[i].first;
+	}
+
+	sort(v.begin(), v.end());
+
+	bool used[10005];
+	memset(used, 0, sizeof(used));
+
+	int res = 0;
+	int l = -1, r = -1;
+	int ans = 0;
+
+	while(true) {
+		bool flag = true;
+		rep(i, n) {
+			if(!used[i]) flag = false;
+		}
+
+		if(flag) break;
+
+		int r = -1;
+		rep(i, n) {
+			if(used[i]) continue;
+
+			if(r <= v[i].second) {
+				r = v[i].first;
+				res++;
+				used[i] = true;
+			}
+		}
+
+		ans++;
+
+		if(res >= m) break;
+	}
+
+	if(res >= m) {
+		cout << ans-1 << endl;
+	} else {
+		cout << -1 << endl;
+	}
+
+	return 0;
+}
+```
+
+## I : ナイト再び
+状態を[x][y][手]で持った幅優先じゃだめなの?　よく分からず．**AC取れてません**
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+#include <queue>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+ll d[15][15][1005];
+bool Q[15][15][1005];
+int n, m;
+
+int dx[8] = {+1,+2,+2,+1, -1,-2,-2,-1};
+int dy[8] = {+2,+1,-1,-2, -2,-1,+1,+2};
+
+bool can(int x, int y) {
+	if(0 <= x && x < n && 0 <= y && y < n) return true;
+	return false;
+}
+
+int main() {
+	cin >> n >> m;
+
+	int sx, sy, gx, gy;
+	cin >> sx >> sy >> gx >> gy;
+
+	memset(d, 0, sizeof(d));
+	memset(Q, 0, sizeof(Q));
+
+	queue<pair<P, int> > que;
+	que.push(mp(mp(sx, sy), 0));
+
+	d[sx][sy][0] = 1;
+	Q[sx][sy][0] = true;
+
+	while(que.size()) {
+		P p = que.front().first;
+		int t = que.front().second;
+
+		int x = p.first;
+		int y = p.second;
+
+		que.pop();
+		Q[x][y][t] = false;
+
+		if(t >= m) continue;
+
+		rep(i, 8) {
+			int nx = x + dx[i];
+			int ny = y + dy[i];
+
+			if(can(nx, ny)) {
+				d[nx][ny][t+1] += d[x][y][t];
+				d[nx][ny][t+1] %= 1000000007;
+				if(!Q[nx][ny][t+1]) {
+					que.push(mp(mp(nx, ny), t+1));
+					Q[nx][ny][t+1] = true;
+				}
+			}
+		}
+	}
+
+	cout << d[gx][gy][m] << endl;
+
+	return 0;
+}
+```
+
+## J : 気まぐれ勇者
+逆からdijkstra．遷移先が{% m %} V_i {% em %}を超えないようにする．
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+#include <queue>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+struct edge {
+	int from,to;
+	int cost;
+
+	edge(int t,int c) : to(t),cost(c) {}
+	edge(int f,int t,int c) : from(f),to(t),cost(c) {}
+
+	bool operator<(const edge &e) const {
+		return cost < e.cost;
+	}
+};
+
+vector<edge> G[105];
+int d[105];
+int val[105];
+
+void dijkstra(int s,int n) {
+	priority_queue<P,vector<P>,greater<P> > que;
+	fill(d,d+n,INF);
+
+	d[s] = 0;
+	que.push(P(0,s));
+
+	while(que.size()) {
+		P p = que.top();
+		que.pop();
+
+		int v = p.second;
+		if(d[v] < p.first) continue;
+
+		rep(i,G[v].size()) {
+			edge e = G[v][i];
+			int ncost = d[v] + e.cost;
+			if(d[e.to] > ncost && val[e.to] >= ncost) {
+				d[e.to] = ncost;
+				que.push(P(d[e.to],e.to));
+			}
+		}
+	}
+}
+
+int main() {
+	int n, m;
+	cin >> n >> m;
+
+	memset(d, 0, sizeof(d));
+	memset(val, 0, sizeof(val));
+
+	rep(i, n) cin >> val[i];
+	rep(i, m) {
+		int s, t, cost;
+		cin >> s >> t >> cost;
+
+		G[t].push_back(edge(s, cost));
+	}
+
+	int s, t;
+	cin >> s >> t;
+
+	dijkstra(t, n);
+
+	if(d[s] == INF) cout << "NO" << endl;
+	else cout << "YES" << endl;
+
+	return 0;
+}
+```
+
+## K : Non-decreasing Sequence of Longest Increasing Subsequence
+最初にlisを求める．大きい値から右にずらしていくが，その時にlisに含まれていない場合は追加して+1．含まれている場合はそのまま．これを繰り返す．
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+vector<int> lis(int n, vector<int> v) {
+	vector<int> res(n);
+	rep(i, n) res[i] = INF;
+
+	rep(i, n) {
+		*lower_bound(res.begin(), res.end(), v[i]) = v[i];
+	}
+
+	return res;
+}
+
+int main() {
+	int n;
+	cin >> n;
+
+	vector<int> v(n);
+	rep(i, n) cin >> v[i];
+
+	vector<int> res = lis(n, v);
+	sort(v.rbegin(), v.rend());
+
+	int ans = 0;
+	set<int> st;
+	rep(i, n) {
+		if(res[i] == INF) continue;
+		ans++;
+		st.insert(res[i]);
+	}
+
+	cout << ans << endl;
+	rep(i, n) {
+		if(st.find(v[i]) == st.end()) {
+			ans++;
+			*lower_bound(res.begin(), res.end(), v[i]) = v[i];
+		}
+		cout << ans << endl;
+	}
+
+	return 0;
+}
+```

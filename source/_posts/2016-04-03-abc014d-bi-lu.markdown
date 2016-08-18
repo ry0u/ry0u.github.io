@@ -1,0 +1,112 @@
+---
+layout: post
+title: "ABC014D 閉路"
+date: 2016-04-03 18:09:24 +0900
+comments: true
+categories: [ABC, AtCoder, LCA, 木]
+---
+
+<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://abc014.contest.atcoder.jp/tasks/abc014_4">D: 閉路 - AtCoder Beginner Contest 014 | AtCoder</a></h4><p>(null)</p></blockquote>
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+<!-- more -->
+
+木に {% m %} 1 {% em %}本付け加えて出来る閉路は，つなげる {% m %} 2 {% em %}点とその {% m %} 2 {% em %}点の最小共通祖先で出来る三角形になるはずである．よって， {% m %} LCA(a, b) {% em %}を求めた後に，その三角形の長さを出力した．長さは {% m %} LCA {% em %}を求める際に深さが出ているので，そこから出せる．
+
+# Code
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+#include <cmath>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+vector<int> G[100005];
+int root;
+
+int parent[20][100005];
+int depth[100005];
+
+void dfs(int v, int p, int d) {
+	parent[0][v] = p;
+	depth[v] = d;
+	rep(i, G[v].size()) {
+		if(G[v][i] != p) dfs(G[v][i], v, d+1);
+	}
+}
+
+void init(int V) {
+	dfs(root, -1, 0);
+	for(int k = 0; k + 1 < 20; k++) {
+		rep(v, V) {
+			if(parent[k][v] < 0) parent[k + 1][v] = -1;
+			else parent[k + 1][v]= parent[k][parent[k][v]];
+		}
+	}
+}
+
+int lca(int u, int v) {
+	if(depth[u] > depth[v]) swap(u, v);
+	rep(k, 20) {
+		if((depth[v] - depth[u]) >> k & 1) {
+			v = parent[k][v];
+		}
+	}
+	if(u == v) return u;
+	for(int k = 20 - 1; k >= 0; k--) {
+		if(parent[k][u] != parent[k][v]) {
+			u = parent[k][u];
+			v = parent[k][v];
+		}
+	}
+	return parent[0][u];
+}
+
+int main() {
+	int n;
+	cin >> n;
+
+	rep(i, n-1) {
+		int x, y;
+		cin >> x >> y;
+
+		x--; y--;
+		G[x].push_back(y);
+		G[y].push_back(x);
+	}
+
+	root = 0;
+	init(n);
+
+	int Q;
+	cin >> Q;
+
+	rep(q, Q) {
+		int a, b;
+		cin >> a >> b;
+
+		a--; b--;
+
+		int par = lca(a, b);
+
+		cout << (depth[a] - depth[par]) + (depth[b] - depth[par]) + 1 << endl;
+	}
+
+	return 0;
+}
+```

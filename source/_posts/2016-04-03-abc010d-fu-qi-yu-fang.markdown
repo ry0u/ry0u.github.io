@@ -1,0 +1,116 @@
+---
+layout: post
+title: "ABC010D 浮気予防"
+date: 2016-04-03 17:10:50 +0900
+comments: true
+categories: [ABC, AtCoder, 最大流]
+---
+
+<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://abc010.contest.atcoder.jp/tasks/abc010_4">D: 浮気予防 - AtCoder Beginner Contest 010 | AtCoder</a></h4><p>(null)</p></blockquote>
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+<!-- more -->
+
+二重辺連結成分分解をしてrootを{% m %} 0 {% em %}の木にした後に， {% m %} 0 {% em %}から伸びるパスの後に対称が入ればその辺を切る，で出来ると思い実装してみたがサンプルが全然合わない．  
+rootを含む閉路があった場合に，そこはrootにまとまってしまうのでそのグループの中での最小が分からないし，そこの切り方によってはrootから出る枝を切る必要が無いかもしれない．  
+
+ギブアップして解説を見た．  
+http://www.slideshare.net/chokudai/abc010-35598499  
+
+最大流・最小カット問題になるのか...  
+処理を追加後のグラフでは，辺を切るのはそのままで，ログイン出来なくするのは，追加したパスを切れば良いとなる．この考え方は非常に勉強になった．
+
+# Code
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+#include <stack>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+struct edge {
+	int to, cap, rev;
+	
+	edge(int t, int c, int r) {
+		to = t; cap = c; rev = r;
+	}
+};
+
+vector<edge> G[105];
+bool used[105];
+
+void add_edge(int from,int to,int cap) {
+	G[from].push_back(edge(to,cap,G[to].size()));
+	G[to].push_back(edge(from,0,G[from].size()-1));
+}
+
+int dfs(int v,int t,int f) {
+	if(v == t) return f;
+	used[v] = true;
+
+	rep(i,G[v].size()) {
+		edge &e = G[v][i];
+		if(!used[e.to] && e.cap > 0) {
+			int d = dfs(e.to,t,min(f,e.cap));
+			if(d > 0) {
+				e.cap -= d;   
+				G[e.to][e.rev].cap += d; 
+				return d;
+			}
+		}
+	}
+	return 0;
+}
+
+int max_flow(int s,int t) {
+	int flow = 0;
+	for(;;) {
+		memset(used,0,sizeof(used));
+		int f = dfs(s,t,INF);
+		if(f == 0) return flow;
+		flow += f;
+	}
+}
+
+int main() {
+	int n, g, e;
+	cin >> n >> g >> e;
+
+	vector<int> p(g);
+	rep(i, g) cin >> p[i];
+
+	rep(i, e) {
+		int a, b;
+		cin >> a >> b;
+
+		add_edge(a, b, 1);
+		add_edge(b, a, 1);
+	}
+
+	rep(i, g) {
+		add_edge(p[i], n+1, 1);
+	}
+
+	int s = 0, t = n + 1;
+
+	cout << max_flow(s, t) << endl;
+
+	return 0;
+}
+```
+

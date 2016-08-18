@@ -1,0 +1,86 @@
+---
+layout: post
+title: "ARC043-B 難易度"
+date: 2015-10-25 01:41:41 +0900
+comments: true
+categories: [Atcoder, 動的計画法]
+---
+
+難易度の2倍以上の問題に対して選ぶことが出来る．  
+まずは，難易度でソート．  
+今見ている問題数をiとすると，i+1問目でその問題を選ぶことが出来る場所に足していく．  
+
+{% img /images/Atcoder/001/g.png %}  
+縦を問題，横を問題数と見て，遷移出来る場所を見つけたい．これを愚直に探すと，探索に{% m %} n {% em %}かかってしまう．しかし，難易度でソートされているので，lower_boundで{% m %} log(n) {% em %}で見つけることが出来る．最初に見つけた場所に足していって，累積和を取った．全体で{% m %} O(nlog(n)) {% em %}で間に合う．
+
+# Code
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+#define MOD 1000000007
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+int main() {
+    int n;
+    cin >> n;
+
+    ll vmax = 0;
+    vector<ll> v(n);
+    rep(i,n) {
+        cin >> v[i];
+        vmax = max(vmax, v[i]);
+    }
+
+    sort(v.begin(), v.end());
+
+    ll cnt[100005][4];
+    memset(cnt, 0, sizeof(cnt)) ;
+
+    rep(i,n) {
+        cnt[i][0]++;
+    }
+
+    rep(i,3) {
+        rep(j,n) {
+            if(v[j]*2 > vmax) continue;
+            int id = lower_bound(v.begin(), v.end(), v[j]*2) - v.begin();
+
+            cnt[id][i+1] += cnt[j][i];
+            cnt[id][i+1] %= MOD;
+        }
+
+        REP(j,1,n) {
+            cnt[j][i+1] += cnt[j-1][i+1];
+            cnt[j][i+1] %= MOD;
+        }
+    }
+
+    ll ans = 0;
+    rep(i,n) {
+        ans += cnt[i][3];
+        ans %= MOD;
+    }
+    cout << ans << endl;
+
+    return 0;
+}
+
+```
+
+2倍するので，オーバーフローしてWA．llに直した時に，cntの初期化を消してしまったらしく，それに気づかずWAを連発してしまった．．．

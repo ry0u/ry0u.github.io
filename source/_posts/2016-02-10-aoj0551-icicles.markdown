@@ -1,0 +1,74 @@
+---
+layout: post
+title: "AOJ0551 Icicles"
+date: 2016-02-10 22:42:10 +0900
+comments: true
+categories: [AOJ]
+---
+
+問題文  
+http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0551
+
+<!-- more -->
+
+i番目のつららが落ちる時間は両隣のi-1，i+1番目のつららが落ちる時間に依存し，初期の値が大きいほうからつららを落として行けば矛盾は起きないと思ったので，priority_queueでやったらACした．
+
+# Code
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+#include <queue>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+int main() {
+	int n, l;
+	while(cin >> n >> l) {
+		if(n == 0 && l == 0) break;
+
+		vector<int> v(n), cnt(n);
+		priority_queue<P, vector<P>, greater<P> > que;
+		rep(i, n) {
+			cin >> v[i];
+			cnt[i] = 0;
+			que.push(P(v[i], i));
+		}
+
+		while(que.size()) {
+			P p = que.top();
+			que.pop();
+
+			int d = l - p.first;
+			int id = p.second;
+
+			if(id == 0) cnt[id] += cnt[id+1] + d;
+			else if(id == n-1) cnt[id] += cnt[id-1] + d;
+			else cnt[id] += max(cnt[id-1], cnt[id+1]) + d;
+		}
+
+		int ans = 0;
+		rep(i, n) {
+			ans = max(ans, cnt[i]);
+		}
+		cout << ans << endl;
+	}
+
+	return 0;
+}
+```
+

@@ -1,0 +1,102 @@
+---
+layout: post
+title: "AOJ0599 IOI Manju"
+date: 2016-03-08 15:01:46 +0900
+comments: true
+categories: [AOJ, 動的計画法]
+---
+
+<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0599">IOI Manju | Aizu Online Judge</a></h4><p>ところで，あなたはJust Odd Inventions 社を知っているだろうか？ この会社の業務は「ただ奇妙な発明(just odd inventions)」をすることである．ここでは略してJOI 社と呼ぶ．IOI 社は，饅頭を詰めるための高級な箱をJOI 社に発注することになった．JOI 社の製作する饅頭用の箱は$N$ 種類あり， $j$ 番目$(1 \leq j \leq N)$の箱は最大で$C_j$ 個の饅頭を詰められる大きさであり，販売価格は$E_j$ 円である．これらの$N$ 種類の箱のうちの何種類か(0 種類以上$N$ 種類以下) を1 個ずつ発注し，饅頭をそれらの箱に詰め分けてセットで販売することになった．各饅頭セットの価格は，それに含まれる饅頭の価格の合計である．</p></blockquote>
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+<!-- more -->
+
+饅頭{% m %} i {% em %}から饅頭{% m %} j {% em %}まで選んだ時の価格が欲しいので，累積和を取っておく．  
+{% math %}
+	dp[i][j] := i番目以内の箱を使い，饅頭jまで詰めた時の最大値
+{% endmath %}
+とする．{% m %} i {% em %}番目の箱を  
+
+* 使う遷移は，{% m %} dp\[i\]\[j\]+(d\[j+c\[i\]\]-d\[j\])-e[i]{% em %}
+* 使わない遷移は{% m %} dp\[i\]\[j+c\[i\]\]{% em %}．  
+
+{% img /images/AOJ/0599.png %}
+
+# Code
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+ll dp[505][10005];
+
+int main() {
+	int m, n;
+	cin >> m >> n;
+
+	vector<int> v(m);
+	rep(i, m) cin >> v[i];
+
+	vector<P> p(n);
+	rep(i, n) {
+		cin >> p[i].first >> p[i].second;
+	}
+
+	sort(v.begin(), v.end(), greater<int>());
+
+	int d[10005];
+	memset(d, 0, sizeof(d));
+	REP(i, 1, m + 1) {
+		d[i] += d[i-1] + v[i-1];
+	}
+
+	memset(dp, 0, sizeof(dp));
+	rep(i, 505) {
+		rep(j, 10005) dp[i][j]  = -1;
+	}
+
+	dp[0][0] = 0;
+
+	rep(i, n) {
+		rep(j, m + 1) {
+			dp[i+1][j] = max(dp[i+1][j], dp[i][j]);
+		}
+
+		rep(j, m) {
+			if(dp[i][j] == -1) continue;
+
+			int id = j + p[i].first;
+			id = min(id, m);
+			dp[i+1][id] = max(dp[i+1][id], max(dp[i][id], dp[i][j] + (d[id] - d[j]) - p[i].second));
+		}
+	}
+
+
+	ll ans = 0;
+	rep(i, n + 1) {
+		rep(j, m + 1) {
+			ans = max(ans, dp[i][j]);
+		}
+	}
+
+	cout << ans << endl;
+
+	return 0;
+}
+```

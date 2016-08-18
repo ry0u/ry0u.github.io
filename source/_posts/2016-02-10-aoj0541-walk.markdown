@@ -1,0 +1,127 @@
+---
+layout: post
+title: "AOJ0541 Walk"
+date: 2016-02-10 20:37:51 +0900
+comments: true
+categories: [AOJ, 動的計画法]
+---
+
+問題文  
+http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0541
+
+<!-- more -->
+
+その交差点を何回通ったかが分かれば，その偶奇でどちらに進むかが分かる．  
+例えば現在いる場所を赤として，次に向かう場所を青，さらにをそこに通る回数を5とする．
+
+**東**
+{% img /images/AOJ/0541-1.png %}
+**南**
+{% img /images/AOJ/0541-2.png %}  
+
+東の場合は，東に3回行き，南に2回行く．  
+南の場合は，東に2回行き，南に3回行く．  
+通る回数が偶数の場合はどちらに行く回数も同じである．  
+よって初期地点{% m %} (1, 1)にN として，{% em %}
+{% m %}(i, j)が東なら{% em %}
+{% math %}
+\begin{eqnarray}
+	dp[i+1][j] &=& dp[i][j]/2 \\
+	dp[i][j+1] &=& dp[i][j] - dp[i][j]/2
+\end{eqnarray}
+{% endmath %}
+
+{% m %} (i, j)が南なら {% em %}
+{% math %}
+\begin{eqnarray}
+	dp[i+1][j] &=& dp[i][j] - dp[i][j]/2 \\
+	dp[i][j+1] &=& dp[i][j]/2
+\end{eqnarray}
+{% endmath %}
+
+これで通った回数が分かったので，{% m %}(1, 1)から始めてW+1またはH+1{% em %}に出るまで進む．
+
+# Code
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+int h, w, n;
+int dp[1005][1005];
+
+int main() {
+	while(cin >> h >> w >> n) {
+		if(h == 0 && w == 0 && n == 0) break;
+
+		vector< vector<int> > v(h, vector<int>(w));
+		rep(i, h) {
+			rep(j, w) {
+				cin >> v[i][j];
+			}
+		}
+
+		memset(dp, 0, sizeof(dp));
+		dp[0][0] = n;
+
+		rep(i, h) {
+			rep(j, w) {
+				int s = dp[i][j] / 2;
+				int t = dp[i][j] - s;
+
+				if(v[i][j] % 2 == 1) {
+					dp[i][j+1] += t;
+					dp[i+1][j] += s;
+				} else {
+					dp[i+1][j] += t;
+					dp[i][j+1] += s;
+				}
+			}
+		}
+
+		int y = 0, x = 0;
+		while(y != h && x != w) {
+			if(v[y][x] == 1) {
+				if(dp[y][x] % 2 == 1) {
+					x++;
+				} else {
+					y++;
+				}
+			} else {
+				if(dp[y][x] % 2 == 1) {
+					y++;
+				} else {
+					x++;
+				}
+			}
+		}
+
+		cout << y + 1 << " " << x + 1 << endl;
+		// rep(i, h) {
+		// 	rep(j, w) {
+		// 		cout << dp[i][j] << " ";
+		// 	}
+		// 	cout << endl;
+		// }
+	}
+
+	return 0;
+}
+```
+

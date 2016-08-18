@@ -1,0 +1,87 @@
+---
+layout: post
+title: "AOJ0579 Hot days"
+date: 2016-02-22 22:24:12 +0900
+comments: true
+categories: [AOJ,動的計画法]
+---
+
+問題文  
+http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0579
+
+<!-- more -->
+
+{% math %}
+	dp[i][j] := i日目に服jを着た時の最大値 \\
+{% endmath %}
+として，最大化したい値は
+
+{% math %}
+	|C_{x_1} - C_{x_2}| + |C_{x_2} - C_{x_3}| + \cdots +  |C_{x_{D-1}} - C_{x_D}|
+{% endmath %}
+
+なので，{% m %} 1日目に切れる服には0を入れておき， i-1日目からi日目に遷移する．(2 \leq i \leq D){% em %}  
+遷移可能({% m %}i{% em %}日目の最高気温によって服が着れるか着れないか)な場合，{% m %}i-1{% em %}日目に何を着ていた場合が値が最大になるかを選ぶ．
+
+# Code
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+int main() {
+	int d, n;
+	cin >> d >> n;
+
+	vector<int> t(d);
+	rep(i, d) cin >> t[i];
+
+	vector<int> a(n), b(n), c(n);
+	rep(i, n) cin >> a[i] >> b[i] >> c[i];
+
+	int dp[205][205];
+	rep(i, 205) rep(j, 205) dp[i][j] = -1;
+
+	rep(i, n) {
+		if(a[i] <= t[0] && t[0] <= b[i]) dp[0][i] = 0;
+	}
+
+	REP(i, 1, d) {
+		rep(j, n) {
+			if(a[j] <= t[i] && t[i] <= b[j]) {
+				rep(k, n) {
+					if(dp[i-1][k] == -1) continue;
+					dp[i][j] = max(dp[i][j], dp[i-1][k] + abs(c[k] - c[j]));
+				}
+			}
+		}
+	}
+
+	int ans = 0;
+	rep(i, n) {
+		ans = max(ans, dp[d-1][i]);
+	}
+
+	cout << ans << endl;
+
+
+	return 0;
+}
+```
+

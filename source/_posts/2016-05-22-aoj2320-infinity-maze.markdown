@@ -1,0 +1,161 @@
+---
+layout: post
+title: "AOJ2320 Infinity Maze"
+date: 2016-05-22 23:54:24 +0900
+comments: true
+categories: [AOJ-ICPC, 350, 周期]
+---
+
+<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2320">Infinity Maze</a></h4><p>Dr. Fukuoka has placed a simple robot in a two-dimensional maze. It moves within the maze and never goes out of the maze as there is no exit. The maze is made up of H × W grid cells as depicted below. The upper side of the maze faces north.</p></blockquote>
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+<!-- more -->
+
+向いてる方向に一歩進む．進めない場合は進めるまで{% m %} 90 {% em %}度回転して進む．この行動を{% m %} L {% em %}( {% m %} 1 \leq L \leq 10 ^{18}) {% em %})回行った時に最終的にはどこにどの向きでいるか．  
+行動回数{% m %} L {% em %}が非常に大きいが盤面は {% m %} 100 \times 100 {% em %}なので，行動回数が多い場合は，どこかを周回
+
+{% img /images/AOJ/2320.png %}  
+(赤い所をグルグル周る)感じになるので，周回する所を見つけて，後は行動回数をその周期で割り，最終的にいる場所を出す．メモするのが{% m %} (y, x, 次に向かう方向) {% em %}で答えるのが{% m %} (y, x, 現在向いてる方向) {% em %}で違うので混乱していた．周回する場所を見つけるために，次に向かう方向を持っていたので，その場所が見つかる前に行動が終わった場合は，その {% m %} 1 {% em %}個前の方向を答えなければならずWAを生やした．  
+時間をめちゃくちゃかけてしまったので，もう少し早く解けるようになりたい...
+
+
+# Code
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+int h, w;
+int sy, sx, dir;
+int dx[4] = {1, 0, -1, 0};
+int dy[4] = {0, 1, 0, -1};
+char dd[4] = {'E', 'S', 'W', 'N'};
+
+bool can(int y, int x) {
+	if(0 <= y && y < h && 0 <= x && x < w) return true;
+	return false;
+}
+
+int main() {
+	ll l;
+	while(cin >> h >> w >> l) {
+		if(h == 0 && w == 0 && l == 0) break;
+
+		vector<string> v(h);
+		rep(i, h) cin >> v[i];
+
+		rep(i, h) {
+			rep(j, w) {
+				if(v[i][j] == 'E') {
+					sy = i; sx = j;
+					dir = 0;
+					v[i][j] = '.';
+				}
+				else if(v[i][j] == 'S') {
+					sy = i; sx = j;
+					dir = 1;
+					v[i][j] = '.';
+				}
+				else if(v[i][j] == 'W') {
+					sy = i; sx = j;
+					dir = 2;
+					v[i][j] = '.';
+				}
+				else if(v[i][j] == 'N') {
+					sy = i; sx = j;
+					dir = 3;
+					v[i][j] = '.';
+				}
+			}
+		}
+
+		ll d[105][105][4];
+		memset(d, -1, sizeof(d));
+
+		vector<int> X, Y, D;
+		int y = sy, x = sx, cnt = 0;
+
+		rep(i, 4) {
+			int ny = y + dy[(dir + i) % 4];
+			int nx = x + dx[(dir + i) % 4];
+
+			if(can(ny, nx) && v[ny][nx] == '.') {
+				dir = (dir + i) % 4;
+				break;
+			}
+		}
+
+		int pdir = dir;
+		d[y][x][dir] = cnt;
+		cnt++;
+
+		while(l) {
+			y = y + dy[dir];
+			x = x + dx[dir];
+			pdir = dir;
+			l--;
+
+			rep(i, 4) {
+				int ny = y + dy[(dir + i) % 4];
+				int nx = x + dx[(dir + i) % 4];
+
+				if(can(ny, nx) && v[ny][nx] == '.') {
+					dir = (dir + i) % 4;
+					break;
+				}
+			}
+
+			if(d[y][x][dir] == -1) {
+				d[y][x][dir] = cnt;
+				cnt++;
+			} else {
+				break;
+			}
+		}
+
+		if(l == 0) {
+			cout << y + 1 << " " << x + 1 << " " << dd[pdir] << endl;
+			continue;
+		}
+
+		ll len = cnt - d[y][x][dir];
+		l = l % len;
+		dir = pdir;
+
+		rep(i, l) {
+			rep(j, 4) {
+				int ny = y + dy[(dir + j) % 4];
+				int nx = x + dx[(dir + j) % 4];
+
+				if(can(ny, nx) && v[ny][nx] == '.') {
+					y = ny; x = nx;
+					dir = (dir + j) % 4;
+					break;
+				}
+			}
+		}
+
+		cout << y + 1 << " " << x + 1 << " " << dd[dir] << endl;
+	}
+
+
+	return 0;
+}
+```
+

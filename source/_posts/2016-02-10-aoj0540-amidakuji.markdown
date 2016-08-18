@@ -1,0 +1,88 @@
+---
+layout: post
+title: "AOJ0540 Amidakuji"
+date: 2016-02-10 20:28:02 +0900
+comments: true
+categories: [AOJ,シュミレーション]
+---
+
+問題文  
+http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0540
+
+<!-- more-->
+
+減らす棒は1本で良いので，アミダをシュミレーションして，下から順に戻した．戻していく時に，k番目以内に双方が入っている場合はその棒を無くしてもk番目までのコストの和は変わらないので，どちらか一方がk番目に入っている場合に更新があるかないかの判断をした．
+
+# Code
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+int main() {
+	int n, m, h, k;
+
+	while(cin >> n >> m >> h >> k) {
+		if(n == 0 && m == 0 && h == 0 && k == 0) break;
+
+		vector<int> cost(n);
+		rep(i, n) cin >> cost[i];
+
+		vector<P> p(m);
+		rep(i, m) cin >> p[i].second >> p[i].first;
+		sort(p.begin(), p.end());
+
+		vector<int> id(n);
+		rep(i, n) id[i] = i;
+
+		rep(i, m) {
+			swap(id[ p[i].second-1 ], id[ p[i].second]);
+		}
+
+		int ans = 0;
+		vector<int> v(n);
+		rep(i, n) {
+			v[id[i]] = cost[i];
+			if(id[i] < k) ans += cost[i];
+		}
+
+		int res = 0;
+		for(int i = m-1; i >= 0; i--) {
+			int a = id[ p[i].second-1];
+			int b = id[ p[i].second];
+
+			if(a < k && k <= b) {
+				if(v[a] > v[b]) {
+					res = max(res, v[a] - v[b]);
+				}
+			} else if(b < k && k <= a) {
+				if(v[b] > v[a]) {
+					res = max(res, v[b] - v[a]);
+				}
+			}
+
+			swap(id[ p[i].second-1], id[p[i].second]);
+		}
+
+		cout << ans - res << endl;
+	}
+
+	return 0;
+}
+```

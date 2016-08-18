@@ -1,0 +1,132 @@
+---
+layout: post
+title: "AOJ2608 Minus One"
+date: 2016-06-06 23:24:32 +0900
+comments: true
+categories: [AOJ-ICPC, 350, グラフ, dijkstra]
+---
+
+<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article-full"><h4><a href="http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=2608">Minus One | Aizu Online Judge</a></h4><p>Introduction to Programming Introduction to Algorithms and Data Structures Library of Data Structures Library of Graph Algorithms Library of Computational Geometry Library of Dynamic Programming Library of Number Theory</p></blockquote>
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+<!-- more -->
+
+$G$に$e$を付け加えて無向グラフにおける$s$から$t$への最短路の長さより$1$だけ大きいものの個数を答える．これはつまり，パスを貼った時に最短経路長が$1$小さくなるものである．  
+  
+$s$からの最短経路長を$d[i]$，$t$からの最短経路長を$d2[i]$とする．点$a$と点$b$を結んだ場合，$s \to a \to b \to t$という経路を行くとすると，コストは$d[a] + 1 + d2[b]$となる．この時$s \to t$の最短経路長$+1$となる経路は，
+$$
+\begin{eqnarray}
+	d[t] - 1 &=& d[a] + 1 + d2[b] \\\\
+	d2[b] &=& d[t] - 2 - d[a]
+\end{eqnarray}
+$$
+が条件となる．愚直に$a, b$のペアを列挙して確認すると$O(n ^2)$で間に合わないが，点$a$を決めた時に，経路長$1$少なくなる$b$の選び方は$d[t] - 2 - d[a]$となる$d2[i]$の個数と決まるので，先に$d2[i]$をカウントしておくと$O(n)$で求められる．最短経路を求めるのが一番時間がかかるので全体で$O(n logn)$．
+
+# Code
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+#include <queue>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+struct edge {
+	int from,to;
+	int cost;
+
+	edge(int t,int c) : to(t),cost(c) {}
+	edge(int f,int t,int c) : from(f),to(t),cost(c) {}
+
+	bool operator<(const edge &e) const {
+		return cost < e.cost;
+	}
+};
+
+vector<edge> G[100005];
+int d[100005], d2[100005], cnt[100005];
+
+void dijkstra(int s) {
+	priority_queue<P, vector<P>, greater<P> > que;
+	rep(i, 100005) d[i] = INF;
+	
+	que.push(mp(0, s));
+	d[s] = 0;
+
+	while(que.size()) {
+		P p = que.top(); que.pop();
+		int cost = p.first;
+		int v = p.second;
+
+		if(d[v] < cost) continue;
+
+		rep(i, G[v].size()) {
+			edge e = G[v][i];
+			if(d[e.to] > d[v] + e.cost) {
+				d[e.to] = d[v] + e.cost;
+				que.push(mp(d[e.to], e.to));
+			}
+		}
+	}
+}
+
+int main() {
+	int n, m;
+	cin >> n >> m;
+
+	int s, t;
+	cin >> s >> t;
+	s--; t--;
+
+	rep(i, m) {
+		int a, b;
+		cin >> a >> b;
+		a--; b--;
+
+		G[a].push_back(edge(b, 1));
+		G[b].push_back(edge(a, 1));
+	}
+
+	dijkstra(s);
+	rep(i, n) d2[i] = d[i];
+
+	dijkstra(t);
+	rep(i, n) swap(d[i], d2[i]);
+
+	memset(cnt, 0, sizeof(cnt));
+	rep(i, n) {
+		if(d2[i] == INF) continue;
+		cnt[d2[i]]++;
+	}
+
+	ll ans = 0;
+	rep(i, n) {
+		if(d[i] == INF || d2[i] == INF) continue;
+		int x = d[t] - 2 - d[i];
+
+		if(x >= 0) {
+			ans += cnt[x];
+		}
+	}
+
+	cout << ans << endl;
+
+	return 0;
+}
+```
+
+経路復元とか色々していて，色々考えた後に書き直したら非常にスッキリして面白いと思った．但し解くのに時間がかかりすぎている...

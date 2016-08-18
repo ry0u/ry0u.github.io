@@ -1,0 +1,99 @@
+---
+layout: post
+title: "Codeforces357-div2C Heap Operations"
+date: 2016-06-15 23:42:41 +0900
+comments: true
+categories: [Codeforces, priority_queue]
+---
+
+<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article"><h4><a href="http://codeforces.com/contest/681/problem/C">Problem - C - Codeforces</a></h4><p>Petya has recently learned data structure named "Binary heap". The heap he is now operating with allows the following operations: put the given number into the heap; get the value of the minimum element in the heap; extract the minimum element from the heap; Thus, at any moment of time the heap contains several integers (possibly none), some of them might be equal.</p></blockquote>
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+<!-- more -->
+
+* insert $x$
+* getMin $x$
+* removeMin
+
+の$3$の命令がある．この命令列が与えられた時に矛盾がないように命令列を変更する  
+  
+priority\_queueを使う．操作がpush, top, popで全部出来るのでやる．queueが空の時にも命令が与えられるので，REにならないように分岐を付ける．TLEが全然取れなくてとても大変だった．文字列を構成してpush\_backするのではなく，pairで突っ込んで出力を変えたらACした．
+
+# Code
+```cpp
+#include <iostream>
+#include <sstream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <queue>
+#include <map>
+#include <set>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define each(it,v) for(__typeof((v).begin()) it=(v).begin();it!=(v).end();it++)
+#define INF 1<<30
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+int main() {
+	cin.tie(0);
+	ios::sync_with_stdio(false);
+
+	int n;
+	cin >> n;
+
+	priority_queue<int, vector<int>, greater<int> > que;
+	vector<pair<string, int> > ans;
+
+	string a = "insert", b = "removeMin", c = "getMin";
+
+	rep(i, n) {
+		string s;
+		cin >> s;
+
+		if(s == a) {
+			int x;
+			cin >> x;
+			que.push(x);
+
+			ans.push_back(mp(a, x));
+		} else if(s == b) {
+			if(que.size() == 0) {
+				ans.push_back(mp(a, 0));
+			} else {
+				que.pop();
+			}
+			ans.push_back(mp(b, -INF));
+		} else {
+			int x;
+			cin >> x;
+
+			while(que.size() && que.top() < x) {
+					que.pop();
+					ans.push_back(mp(b, -INF));
+			}
+
+			if(que.size() == 0 || que.top() != x) {
+				que.push(x);
+				ans.push_back(mp(a, x));
+			}
+
+			ans.push_back(mp(c, x));
+		}
+	}
+
+	cout << ans.size() << endl;
+	rep(i, ans.size()) {
+		if(ans[i].second == -INF) cout << ans[i].first << endl;
+		else cout << ans[i].first << " " << ans[i].second << endl;
+	}
+
+	return 0;
+}
+```

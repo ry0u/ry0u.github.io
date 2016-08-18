@@ -1,0 +1,157 @@
+---
+layout: post
+title: "AOJ0568 Pasta"
+date: 2016-02-15 21:23:15 +0900
+comments: true
+categories: [AOJ,動的計画法]
+---
+
+問題文  
+http://judge.u-aizu.ac.jp/onlinejudge/description.jsp?id=0568
+
+<!-- more -->
+
+3日以上連続してはいけないので，連続して選んだ状態を{% m %} 1 {% em %}，選んでいない状態を{% m %} 0 {% em %}と分ける．
+{% math %}
+\begin{eqnarray}
+	dp[i][j][0] &:=& i日目にj番目のソースを選び，全日に同じソースを選んでいない場合の通り\\
+	dp[i][j][1] &:=& i日目にj番目のソースを選び，前日に同じソースを選んだ場合の通り
+\end{eqnarray}
+{% endmath %}
+
+> ある{% m %} i {% em %}日目に{% m %} j {% em %}番目を連続して選ぶ時に，同じ種類の{% m %} j {% em %}番目を選ぶ．しかし，{% m %} i-1 {% em %}日目が連続して選んだ場合から遷移すると3連続となってしまうので，{% m %} i-1 {% em %}日目が非連続の場合からのみ遷移する．
+
+ソース1を{% m %} j {% em %}番目に連続して選ぶ場合，{% m %} j-1 {% em %}番目のソースを連続して選んでいない場合，つまり{% m %} dp[i-1][1][0] {% em %}から遷移
+{% img /images/AOJ/0568-1.png %}  
+
+ソース2を{% m %} j {% em %}番目に連続して選ぶ場合，{% m %} j-1 {% em %}番目のソースを連続して選んでいない場合，つまり{% m %} dp[i-1][2][0] {% em %}から遷移
+{% img /images/AOJ/0568-2.png %}  
+
+ソース3を{% m %} j {% em %}番目に連続して選ぶ場合，{% m %} j-1 {% em %}番目のソースを連続して選んでいない場合，つまり{% m %} dp[i-1][3][0] {% em %}から遷移
+{% img /images/AOJ/0568-3.png %}  
+
+
+> ある{% m %} i {% em %}日目に{% m %} j {% em %}番目を連続して選ばない時に，連続して選ばないということは同じ種類を選ばないということなので，{% m %} i {% em %}日目の他の2種類の連続，非連続の場合から遷移する
+
+ソース1を{% m %} j {% em %}番目に連続して選ばない場合，ソース1以外の場合，  
+つまり{% m %}dp\[i-1\]\[2\]\[0\] {% em %}，{% m %}dp\[i-1\]\[2\]\[1\] {% em %}，{% m %}dp\[i-1\]\[3\]\[0\] {% em %}，{% m %}dp\[i-1\]\[3\]\[1\] {% em %}から遷移  
+{% img /images/AOJ/0568-4.png %}
+
+ソース2を{% m %} j {% em %}番目に連続して選ばない場合，ソース2以外の場合，  
+つまり{% m %}dp\[i-1\]\[1\]\[0\] {% em %}，{% m %}dp\[i-1\]\[1\]\[1\] {% em %}，{% m %}dp\[i-1\]\[3\]\[0\] {% em %}，{% m %}dp\[i-1\]\[3\]\[1\] {% em %}から遷移  
+{% img /images/AOJ/0568-5.png %}
+
+ソース3を{% m %} j {% em %}番目に連続して選ばない場合，ソース3以外の場合，  
+つまり{% m %}dp\[i-1\]\[1\]\[0\] {% em %}，{% m %}dp\[i-1\]\[1\]\[1\] {% em %}，{% m %}dp\[i-1\]\[2\]\[0\] {% em %}，{% m %}dp\[i-1\]\[2\]\[1\] {% em %}から遷移  
+{% img /images/AOJ/0568-6.png %}
+
+# Code
+
+```cpp
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <sstream>
+#include <map>
+#include <set>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define INF 1<<30
+#define pb push_back
+#define mp make_pair
+#define MOD 10000
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+int dp[105][5][5], d[105];
+bool used[105];
+
+int main() {
+	int n, k;
+	cin >> n >> k;
+
+	memset(used, 0, sizeof(used));
+	memset(d, 0, sizeof(d));
+
+	rep(i, k) {
+		int a, b;
+		cin >> a >> b;
+
+		used[a] = true;
+		d[a] = b;
+	}
+
+	memset(dp, 0, sizeof(dp));
+
+	if(used[1]) {
+		REP(j, 1, 4) {
+			if(d[1] == j) dp[1][j][0] = 1;
+		}
+	} else {
+		REP(j, 1, 4) {
+			dp[1][j][0] = 1;
+		}
+	}
+
+	REP(i, 2, n + 1) {
+		if(used[i]) {
+			if(d[i] == 1) {
+				dp[i][1][1] = dp[i-1][1][0];
+				dp[i][1][0] = (dp[i-1][2][0] + dp[i-1][2][1]) + (dp[i-1][3][0] + dp[i-1][3][1]);
+				dp[i][1][1] %= MOD;
+				dp[i][1][0] %= MOD;
+			} else if(d[i] == 2) {
+				dp[i][2][1] = dp[i-1][2][0];
+				dp[i][2][0] = (dp[i-1][1][0] + dp[i-1][1][1]) + (dp[i-1][3][0] + dp[i-1][3][1]);
+				dp[i][2][1] %= MOD;
+				dp[i][2][0] %= MOD;
+			} else {
+				dp[i][3][1] = dp[i-1][3][0];
+				dp[i][3][0] = (dp[i-1][1][0] + dp[i-1][1][1]) + (dp[i-1][2][0] + dp[i-1][2][1]);
+				dp[i][3][1] %= MOD;
+				dp[i][3][0] %= MOD;
+			}
+		} else {
+			dp[i][1][1] = dp[i-1][1][0];
+			dp[i][1][0] = (dp[i-1][2][0] + dp[i-1][2][1]) + (dp[i-1][3][0] + dp[i-1][3][1]);
+			dp[i][2][1] = dp[i-1][2][0];
+			dp[i][2][0] = (dp[i-1][1][0] + dp[i-1][1][1]) + (dp[i-1][3][0] + dp[i-1][3][1]);
+			dp[i][3][1] = dp[i-1][3][0];
+			dp[i][3][0] = (dp[i-1][1][0] + dp[i-1][1][1]) + (dp[i-1][2][0] + dp[i-1][2][1]);
+
+			dp[i][1][1] %= MOD;
+			dp[i][1][0] %= MOD;
+			dp[i][2][1] %= MOD;
+			dp[i][2][0] %= MOD;
+			dp[i][3][1] %= MOD;
+			dp[i][3][0] %= MOD;
+		}
+	}
+
+
+	// rep(i, n + 1) {
+	// 	REP(j, 1, 4) {
+	// 		cout << "(" << dp[i][j][0] << "," << dp[i][j][1] << ") ";
+	// 	}
+	// 	cout << endl;
+	// }
+
+	int sum = 0;
+	REP(j, 1, 4) {
+		rep(k, 2) {
+			sum += dp[n][j][k];
+			sum %= MOD;
+		}
+	}
+
+	cout << sum << endl;
+
+	return 0;
+}
+```
+
