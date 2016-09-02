@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 数列 | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/shu-lie/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-08-31T03:57:22+09:00</updated>
+  <updated>2016-09-03T02:19:57+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,194 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[SRM309 D1M KMonotonic]]></title>
+    <link href="http://ry0u.github.io/blog/2016/09/03/srm309-d1m-kmonotonic/"/>
+    <updated>2016-09-03T01:31:15+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/09/03/srm309-d1m-kmonotonic</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article-full"><h4><a href="https://community.topcoder.com/stat?c=problem_statement&pm=6516&rd=9989">TopCoder Statistics - Problem Statement</a></h4><p>This problem statement is the exclusive and proprietary property of TopCoder, Inc. Any unauthorized use or reproduction of this information without the prior written consent of TopCoder, Inc. is strictly prohibited. (c)2010, TopCoder, Inc. All rights reserved.</p></blockquote>
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+<!-- more -->
+
+数列を$K$個に分けた時に，それぞれの数列に狭義での単調増加数列か，単調減少数列にしたい．要素の値を$1$変更するには$1$コストがかかる時，その最小コストを求める．
+
+---
+
+区間$[l, r)$を単調増加，単調減少の数列にする最小コストがわかれば，後はどこで区切るか，何回区切るかを持ってメモ化再起すれば良いと分かったが，区間$[l, r)$の最小の出し方が分からなかった．解説を見てしまった．
+
+<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article-full"><h4><a href="http://d.hatena.ne.jp/simezi_tan/20120613/1339542749">TopCoder SRM 309 Div1 Medium KMonotonic - simezi_tanの日記</a></h4><p>問題 n本の相異なる直線が与えられる。 n本の直線の集合の、点対称の中心の個数を求めよ。 無限にある場合..</p></blockquote>
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+単純に区間$[l, r)$だけを状態として持つわけではなく右端の値も持って
+
+$$
+	dp[l][r][k] := [l, r)の右端の値をk変更した時の最小値
+$$
+
+として動的計画法をした．この$k$変更するという範囲は$-n \sim n$までやっておけば大丈夫という勘違いをして，単調増加の場合には
+
+```cpp
+rep(i, n) {
+	REP(j, i + 1, n) {
+		REP(k, -n, n) {
+			REP(l, -n, n) {
+				int a = sequence[j-1] + k;
+				int b = sequence[j] + l;
+
+				if(a < b) {
+					dp[i][j+1][l] = min(dp[i][j+1][l], dp[i][j][k] + abs(sequence[j] - l));
+				}
+			}
+		}
+	}
+}
+```
+としていた．これでは$[0, 10000, 0]$といったようなケースには対応出来ないため，変化させるのは各要素に$-n \sim n$足したものを候補としなければならない．となると$n$個の要素に対して$-n \sim n$足した$2n ^2$個の候補が出来るため，上の方法では計算量が$n ^6$となってしまい間に合わない．$[l, r)$の右端が$k(index)$の時，単調増加数列になっているという時は$[l, r-1)$の右端が$k$より小さければ何でも良いので，一番小さいものからの遷移で大丈夫ということが分かる．
+
+```cpp
+rep(i, n) {
+	int res = INF;
+	rep(j, m) {
+		res = min(res, abs(sequence[i] - v[j])); //それより以前にコストが少ないものがあればそれで良い
+		dp[i][i+1][j] = res;
+	}
+}
+
+rep(i, n) {
+	REP(j, i + 1, n) {
+		REP(k, 1, m) {
+			dp[i][j+1][k] = min(dp[i][j+1][k], dp[i][j][k-1] + abs(sequence[j] - v[k])); //[l, r-1)の右端がv[k]より小さい時の最適コスト + jをv[k]に変えるコスト
+			dp[i][j+1][k] = min(dp[i][j+1][k], dp[i][j+1][k-1]); // 以前より小さいものがあればそれを採用
+		}
+	}
+}
+```
+後は区間$[l, r)$の最小コストは$k$に対してループを回した時の最小値となる．単調減少の場合は，候補のvectorをひっくり返して同じことをやった．これが出ると，あとは再起で区間$[l, r)$を残り$k$回分解しなければならない時の最小値として，区切る場所を全て試した．メモリが厳しくて適当に配列を取ったたらMLEした．
+
+# Code
+```cpp
+#include <iostream>
+#include <sstream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <map>
+#include <set>
+#include <queue>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define each(it,v) for(__typeof((v).begin()) it=(v).begin();it!=(v).end();it++)
+#define INF 1<<30
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int, int> P;
+
+int dp[50][51][50*51*2], up[55][55], down[55][55];
+
+// int memo[50][51][50*51*2];
+
+int dfs(int l, int r, int k) {
+	if(dp[l][r][k] != -1) return dp[l][r][k];
+	if(k == 1) return min(up[l][r], down[l][r]);
+
+	int ret = INF;
+	REP(i, l + 1, r) {
+		ret = min(ret, dfs(l, i, 1) + dfs(i, r, k - 1));
+	}
+
+	return dp[l][r][k] = ret;
+}
+
+class KMonotonic {
+	public:
+	int transform(vector <int> sequence, int K) {
+		int n = sequence.size();
+		vector<int> v;
+		rep(i, n) {
+			REP(j, -n, n + 1) v.push_back(sequence[i] + j);
+		}
+		sort(v.begin(), v.end());
+		v.erase(unique(v.begin(),v.end()),v.end());
+		int m = v.size();
+
+		{
+			rep(i, 50) rep(j, 51) {
+				up[i][j] = INF;
+				rep(k, 50 * 51 * 2) dp[i][j][k] = INF;
+			}
+
+			rep(i, n) {
+				int res = INF;
+				rep(j, m) {
+					res = min(res, abs(sequence[i] - v[j]));
+					dp[i][i+1][j] = res;
+				}
+			}
+
+			rep(i, n) {
+				REP(j, i + 1, n) {
+					REP(k, 1, m) {
+						dp[i][j+1][k] = min(dp[i][j+1][k], dp[i][j][k-1] + abs(sequence[j] - v[k]));
+						dp[i][j+1][k] = min(dp[i][j+1][k], dp[i][j+1][k-1]);
+					}
+				}
+			}
+
+			rep(i, n) {
+				REP(j, i + 1, n + 1) {
+					rep(k, m) {
+						up[i][j] = min(up[i][j], dp[i][j][k]);
+					}
+				}
+			}
+		}
+		{
+			reverse(v.begin(), v.end());
+			rep(i, 50) rep(j, 51) {
+				down[i][j] = INF;
+				rep(k, 50 * 51 * 2) dp[i][j][k] = INF;
+			}
+
+			rep(i, n) {
+				int res = INF;
+				rep(j, m) {
+					res = min(res, abs(sequence[i] - v[j]));
+					dp[i][i+1][j] = res;
+				}
+			}
+
+			rep(i, n) {
+				REP(j, i + 1, n) {
+					REP(k, 1, m) {
+						dp[i][j+1][k] = min(dp[i][j+1][k], dp[i][j][k-1] + abs(sequence[j] - v[k]));
+						dp[i][j+1][k] = min(dp[i][j+1][k], dp[i][j+1][k-1]);
+					}
+				}
+			}
+			
+			rep(i, n) {
+				REP(j, i + 1, n + 1) {
+					rep(k, m) {
+						down[i][j] = min(down[i][j], dp[i][j][k]);
+					}
+				}
+			}
+		}
+
+		rep(i, n) rep(j, n + 1) rep(k, m) dp[i][j][k] = -1;
+		int ret = dfs(0, n, K);
+		return ret;
+	}
+
+};
+```
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[SRM307 D1E-D2M PartSorting]]></title>
@@ -30,139 +218,74 @@
 最大値が一番左に来るのが一番良い．左から順番に要素を決めていく．新しく決める場所から，右にある要素を残りのswap回数で移動出来るかを大きい順に試す．移動可能であればswapしていき，そうでなければ次の要素を見る．これを繰り返して，試した前と変化が無ければそこで終了する．
 
 # Code
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-<span class='line-number'>60</span>
-<span class='line-number'>61</span>
-<span class='line-number'>62</span>
-<span class='line-number'>63</span>
-<span class='line-number'>64</span>
-<span class='line-number'>65</span>
-<span class='line-number'>66</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &lt;iostream&gt;</span>
-</span><span class='line'><span class="cp">#include &lt;sstream&gt;</span>
-</span><span class='line'><span class="cp">#include &lt;vector&gt;</span>
-</span><span class='line'><span class="cp">#include &lt;string&gt;</span>
-</span><span class='line'><span class="cp">#include &lt;cstring&gt;</span>
-</span><span class='line'><span class="cp">#include &lt;algorithm&gt;</span>
-</span><span class='line'><span class="cp">#include &lt;queue&gt;</span>
-</span><span class='line'><span class="cp">#include &lt;map&gt;</span>
-</span><span class='line'><span class="cp">#include &lt;set&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="cp">#define REP(i,k,n) for(int i=k;i&lt;n;i++)</span>
-</span><span class='line'><span class="cp">#define rep(i,n) for(int i=0;i&lt;n;i++)</span>
-</span><span class='line'><span class="cp">#define each(it,v) for(__typeof((v).begin()) it=(v).begin();it!=(v).end();it++)</span>
-</span><span class='line'><span class="cp">#define INF 1&lt;&lt;30</span>
-</span><span class='line'><span class="cp">#define mp make_pair</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="p">;</span>
-</span><span class='line'><span class="k">typedef</span> <span class="kt">long</span> <span class="kt">long</span> <span class="n">ll</span><span class="p">;</span>
-</span><span class='line'><span class="k">typedef</span> <span class="n">pair</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">P</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="kt">bool</span> <span class="n">used</span><span class="p">[</span><span class="mi">1000005</span><span class="p">];</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">PartSorting</span> <span class="p">{</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">public</span><span class="o">:</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="n">vector</span> <span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">process</span><span class="p">(</span><span class="n">vector</span> <span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">data</span><span class="p">,</span> <span class="kt">int</span> <span class="n">nSwaps</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>		<span class="kt">int</span> <span class="n">n</span> <span class="o">=</span> <span class="n">data</span><span class="p">.</span><span class="n">size</span><span class="p">();</span>
-</span><span class='line'>		<span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">v</span> <span class="o">=</span> <span class="n">data</span><span class="p">;</span>
-</span><span class='line'>		<span class="n">sort</span><span class="p">(</span><span class="n">v</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span> <span class="n">v</span><span class="p">.</span><span class="n">end</span><span class="p">());</span>
-</span><span class='line'>
-</span><span class='line'>		<span class="n">memset</span><span class="p">(</span><span class="n">used</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">used</span><span class="p">));</span>
-</span><span class='line'>
-</span><span class='line'>		<span class="kt">int</span> <span class="n">id</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-</span><span class='line'>		<span class="k">while</span><span class="p">(</span><span class="n">nSwaps</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>			<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">--</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>				<span class="k">if</span><span class="p">(</span><span class="n">used</span><span class="p">[</span><span class="n">v</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span> <span class="k">continue</span><span class="p">;</span>
-</span><span class='line'>				<span class="kt">int</span> <span class="n">len</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-</span><span class='line'>				<span class="n">REP</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">id</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>					<span class="k">if</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="n">v</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">break</span><span class="p">;</span>
-</span><span class='line'>					<span class="n">len</span><span class="o">++</span><span class="p">;</span>
-</span><span class='line'>				<span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>				<span class="k">if</span><span class="p">(</span><span class="n">len</span> <span class="o">&lt;=</span> <span class="n">nSwaps</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>					<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">j</span> <span class="o">=</span> <span class="n">len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span> <span class="n">j</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span><span class="o">--</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>						<span class="n">swap</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">id</span><span class="o">+</span><span class="n">j</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="n">id</span><span class="o">+</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">]);</span>
-</span><span class='line'>					<span class="p">}</span>
-</span><span class='line'>					<span class="n">nSwaps</span> <span class="o">-=</span> <span class="n">len</span><span class="p">;</span>
-</span><span class='line'>					<span class="n">used</span><span class="p">[</span><span class="n">v</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
-</span><span class='line'>					<span class="n">id</span><span class="o">++</span><span class="p">;</span>
-</span><span class='line'>					<span class="k">break</span><span class="p">;</span>
-</span><span class='line'>				<span class="p">}</span> <span class="k">else</span> <span class="k">continue</span><span class="p">;</span>
-</span><span class='line'>			<span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>			<span class="kt">bool</span> <span class="n">flag</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
-</span><span class='line'>			<span class="n">rep</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>				<span class="k">if</span><span class="p">(</span><span class="n">used</span><span class="p">[</span><span class="n">v</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span> <span class="k">continue</span><span class="p">;</span>
-</span><span class='line'>				<span class="n">flag</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
-</span><span class='line'>			<span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>			<span class="k">if</span><span class="p">(</span><span class="n">flag</span><span class="p">)</span> <span class="k">break</span><span class="p">;</span>
-</span><span class='line'>		<span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>		<span class="k">return</span> <span class="n">data</span><span class="p">;</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'><span class="p">};</span>
-</span></code></pre></td></tr></table></div></figure>
+```cpp
+#include <iostream>
+#include <sstream>
+#include <vector>
+#include <string>
+#include <cstring>
+#include <algorithm>
+#include <queue>
+#include <map>
+#include <set>
+
+#define REP(i,k,n) for(int i=k;i<n;i++)
+#define rep(i,n) for(int i=0;i<n;i++)
+#define each(it,v) for(__typeof((v).begin()) it=(v).begin();it!=(v).end();it++)
+#define INF 1<<30
+#define mp make_pair
+
+using namespace std;
+typedef long long ll;
+typedef pair<int,int> P;
+
+bool used[1000005];
+
+class PartSorting {
+
+    public:
+
+    vector <int> process(vector <int> data, int nSwaps) {
+		int n = data.size();
+		vector<int> v = data;
+		sort(v.begin(), v.end());
+
+		memset(used, 0, sizeof(used));
+
+		int id = 0;
+		while(nSwaps) {
+			for(int i = n - 1; i >= 0; i--) {
+				if(used[v[i]]) continue;
+				int len = 0;
+				REP(j, id, n) {
+					if(data[j] == v[i]) break;
+					len++;
+				}
+
+				if(len <= nSwaps) {
+					for(int j = len - 1; j >= 0; j--) {
+						swap(data[id+j], data[id+j+1]);
+					}
+					nSwaps -= len;
+					used[v[i]] = true;
+					id++;
+					break;
+				} else continue;
+			}
+
+			bool flag = true;
+			rep(i, n) {
+				if(used[v[i]]) continue;
+				flag = false;
+			}
+
+			if(flag) break;
+		}
+
+		return data;
+    }
+};
+```
 ]]></content>
   </entry>
   
