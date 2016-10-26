@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 文字列 | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/wen-zi-lie/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2016-10-27T03:35:54+09:00</updated>
+  <updated>2016-10-27T04:04:37+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -30,126 +30,243 @@ inputが$largest$より大きい時点で，それはありえないのではじ
 
 
 # Code
-```cpp
-#include <iostream>
-#include <sstream>
-#include <vector>
-#include <string>
-#include <cstring>
-#include <algorithm>
-#include <map>
-#include <set>
-#include <queue>
-
-#define REP(i,k,n) for(int i=k;i<n;i++)
-#define rep(i,n) for(int i=0;i<n;i++)
-#define each(it,v) for(__typeof((v).begin()) it=(v).begin();it!=(v).end();it++)
-#define INF 1<<30
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair<int, int> P;
-
-string f(ll x) {
-	string s = "";
-	while(x) {
-		s += char('0' + x % 10);
-		x /= 10;
-	}
-	reverse(s.begin(), s.end());
-	return s;
-}
-
-ll g(string s) {
-	ll ret = 0, t = 1;
-	for(int i = s.size() - 1; i >= 0; i--) {
-		ret += int(s[i] - '0') * t;
-		t *= 10;
-	}
-
-	return ret;
-}
-
-class InputBoxChecker {
-	public:
-	vector <string> checkPrefix(int smallest, int largest, vector <int> numbers) {
-		string s = f(smallest);
-		string t = f(largest);
-
-		int n = numbers.size();
-		vector<string> ret(n);
-
-		rep(i, n) {
-			string x = f(numbers[i]);
-			bool flag = false;
-
-			if(numbers[i] <= largest) {
-				if(x.size() > s.size()) {
-					flag = true;
-				} else {
-					string xx = "";
-
-					rep(j, s.size()) {
-						if(j < x.size()) xx += x[j];
-						else xx += s[j];
-					}
-
-					if(smallest <= g(xx) && g(xx) <= largest) flag = true;
-
-					xx = x;
-					while(g(xx) <= largest) {
-						if(smallest <= g(xx) && g(xx) <= largest) flag = true;
-						xx += "0";
-					}
-				}
-			}
-
-			if(flag) ret[i] = "VALID";
-			else ret[i] = "INVALID";
-		}
-		return ret;
-	}
-
-	
-// BEGIN CUT HERE
-	public:
-	void run_test(int Case) { if ((Case == -1) || (Case == 0)) test_case_0(); if ((Case == -1) || (Case == 1)) test_case_1(); if ((Case == -1) || (Case == 2)) test_case_2(); if ((Case == -1) || (Case == 3)) test_case_3(); if ((Case == -1) || (Case == 4)) test_case_4(); 
-		if(Case == -1) test_case_5();
-		if(Case == -1) test_case_6();
-	}
-	private:
-	template <typename T> string print_array(const vector<T> &V) { ostringstream os; os << "{ "; for (typename vector<T>::const_iterator iter = V.begin(); iter != V.end(); ++iter) os << '\"' << *iter << "\","; os << " }"; return os.str(); }
-	void verify_case(int Case, const vector <string> &Expected, const vector <string> &Received) { cerr << "Test Case #" << Case << "..."; if (Expected == Received) cerr << "PASSED" << endl; else { cerr << "FAILED" << endl; cerr << "\tExpected: " << print_array(Expected) << endl; cerr << "\tReceived: " << print_array(Received) << endl; } }
-	void test_case_0() { int Arg0 = 300; int Arg1 = 347; int Arr2[] = {37}; vector <int> Arg2(Arr2, Arr2 + (sizeof(Arr2) / sizeof(Arr2[0]))); string Arr3[] = {"INVALID" }; vector <string> Arg3(Arr3, Arr3 + (sizeof(Arr3) / sizeof(Arr3[0]))); verify_case(0, Arg3, checkPrefix(Arg0, Arg1, Arg2)); }
-	void test_case_1() { int Arg0 = 310; int Arg1 = 320; int Arr2[] = {3, 31, 317, 3174, 310, 320}; vector <int> Arg2(Arr2, Arr2 + (sizeof(Arr2) / sizeof(Arr2[0]))); string Arr3[] = {"VALID", "VALID", "VALID", "INVALID", "VALID", "VALID" }; vector <string> Arg3(Arr3, Arr3 + (sizeof(Arr3) / sizeof(Arr3[0]))); verify_case(1, Arg3, checkPrefix(Arg0, Arg1, Arg2)); }
-	void test_case_2() { int Arg0 = 600; int Arg1 = 1020; int Arr2[] = {7, 73, 734, 7349}; vector <int> Arg2(Arr2, Arr2 + (sizeof(Arr2) / sizeof(Arr2[0]))); string Arr3[] = {"VALID", "VALID", "VALID", "INVALID" }; vector <string> Arg3(Arr3, Arr3 + (sizeof(Arr3) / sizeof(Arr3[0]))); verify_case(2, Arg3, checkPrefix(Arg0, Arg1, Arg2)); }
-	void test_case_3() { int Arg0 = 64; int Arg1 = 78; int Arr2[] = {1,2,3,4,5,6,7,8,9}; vector <int> Arg2(Arr2, Arr2 + (sizeof(Arr2) / sizeof(Arr2[0]))); string Arr3[] = {"INVALID", "INVALID", "INVALID", "INVALID", "INVALID", "VALID", "VALID", "INVALID", "INVALID" }; vector <string> Arg3(Arr3, Arr3 + (sizeof(Arr3) / sizeof(Arr3[0]))); verify_case(3, Arg3, checkPrefix(Arg0, Arg1, Arg2)); }
-	void test_case_4() { int Arg0 = 1; int Arg1 = 1234567890; int Arr2[] = {123, 456, 789, 1234567, 7654321, 3245354, 325432532, 243212}; vector <int> Arg2(Arr2, Arr2 + (sizeof(Arr2) / sizeof(Arr2[0]))); string Arr3[] = {"VALID", "VALID", "VALID", "VALID", "VALID", "VALID", "VALID", "VALID" }; vector <string> Arg3(Arr3, Arr3 + (sizeof(Arr3) / sizeof(Arr3[0]))); verify_case(4, Arg3, checkPrefix(Arg0, Arg1, Arg2)); }
-	void test_case_5() { int Arg0 = 123; int Arg1 = 12345; int Arr2[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 122, 123, 124, 12, 13, 139, 290, 9, 99, 999, 9999, 99999, 1234, 1233, 1235}; vector <int> Arg2(Arr2, Arr2 + (sizeof(Arr2) / sizeof(Arr2[0]))); string Arr3[] = {"VALID", "VALID", "VALID", "VALID", "VALID", "VALID", "VALID", "VALID", "VALID", "VALID", "VALID", "VALID", "VALID", "VALID", "VALID", "VALID", "VALID", "VALID", "VALID", "VALID", "INVALID", "VALID", "VALID", "VALID"}; vector <string> Arg3(Arr3, Arr3 + (sizeof(Arr3) / sizeof(Arr3[0]))); verify_case(5, Arg3, checkPrefix(Arg0, Arg1, Arg2)); }
-	void test_case_6() { int Arg0 = 401234567; int Arg1 = 2000000000; int Arr2[] = {1, 1, 1, 1, 1, 11, 11, 11, 11, 11, 2, 3, 4, 5, 6, 7, 8, 9, 31, 78, 123456789, 234567890, 312435678, 1234567890, 1999999999, 2000000000, 123456789, 234567890, 312435678, 1234567890, 1999999999, 2000000000}; vector <int> Arg2(Arr2, Arr2 + (sizeof(Arr2) / sizeof(Arr2[0]))); string Arr3[] = {"VALID", "VALID", "VALID", "VALID", "VALID", "VALID", "VALID", "VALID", "VALID", "VALID", "VALID", "INVALID", "VALID", "VALID", "VALID", "VALID", "VALID", "VALID", "INVALID", "VALID", "VALID", "INVALID", "INVALID", "VALID", "VALID", "VALID", "VALID", "INVALID", "INVALID", "VALID", "VALID", "VALID"}; vector <string> Arg3(Arr3, Arr3 + (sizeof(Arr3) / sizeof(Arr3[0]))); verify_case(6, Arg3, checkPrefix(Arg0, Arg1, Arg2)); }
-
-
-// END CUT HERE
-
-};
-
-
-// BEGIN CUT HERE
-
-int main() {
-
-    InputBoxChecker ___test;
-
-    ___test.run_test(-1);
-
-	vector<int> v = {1, 3, 2, 5, 6, 87, 342, 325, 32, 32523532, 6437654, 1987654320, 213214, 32543265, 436235, 326437543, 437643, 43265432, 32, 33, 34, 333, 333333333};
-
-	vector<string> ans = ___test.checkPrefix(33, 1234098765, v);
-}
-
-// END CUT HERE
-```
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+<span class='line-number'>92</span>
+<span class='line-number'>93</span>
+<span class='line-number'>94</span>
+<span class='line-number'>95</span>
+<span class='line-number'>96</span>
+<span class='line-number'>97</span>
+<span class='line-number'>98</span>
+<span class='line-number'>99</span>
+<span class='line-number'>100</span>
+<span class='line-number'>101</span>
+<span class='line-number'>102</span>
+<span class='line-number'>103</span>
+<span class='line-number'>104</span>
+<span class='line-number'>105</span>
+<span class='line-number'>106</span>
+<span class='line-number'>107</span>
+<span class='line-number'>108</span>
+<span class='line-number'>109</span>
+<span class='line-number'>110</span>
+<span class='line-number'>111</span>
+<span class='line-number'>112</span>
+<span class='line-number'>113</span>
+<span class='line-number'>114</span>
+<span class='line-number'>115</span>
+<span class='line-number'>116</span>
+<span class='line-number'>117</span>
+<span class='line-number'>118</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &lt;iostream&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;sstream&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;vector&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;string&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;cstring&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;algorithm&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;map&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;set&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;queue&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="cp">#define REP(i,k,n) for(int i=k;i&lt;n;i++)</span>
+</span><span class='line'><span class="cp">#define rep(i,n) for(int i=0;i&lt;n;i++)</span>
+</span><span class='line'><span class="cp">#define each(it,v) for(__typeof((v).begin()) it=(v).begin();it!=(v).end();it++)</span>
+</span><span class='line'><span class="cp">#define INF 1&lt;&lt;30</span>
+</span><span class='line'><span class="cp">#define mp make_pair</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="p">;</span>
+</span><span class='line'><span class="k">typedef</span> <span class="kt">long</span> <span class="kt">long</span> <span class="n">ll</span><span class="p">;</span>
+</span><span class='line'><span class="k">typedef</span> <span class="n">pair</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">P</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">string</span> <span class="nf">f</span><span class="p">(</span><span class="n">ll</span> <span class="n">x</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>	<span class="n">string</span> <span class="n">s</span> <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">;</span>
+</span><span class='line'>	<span class="k">while</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>		<span class="n">s</span> <span class="o">+=</span> <span class="kt">char</span><span class="p">(</span><span class="sc">&#39;0&#39;</span> <span class="o">+</span> <span class="n">x</span> <span class="o">%</span> <span class="mi">10</span><span class="p">);</span>
+</span><span class='line'>		<span class="n">x</span> <span class="o">/=</span> <span class="mi">10</span><span class="p">;</span>
+</span><span class='line'>	<span class="p">}</span>
+</span><span class='line'>	<span class="n">reverse</span><span class="p">(</span><span class="n">s</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span> <span class="n">s</span><span class="p">.</span><span class="n">end</span><span class="p">());</span>
+</span><span class='line'>	<span class="k">return</span> <span class="n">s</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">ll</span> <span class="nf">g</span><span class="p">(</span><span class="n">string</span> <span class="n">s</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>	<span class="n">ll</span> <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">t</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span><span class='line'>	<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="n">s</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">--</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>		<span class="n">ret</span> <span class="o">+=</span> <span class="kt">int</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">-</span> <span class="sc">&#39;0&#39;</span><span class="p">)</span> <span class="o">*</span> <span class="n">t</span><span class="p">;</span>
+</span><span class='line'>		<span class="n">t</span> <span class="o">*=</span> <span class="mi">10</span><span class="p">;</span>
+</span><span class='line'>	<span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>	<span class="k">return</span> <span class="n">ret</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">InputBoxChecker</span> <span class="p">{</span>
+</span><span class='line'>	<span class="k">public</span><span class="o">:</span>
+</span><span class='line'>	<span class="n">vector</span> <span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">checkPrefix</span><span class="p">(</span><span class="kt">int</span> <span class="n">smallest</span><span class="p">,</span> <span class="kt">int</span> <span class="n">largest</span><span class="p">,</span> <span class="n">vector</span> <span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">numbers</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>		<span class="n">string</span> <span class="n">s</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">smallest</span><span class="p">);</span>
+</span><span class='line'>		<span class="n">string</span> <span class="n">t</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">largest</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>		<span class="kt">int</span> <span class="n">n</span> <span class="o">=</span> <span class="n">numbers</span><span class="p">.</span><span class="n">size</span><span class="p">();</span>
+</span><span class='line'>		<span class="n">vector</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">ret</span><span class="p">(</span><span class="n">n</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>		<span class="n">rep</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>			<span class="n">string</span> <span class="n">x</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">numbers</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+</span><span class='line'>			<span class="kt">bool</span> <span class="n">flag</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>			<span class="k">if</span><span class="p">(</span><span class="n">numbers</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">largest</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>				<span class="k">if</span><span class="p">(</span><span class="n">x</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">s</span><span class="p">.</span><span class="n">size</span><span class="p">())</span> <span class="p">{</span>
+</span><span class='line'>					<span class="n">flag</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+</span><span class='line'>				<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span><span class='line'>					<span class="n">string</span> <span class="n">xx</span> <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>					<span class="n">rep</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">s</span><span class="p">.</span><span class="n">size</span><span class="p">())</span> <span class="p">{</span>
+</span><span class='line'>						<span class="k">if</span><span class="p">(</span><span class="n">j</span> <span class="o">&lt;</span> <span class="n">x</span><span class="p">.</span><span class="n">size</span><span class="p">())</span> <span class="n">xx</span> <span class="o">+=</span> <span class="n">x</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+</span><span class='line'>						<span class="k">else</span> <span class="n">xx</span> <span class="o">+=</span> <span class="n">s</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+</span><span class='line'>					<span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>					<span class="k">if</span><span class="p">(</span><span class="n">smallest</span> <span class="o">&lt;=</span> <span class="n">g</span><span class="p">(</span><span class="n">xx</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">g</span><span class="p">(</span><span class="n">xx</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">largest</span><span class="p">)</span> <span class="n">flag</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>					<span class="n">xx</span> <span class="o">=</span> <span class="n">x</span><span class="p">;</span>
+</span><span class='line'>					<span class="k">while</span><span class="p">(</span><span class="n">g</span><span class="p">(</span><span class="n">xx</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">largest</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>						<span class="k">if</span><span class="p">(</span><span class="n">smallest</span> <span class="o">&lt;=</span> <span class="n">g</span><span class="p">(</span><span class="n">xx</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">g</span><span class="p">(</span><span class="n">xx</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">largest</span><span class="p">)</span> <span class="n">flag</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+</span><span class='line'>						<span class="n">xx</span> <span class="o">+=</span> <span class="s">&quot;0&quot;</span><span class="p">;</span>
+</span><span class='line'>					<span class="p">}</span>
+</span><span class='line'>				<span class="p">}</span>
+</span><span class='line'>			<span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>			<span class="k">if</span><span class="p">(</span><span class="n">flag</span><span class="p">)</span> <span class="n">ret</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;VALID&quot;</span><span class="p">;</span>
+</span><span class='line'>			<span class="k">else</span> <span class="n">ret</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;INVALID&quot;</span><span class="p">;</span>
+</span><span class='line'>		<span class="p">}</span>
+</span><span class='line'>		<span class="k">return</span> <span class="n">ret</span><span class="p">;</span>
+</span><span class='line'>	<span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>	
+</span><span class='line'><span class="c1">// BEGIN CUT HERE</span>
+</span><span class='line'>	<span class="k">public</span><span class="o">:</span>
+</span><span class='line'>	<span class="kt">void</span> <span class="n">run_test</span><span class="p">(</span><span class="kt">int</span> <span class="n">Case</span><span class="p">)</span> <span class="p">{</span> <span class="k">if</span> <span class="p">((</span><span class="n">Case</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">||</span> <span class="p">(</span><span class="n">Case</span> <span class="o">==</span> <span class="mi">0</span><span class="p">))</span> <span class="n">test_case_0</span><span class="p">();</span> <span class="k">if</span> <span class="p">((</span><span class="n">Case</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">||</span> <span class="p">(</span><span class="n">Case</span> <span class="o">==</span> <span class="mi">1</span><span class="p">))</span> <span class="n">test_case_1</span><span class="p">();</span> <span class="k">if</span> <span class="p">((</span><span class="n">Case</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">||</span> <span class="p">(</span><span class="n">Case</span> <span class="o">==</span> <span class="mi">2</span><span class="p">))</span> <span class="n">test_case_2</span><span class="p">();</span> <span class="k">if</span> <span class="p">((</span><span class="n">Case</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">||</span> <span class="p">(</span><span class="n">Case</span> <span class="o">==</span> <span class="mi">3</span><span class="p">))</span> <span class="n">test_case_3</span><span class="p">();</span> <span class="k">if</span> <span class="p">((</span><span class="n">Case</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">||</span> <span class="p">(</span><span class="n">Case</span> <span class="o">==</span> <span class="mi">4</span><span class="p">))</span> <span class="n">test_case_4</span><span class="p">();</span>
+</span><span class='line'>		<span class="k">if</span><span class="p">(</span><span class="n">Case</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="n">test_case_5</span><span class="p">();</span>
+</span><span class='line'>		<span class="k">if</span><span class="p">(</span><span class="n">Case</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="n">test_case_6</span><span class="p">();</span>
+</span><span class='line'>	<span class="p">}</span>
+</span><span class='line'>	<span class="k">private</span><span class="o">:</span>
+</span><span class='line'>	<span class="k">template</span> <span class="o">&lt;</span><span class="k">typename</span> <span class="n">T</span><span class="o">&gt;</span> <span class="n">string</span> <span class="n">print_array</span><span class="p">(</span><span class="k">const</span> <span class="n">vector</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">V</span><span class="p">)</span> <span class="p">{</span> <span class="n">ostringstream</span> <span class="n">os</span><span class="p">;</span> <span class="n">os</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;{ &quot;</span><span class="p">;</span> <span class="k">for</span> <span class="p">(</span><span class="k">typename</span> <span class="n">vector</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;::</span><span class="n">const_iterator</span> <span class="n">iter</span> <span class="o">=</span> <span class="n">V</span><span class="p">.</span><span class="n">begin</span><span class="p">();</span> <span class="n">iter</span> <span class="o">!=</span> <span class="n">V</span><span class="p">.</span><span class="n">end</span><span class="p">();</span> <span class="o">++</span><span class="n">iter</span><span class="p">)</span> <span class="n">os</span> <span class="o">&lt;&lt;</span> <span class="sc">&#39;\&quot;&#39;</span> <span class="o">&lt;&lt;</span> <span class="o">*</span><span class="n">iter</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;</span><span class="se">\&quot;</span><span class="s">,&quot;</span><span class="p">;</span> <span class="n">os</span> <span class="o">&lt;&lt;</span> <span class="s">&quot; }&quot;</span><span class="p">;</span> <span class="k">return</span> <span class="n">os</span><span class="p">.</span><span class="n">str</span><span class="p">();</span> <span class="p">}</span>
+</span><span class='line'>	<span class="kt">void</span> <span class="n">verify_case</span><span class="p">(</span><span class="kt">int</span> <span class="n">Case</span><span class="p">,</span> <span class="k">const</span> <span class="n">vector</span> <span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">Expected</span><span class="p">,</span> <span class="k">const</span> <span class="n">vector</span> <span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="o">&amp;</span><span class="n">Received</span><span class="p">)</span> <span class="p">{</span> <span class="n">cerr</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;Test Case #&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">Case</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;...&quot;</span><span class="p">;</span> <span class="k">if</span> <span class="p">(</span><span class="n">Expected</span> <span class="o">==</span> <span class="n">Received</span><span class="p">)</span> <span class="n">cerr</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;PASSED&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span> <span class="k">else</span> <span class="p">{</span> <span class="n">cerr</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;FAILED&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span> <span class="n">cerr</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">Expected: &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">print_array</span><span class="p">(</span><span class="n">Expected</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span> <span class="n">cerr</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;</span><span class="se">\t</span><span class="s">Received: &quot;</span> <span class="o">&lt;&lt;</span> <span class="n">print_array</span><span class="p">(</span><span class="n">Received</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span> <span class="p">}</span> <span class="p">}</span>
+</span><span class='line'>	<span class="kt">void</span> <span class="n">test_case_0</span><span class="p">()</span> <span class="p">{</span> <span class="kt">int</span> <span class="n">Arg0</span> <span class="o">=</span> <span class="mi">300</span><span class="p">;</span> <span class="kt">int</span> <span class="n">Arg1</span> <span class="o">=</span> <span class="mi">347</span><span class="p">;</span> <span class="kt">int</span> <span class="n">Arr2</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">37</span><span class="p">};</span> <span class="n">vector</span> <span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">Arg2</span><span class="p">(</span><span class="n">Arr2</span><span class="p">,</span> <span class="n">Arr2</span> <span class="o">+</span> <span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">Arr2</span><span class="p">)</span> <span class="o">/</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">Arr2</span><span class="p">[</span><span class="mi">0</span><span class="p">])));</span> <span class="n">string</span> <span class="n">Arr3</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;INVALID&quot;</span> <span class="p">};</span> <span class="n">vector</span> <span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">Arg3</span><span class="p">(</span><span class="n">Arr3</span><span class="p">,</span> <span class="n">Arr3</span> <span class="o">+</span> <span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">Arr3</span><span class="p">)</span> <span class="o">/</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">Arr3</span><span class="p">[</span><span class="mi">0</span><span class="p">])));</span> <span class="n">verify_case</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">Arg3</span><span class="p">,</span> <span class="n">checkPrefix</span><span class="p">(</span><span class="n">Arg0</span><span class="p">,</span> <span class="n">Arg1</span><span class="p">,</span> <span class="n">Arg2</span><span class="p">));</span> <span class="p">}</span>
+</span><span class='line'>	<span class="kt">void</span> <span class="n">test_case_1</span><span class="p">()</span> <span class="p">{</span> <span class="kt">int</span> <span class="n">Arg0</span> <span class="o">=</span> <span class="mi">310</span><span class="p">;</span> <span class="kt">int</span> <span class="n">Arg1</span> <span class="o">=</span> <span class="mi">320</span><span class="p">;</span> <span class="kt">int</span> <span class="n">Arr2</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">3</span><span class="p">,</span> <span class="mi">31</span><span class="p">,</span> <span class="mi">317</span><span class="p">,</span> <span class="mi">3174</span><span class="p">,</span> <span class="mi">310</span><span class="p">,</span> <span class="mi">320</span><span class="p">};</span> <span class="n">vector</span> <span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">Arg2</span><span class="p">(</span><span class="n">Arr2</span><span class="p">,</span> <span class="n">Arr2</span> <span class="o">+</span> <span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">Arr2</span><span class="p">)</span> <span class="o">/</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">Arr2</span><span class="p">[</span><span class="mi">0</span><span class="p">])));</span> <span class="n">string</span> <span class="n">Arr3</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;INVALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span> <span class="p">};</span> <span class="n">vector</span> <span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">Arg3</span><span class="p">(</span><span class="n">Arr3</span><span class="p">,</span> <span class="n">Arr3</span> <span class="o">+</span> <span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">Arr3</span><span class="p">)</span> <span class="o">/</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">Arr3</span><span class="p">[</span><span class="mi">0</span><span class="p">])));</span> <span class="n">verify_case</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">Arg3</span><span class="p">,</span> <span class="n">checkPrefix</span><span class="p">(</span><span class="n">Arg0</span><span class="p">,</span> <span class="n">Arg1</span><span class="p">,</span> <span class="n">Arg2</span><span class="p">));</span> <span class="p">}</span>
+</span><span class='line'>	<span class="kt">void</span> <span class="n">test_case_2</span><span class="p">()</span> <span class="p">{</span> <span class="kt">int</span> <span class="n">Arg0</span> <span class="o">=</span> <span class="mi">600</span><span class="p">;</span> <span class="kt">int</span> <span class="n">Arg1</span> <span class="o">=</span> <span class="mi">1020</span><span class="p">;</span> <span class="kt">int</span> <span class="n">Arr2</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">7</span><span class="p">,</span> <span class="mi">73</span><span class="p">,</span> <span class="mi">734</span><span class="p">,</span> <span class="mi">7349</span><span class="p">};</span> <span class="n">vector</span> <span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">Arg2</span><span class="p">(</span><span class="n">Arr2</span><span class="p">,</span> <span class="n">Arr2</span> <span class="o">+</span> <span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">Arr2</span><span class="p">)</span> <span class="o">/</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">Arr2</span><span class="p">[</span><span class="mi">0</span><span class="p">])));</span> <span class="n">string</span> <span class="n">Arr3</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;INVALID&quot;</span> <span class="p">};</span> <span class="n">vector</span> <span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">Arg3</span><span class="p">(</span><span class="n">Arr3</span><span class="p">,</span> <span class="n">Arr3</span> <span class="o">+</span> <span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">Arr3</span><span class="p">)</span> <span class="o">/</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">Arr3</span><span class="p">[</span><span class="mi">0</span><span class="p">])));</span> <span class="n">verify_case</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">Arg3</span><span class="p">,</span> <span class="n">checkPrefix</span><span class="p">(</span><span class="n">Arg0</span><span class="p">,</span> <span class="n">Arg1</span><span class="p">,</span> <span class="n">Arg2</span><span class="p">));</span> <span class="p">}</span>
+</span><span class='line'>	<span class="kt">void</span> <span class="n">test_case_3</span><span class="p">()</span> <span class="p">{</span> <span class="kt">int</span> <span class="n">Arg0</span> <span class="o">=</span> <span class="mi">64</span><span class="p">;</span> <span class="kt">int</span> <span class="n">Arg1</span> <span class="o">=</span> <span class="mi">78</span><span class="p">;</span> <span class="kt">int</span> <span class="n">Arr2</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">9</span><span class="p">};</span> <span class="n">vector</span> <span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">Arg2</span><span class="p">(</span><span class="n">Arr2</span><span class="p">,</span> <span class="n">Arr2</span> <span class="o">+</span> <span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">Arr2</span><span class="p">)</span> <span class="o">/</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">Arr2</span><span class="p">[</span><span class="mi">0</span><span class="p">])));</span> <span class="n">string</span> <span class="n">Arr3</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;INVALID&quot;</span><span class="p">,</span> <span class="s">&quot;INVALID&quot;</span><span class="p">,</span> <span class="s">&quot;INVALID&quot;</span><span class="p">,</span> <span class="s">&quot;INVALID&quot;</span><span class="p">,</span> <span class="s">&quot;INVALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;INVALID&quot;</span><span class="p">,</span> <span class="s">&quot;INVALID&quot;</span> <span class="p">};</span> <span class="n">vector</span> <span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">Arg3</span><span class="p">(</span><span class="n">Arr3</span><span class="p">,</span> <span class="n">Arr3</span> <span class="o">+</span> <span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">Arr3</span><span class="p">)</span> <span class="o">/</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">Arr3</span><span class="p">[</span><span class="mi">0</span><span class="p">])));</span> <span class="n">verify_case</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">Arg3</span><span class="p">,</span> <span class="n">checkPrefix</span><span class="p">(</span><span class="n">Arg0</span><span class="p">,</span> <span class="n">Arg1</span><span class="p">,</span> <span class="n">Arg2</span><span class="p">));</span> <span class="p">}</span>
+</span><span class='line'>	<span class="kt">void</span> <span class="n">test_case_4</span><span class="p">()</span> <span class="p">{</span> <span class="kt">int</span> <span class="n">Arg0</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="kt">int</span> <span class="n">Arg1</span> <span class="o">=</span> <span class="mi">1234567890</span><span class="p">;</span> <span class="kt">int</span> <span class="n">Arr2</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">123</span><span class="p">,</span> <span class="mi">456</span><span class="p">,</span> <span class="mi">789</span><span class="p">,</span> <span class="mi">1234567</span><span class="p">,</span> <span class="mi">7654321</span><span class="p">,</span> <span class="mi">3245354</span><span class="p">,</span> <span class="mi">325432532</span><span class="p">,</span> <span class="mi">243212</span><span class="p">};</span> <span class="n">vector</span> <span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">Arg2</span><span class="p">(</span><span class="n">Arr2</span><span class="p">,</span> <span class="n">Arr2</span> <span class="o">+</span> <span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">Arr2</span><span class="p">)</span> <span class="o">/</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">Arr2</span><span class="p">[</span><span class="mi">0</span><span class="p">])));</span> <span class="n">string</span> <span class="n">Arr3</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span> <span class="p">};</span> <span class="n">vector</span> <span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">Arg3</span><span class="p">(</span><span class="n">Arr3</span><span class="p">,</span> <span class="n">Arr3</span> <span class="o">+</span> <span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">Arr3</span><span class="p">)</span> <span class="o">/</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">Arr3</span><span class="p">[</span><span class="mi">0</span><span class="p">])));</span> <span class="n">verify_case</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">Arg3</span><span class="p">,</span> <span class="n">checkPrefix</span><span class="p">(</span><span class="n">Arg0</span><span class="p">,</span> <span class="n">Arg1</span><span class="p">,</span> <span class="n">Arg2</span><span class="p">));</span> <span class="p">}</span>
+</span><span class='line'>	<span class="kt">void</span> <span class="n">test_case_5</span><span class="p">()</span> <span class="p">{</span> <span class="kt">int</span> <span class="n">Arg0</span> <span class="o">=</span> <span class="mi">123</span><span class="p">;</span> <span class="kt">int</span> <span class="n">Arg1</span> <span class="o">=</span> <span class="mi">12345</span><span class="p">;</span> <span class="kt">int</span> <span class="n">Arr2</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">122</span><span class="p">,</span> <span class="mi">123</span><span class="p">,</span> <span class="mi">124</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">139</span><span class="p">,</span> <span class="mi">290</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">99</span><span class="p">,</span> <span class="mi">999</span><span class="p">,</span> <span class="mi">9999</span><span class="p">,</span> <span class="mi">99999</span><span class="p">,</span> <span class="mi">1234</span><span class="p">,</span> <span class="mi">1233</span><span class="p">,</span> <span class="mi">1235</span><span class="p">};</span> <span class="n">vector</span> <span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">Arg2</span><span class="p">(</span><span class="n">Arr2</span><span class="p">,</span> <span class="n">Arr2</span> <span class="o">+</span> <span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">Arr2</span><span class="p">)</span> <span class="o">/</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">Arr2</span><span class="p">[</span><span class="mi">0</span><span class="p">])));</span> <span class="n">string</span> <span class="n">Arr3</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;INVALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">};</span> <span class="n">vector</span> <span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">Arg3</span><span class="p">(</span><span class="n">Arr3</span><span class="p">,</span> <span class="n">Arr3</span> <span class="o">+</span> <span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">Arr3</span><span class="p">)</span> <span class="o">/</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">Arr3</span><span class="p">[</span><span class="mi">0</span><span class="p">])));</span> <span class="n">verify_case</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">Arg3</span><span class="p">,</span> <span class="n">checkPrefix</span><span class="p">(</span><span class="n">Arg0</span><span class="p">,</span> <span class="n">Arg1</span><span class="p">,</span> <span class="n">Arg2</span><span class="p">));</span> <span class="p">}</span>
+</span><span class='line'>	<span class="kt">void</span> <span class="n">test_case_6</span><span class="p">()</span> <span class="p">{</span> <span class="kt">int</span> <span class="n">Arg0</span> <span class="o">=</span> <span class="mi">401234567</span><span class="p">;</span> <span class="kt">int</span> <span class="n">Arg1</span> <span class="o">=</span> <span class="mi">2000000000</span><span class="p">;</span> <span class="kt">int</span> <span class="n">Arr2</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">31</span><span class="p">,</span> <span class="mi">78</span><span class="p">,</span> <span class="mi">123456789</span><span class="p">,</span> <span class="mi">234567890</span><span class="p">,</span> <span class="mi">312435678</span><span class="p">,</span> <span class="mi">1234567890</span><span class="p">,</span> <span class="mi">1999999999</span><span class="p">,</span> <span class="mi">2000000000</span><span class="p">,</span> <span class="mi">123456789</span><span class="p">,</span> <span class="mi">234567890</span><span class="p">,</span> <span class="mi">312435678</span><span class="p">,</span> <span class="mi">1234567890</span><span class="p">,</span> <span class="mi">1999999999</span><span class="p">,</span> <span class="mi">2000000000</span><span class="p">};</span> <span class="n">vector</span> <span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">Arg2</span><span class="p">(</span><span class="n">Arr2</span><span class="p">,</span> <span class="n">Arr2</span> <span class="o">+</span> <span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">Arr2</span><span class="p">)</span> <span class="o">/</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">Arr2</span><span class="p">[</span><span class="mi">0</span><span class="p">])));</span> <span class="n">string</span> <span class="n">Arr3</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;INVALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;INVALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;INVALID&quot;</span><span class="p">,</span> <span class="s">&quot;INVALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;INVALID&quot;</span><span class="p">,</span> <span class="s">&quot;INVALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">,</span> <span class="s">&quot;VALID&quot;</span><span class="p">};</span> <span class="n">vector</span> <span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">Arg3</span><span class="p">(</span><span class="n">Arr3</span><span class="p">,</span> <span class="n">Arr3</span> <span class="o">+</span> <span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="n">Arr3</span><span class="p">)</span> <span class="o">/</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">Arr3</span><span class="p">[</span><span class="mi">0</span><span class="p">])));</span> <span class="n">verify_case</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="n">Arg3</span><span class="p">,</span> <span class="n">checkPrefix</span><span class="p">(</span><span class="n">Arg0</span><span class="p">,</span> <span class="n">Arg1</span><span class="p">,</span> <span class="n">Arg2</span><span class="p">));</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// END CUT HERE</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// BEGIN CUT HERE</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">InputBoxChecker</span> <span class="n">___test</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">___test</span><span class="p">.</span><span class="n">run_test</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>	<span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">v</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">87</span><span class="p">,</span> <span class="mi">342</span><span class="p">,</span> <span class="mi">325</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32523532</span><span class="p">,</span> <span class="mi">6437654</span><span class="p">,</span> <span class="mi">1987654320</span><span class="p">,</span> <span class="mi">213214</span><span class="p">,</span> <span class="mi">32543265</span><span class="p">,</span> <span class="mi">436235</span><span class="p">,</span> <span class="mi">326437543</span><span class="p">,</span> <span class="mi">437643</span><span class="p">,</span> <span class="mi">43265432</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">33</span><span class="p">,</span> <span class="mi">34</span><span class="p">,</span> <span class="mi">333</span><span class="p">,</span> <span class="mi">333333333</span><span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'>	<span class="n">vector</span><span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">ans</span> <span class="o">=</span> <span class="n">___test</span><span class="p">.</span><span class="n">checkPrefix</span><span class="p">(</span><span class="mi">33</span><span class="p">,</span> <span class="mi">1234098765</span><span class="p">,</span> <span class="n">v</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// END CUT HERE</span>
+</span></code></pre></td></tr></table></div></figure>
 ]]></content>
   </entry>
   
@@ -176,61 +293,113 @@ $$
 として動的計画法．文字列のindexを$1-indexed$にしたため，最終的に答える場所は$dp[|oldText|][|newText|]$．遷移は，$oldText[i]$と$newText[j]$が一致している時は何も挿入する必要がないので，そのまま$dp[i][j]$ $\to$ $dp[i+1][j+1]$．後はそこから何文字目まで合わせる挿入を行うかを探索して，例えば$k$文字目まで合わせるとすると$dp[i][j] + 1$ $\to$ $dp[i+1][j+1]$．これでは$oldText$の先頭に追加することは考えられるが，最後に挿入することが考えられていないので，番兵として$X$を末尾に追加して合わせるようにした．
 
 # Code
-```cpp
-#include <iostream>
-#include <sstream>
-#include <vector>
-#include <string>
-#include <cstring>
-#include <algorithm>
-#include <queue>
-#include <map>
-#include <set>
-
-#define REP(i,k,n) for(int i=k;i<n;i++)
-#define rep(i,n) for(int i=0;i<n;i++)
-#define each(it,v) for(__typeof((v).begin()) it=(v).begin();it!=(v).end();it++)
-#define INF 1<<30
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair<int,int> P;
-
-int dp[1005][1005];
-
-class BlockDistance {
-
-    public:
-
-    int minDist(vector <string> oldText, vector <string> newText) {
-		rep(i, 1005) rep(j, 1005) dp[i][j] = INF;
-
-		string s = "", t = "";
-		rep(i, oldText.size()) s += oldText[i];
-		rep(i, newText.size()) t += newText[i];
-		s += "X";
-		t += "X";
-
-		dp[0][0] = 0;
-
-		rep(i, s.size()) {
-			rep(j, t.size()) {
-				if(s[i] == t[j]) {
-					dp[i+1][j+1] = min(dp[i+1][j+1], dp[i][j]);
-				}
-
-				REP(k, j+1, t.size()) {
-					dp[i][k] = min(dp[i][k], dp[i][j] + 1);
-				}
-			}
-		}
-
-		if(dp[s.size()][t.size()] == INF) return -1;
-		return dp[s.size()][t.size()];
-    }
-};
-```
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &lt;iostream&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;sstream&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;vector&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;string&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;cstring&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;algorithm&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;queue&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;map&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;set&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="cp">#define REP(i,k,n) for(int i=k;i&lt;n;i++)</span>
+</span><span class='line'><span class="cp">#define rep(i,n) for(int i=0;i&lt;n;i++)</span>
+</span><span class='line'><span class="cp">#define each(it,v) for(__typeof((v).begin()) it=(v).begin();it!=(v).end();it++)</span>
+</span><span class='line'><span class="cp">#define INF 1&lt;&lt;30</span>
+</span><span class='line'><span class="cp">#define mp make_pair</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="p">;</span>
+</span><span class='line'><span class="k">typedef</span> <span class="kt">long</span> <span class="kt">long</span> <span class="n">ll</span><span class="p">;</span>
+</span><span class='line'><span class="k">typedef</span> <span class="n">pair</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">P</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">int</span> <span class="n">dp</span><span class="p">[</span><span class="mi">1005</span><span class="p">][</span><span class="mi">1005</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">BlockDistance</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">public</span><span class="o">:</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kt">int</span> <span class="n">minDist</span><span class="p">(</span><span class="n">vector</span> <span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">oldText</span><span class="p">,</span> <span class="n">vector</span> <span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">newText</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>		<span class="n">rep</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">1005</span><span class="p">)</span> <span class="n">rep</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="mi">1005</span><span class="p">)</span> <span class="n">dp</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">INF</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>		<span class="n">string</span> <span class="n">s</span> <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">t</span> <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">;</span>
+</span><span class='line'>		<span class="n">rep</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">oldText</span><span class="p">.</span><span class="n">size</span><span class="p">())</span> <span class="n">s</span> <span class="o">+=</span> <span class="n">oldText</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+</span><span class='line'>		<span class="n">rep</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">newText</span><span class="p">.</span><span class="n">size</span><span class="p">())</span> <span class="n">t</span> <span class="o">+=</span> <span class="n">newText</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+</span><span class='line'>		<span class="n">s</span> <span class="o">+=</span> <span class="s">&quot;X&quot;</span><span class="p">;</span>
+</span><span class='line'>		<span class="n">t</span> <span class="o">+=</span> <span class="s">&quot;X&quot;</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>		<span class="n">dp</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>		<span class="n">rep</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">s</span><span class="p">.</span><span class="n">size</span><span class="p">())</span> <span class="p">{</span>
+</span><span class='line'>			<span class="n">rep</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">t</span><span class="p">.</span><span class="n">size</span><span class="p">())</span> <span class="p">{</span>
+</span><span class='line'>				<span class="k">if</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">t</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="p">{</span>
+</span><span class='line'>					<span class="n">dp</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">min</span><span class="p">(</span><span class="n">dp</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">][</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">],</span> <span class="n">dp</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]);</span>
+</span><span class='line'>				<span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>				<span class="n">REP</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">t</span><span class="p">.</span><span class="n">size</span><span class="p">())</span> <span class="p">{</span>
+</span><span class='line'>					<span class="n">dp</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">min</span><span class="p">(</span><span class="n">dp</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">k</span><span class="p">],</span> <span class="n">dp</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+</span><span class='line'>				<span class="p">}</span>
+</span><span class='line'>			<span class="p">}</span>
+</span><span class='line'>		<span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>		<span class="k">if</span><span class="p">(</span><span class="n">dp</span><span class="p">[</span><span class="n">s</span><span class="p">.</span><span class="n">size</span><span class="p">()][</span><span class="n">t</span><span class="p">.</span><span class="n">size</span><span class="p">()]</span> <span class="o">==</span> <span class="n">INF</span><span class="p">)</span> <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span><span class='line'>		<span class="k">return</span> <span class="n">dp</span><span class="p">[</span><span class="n">s</span><span class="p">.</span><span class="n">size</span><span class="p">()][</span><span class="n">t</span><span class="p">.</span><span class="n">size</span><span class="p">()];</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure>
 ]]></content>
   </entry>
   
@@ -249,42 +418,75 @@ class BlockDistance {
 愚直にIに操作していくと，2^(T.size()-I.size())で無理．しかしTから減らしていくには，一意しかない．末尾が"A"ならば，一つ前の状態をpreTとすると，T = preT+"A"となる．まと同様に，末尾が"B"ならば，T = reverse(preT) + "B"である．これを繰り返し，Iと同じsizeになった時に，同じかどうかで判定できる．
 
 # Code
-```cpp
-#line 5 "ABBA.cpp"
-#include <iostream>
-#include <string>
-#include <vector>
-#include <algorithm>
-#include <sstream>
-#include <cstring>
-#include <queue>
-#include <set>
-#include <map>
-
-#define REP(i,k,n) for(int i=k;i<n;i++)
-#define rep(i,n) for(int i=0;i<n;i++)
-
-using namespace std;
-typedef long long ll;
-
-class ABBA {
-	public:
-	string canObtain(string I, string T) {
-
-        while(T != I && T.size() > I.size()) {
-            if(T[T.size()-1] == 'A') {
-                T = T.substr(0,T.size()-1);
-            }else {
-                T = T.substr(0,T.size()-1);
-                reverse(T.begin(),T.end());
-            }
-        }
-
-        if(T == I) return "Possible";
-        return "Impossible";
-	}
-};
-```
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#line 5 &quot;ABBA.cpp&quot;</span>
+</span><span class='line'><span class="cp">#include &lt;iostream&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;string&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;vector&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;algorithm&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;sstream&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;cstring&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;queue&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;set&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;map&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="cp">#define REP(i,k,n) for(int i=k;i&lt;n;i++)</span>
+</span><span class='line'><span class="cp">#define rep(i,n) for(int i=0;i&lt;n;i++)</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="p">;</span>
+</span><span class='line'><span class="k">typedef</span> <span class="kt">long</span> <span class="kt">long</span> <span class="n">ll</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">ABBA</span> <span class="p">{</span>
+</span><span class='line'>	<span class="k">public</span><span class="o">:</span>
+</span><span class='line'>	<span class="n">string</span> <span class="n">canObtain</span><span class="p">(</span><span class="n">string</span> <span class="n">I</span><span class="p">,</span> <span class="n">string</span> <span class="n">T</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">while</span><span class="p">(</span><span class="n">T</span> <span class="o">!=</span> <span class="n">I</span> <span class="o">&amp;&amp;</span> <span class="n">T</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">I</span><span class="p">.</span><span class="n">size</span><span class="p">())</span> <span class="p">{</span>
+</span><span class='line'>            <span class="k">if</span><span class="p">(</span><span class="n">T</span><span class="p">[</span><span class="n">T</span><span class="p">.</span><span class="n">size</span><span class="p">()</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="sc">&#39;A&#39;</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>                <span class="n">T</span> <span class="o">=</span> <span class="n">T</span><span class="p">.</span><span class="n">substr</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">T</span><span class="p">.</span><span class="n">size</span><span class="p">()</span><span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+</span><span class='line'>            <span class="p">}</span><span class="k">else</span> <span class="p">{</span>
+</span><span class='line'>                <span class="n">T</span> <span class="o">=</span> <span class="n">T</span><span class="p">.</span><span class="n">substr</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">T</span><span class="p">.</span><span class="n">size</span><span class="p">()</span><span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+</span><span class='line'>                <span class="n">reverse</span><span class="p">(</span><span class="n">T</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span><span class="n">T</span><span class="p">.</span><span class="n">end</span><span class="p">());</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="k">if</span><span class="p">(</span><span class="n">T</span> <span class="o">==</span> <span class="n">I</span><span class="p">)</span> <span class="k">return</span> <span class="s">&quot;Possible&quot;</span><span class="p">;</span>
+</span><span class='line'>        <span class="k">return</span> <span class="s">&quot;Impossible&quot;</span><span class="p">;</span>
+</span><span class='line'>	<span class="p">}</span>
+</span><span class='line'><span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure>
 
 コードを短く，シンプルにかける．本番中は誤読をしていて死んでいた．このある状態を目的の状態にする問題で，逆からやると上手くいく系はすぐ解けるようになりたい．
 ]]></content>
