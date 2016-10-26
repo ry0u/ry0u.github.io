@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: 数え上げ | ry0u_ydのblog]]></title>
+  <link href="http://ry0u.github.io/blog/categories/shu-eshang-ge/atom.xml" rel="self"/>
+  <link href="http://ry0u.github.io/"/>
+  <updated>2016-10-26T16:09:54+09:00</updated>
+  <id>http://ry0u.github.io/</id>
+  <author>
+    <name><![CDATA[ry0u_yd]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[SRM317 D2H OrdringCount]]></title>
+    <link href="http://ry0u.github.io/blog/2016/10/26/srm317-d2h-ordringcount/"/>
+    <updated>2016-10-26T15:18:32+09:00</updated>
+    <id>http://ry0u.github.io/blog/2016/10/26/srm317-d2h-ordringcount</id>
+    <content type="html"><![CDATA[<!-- more -->
+
+グラフが与えられるのでトポロジカル順序の個数を答える．  
+逆から考えていく．トポロジカル順序として一番最後となるのは，出次数が0のノードとなる．既に決めた頂点数集合$S$をbitとして持ち，
+
+$$
+	dp[S] := 頂点集合Sをトポロジカルソートする方法の数
+$$
+
+とする．逆から見て，この頂点集合$S$の次に選べるものは，頂点の隣接しているのものが頂点集合の中に既に含まれているか，隣接しているノードが無いかのどちらかである．最終的に$dp[(1<<n)-1]$が答えとなる．
+
+# Code
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &lt;iostream&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;sstream&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;vector&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;string&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;cstring&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;algorithm&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;map&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;set&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;queue&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="cp">#define REP(i,k,n) for(int i=k;i&lt;n;i++)</span>
+</span><span class='line'><span class="cp">#define rep(i,n) for(int i=0;i&lt;n;i++)</span>
+</span><span class='line'><span class="cp">#define each(it,v) for(__typeof((v).begin()) it=(v).begin();it!=(v).end();it++)</span>
+</span><span class='line'><span class="cp">#define INF 1&lt;&lt;30</span>
+</span><span class='line'><span class="cp">#define mp make_pair</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="p">;</span>
+</span><span class='line'><span class="k">typedef</span> <span class="kt">long</span> <span class="kt">long</span> <span class="n">ll</span><span class="p">;</span>
+</span><span class='line'><span class="k">typedef</span> <span class="n">pair</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">P</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">ll</span> <span class="n">dp</span><span class="p">[</span><span class="mi">1</span><span class="o">&lt;&lt;</span><span class="mi">21</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">OrderingCount</span> <span class="p">{</span>
+</span><span class='line'>	<span class="k">public</span><span class="o">:</span>
+</span><span class='line'>	<span class="kt">long</span> <span class="kt">long</span> <span class="n">countOrderings</span><span class="p">(</span><span class="n">vector</span> <span class="o">&lt;</span><span class="n">string</span><span class="o">&gt;</span> <span class="n">req</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>		<span class="kt">int</span> <span class="n">n</span> <span class="o">=</span> <span class="n">req</span><span class="p">.</span><span class="n">size</span><span class="p">();</span>
+</span><span class='line'>
+</span><span class='line'>		<span class="n">memset</span><span class="p">(</span><span class="n">dp</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">dp</span><span class="p">));</span>
+</span><span class='line'>		<span class="n">dp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>		<span class="n">rep</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="o">&lt;&lt;</span><span class="n">n</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>			<span class="n">rep</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>				<span class="k">if</span><span class="p">(</span><span class="n">i</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">j</span><span class="p">))</span> <span class="k">continue</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>				<span class="kt">bool</span> <span class="n">flag</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+</span><span class='line'>				<span class="n">rep</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>					<span class="k">if</span><span class="p">(</span><span class="n">i</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">k</span><span class="p">))</span> <span class="k">continue</span><span class="p">;</span>
+</span><span class='line'>					<span class="k">if</span><span class="p">(</span><span class="n">req</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">==</span> <span class="sc">&#39;Y&#39;</span><span class="p">)</span> <span class="n">flag</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+</span><span class='line'>				<span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>				<span class="k">if</span><span class="p">(</span><span class="n">flag</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>					<span class="n">dp</span><span class="p">[</span><span class="n">i</span> <span class="o">|</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">j</span><span class="p">)]</span> <span class="o">+=</span> <span class="n">dp</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+</span><span class='line'>				<span class="p">}</span>
+</span><span class='line'>			<span class="p">}</span>
+</span><span class='line'>		<span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>		<span class="k">return</span> <span class="n">dp</span><span class="p">[(</span><span class="mi">1</span><span class="o">&lt;&lt;</span><span class="n">n</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">];</span>
+</span><span class='line'>	<span class="p">}</span>
+</span><span class='line'><span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure>
+]]></content>
+  </entry>
+  
+</feed>
