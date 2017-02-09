@@ -4,7 +4,7 @@
   <title><![CDATA[Category: srm | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/srm/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2017-02-06T00:13:38+09:00</updated>
+  <updated>2017-02-09T23:29:56+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,6 +12,110 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[SRM338 D1E-D2M ImprovingStatistics]]></title>
+    <link href="http://ry0u.github.io/blog/2017/02/09/srm338-d1e-d2m-improvingstatistics/"/>
+    <updated>2017-02-09T23:13:01+09:00</updated>
+    <id>http://ry0u.github.io/blog/2017/02/09/srm338-d1e-d2m-improvingstatistics</id>
+    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article-full"><h4><a href="https://community.topcoder.com/stat?c=problem_statement&pm=7386&rd=10662">TopCoder Statistics - Problem Statement</a></h4><p>This problem statement is the exclusive and proprietary property of TopCoder, Inc. Any unauthorized use or reproduction of this information without the prior written consent of TopCoder, Inc. is strictly prohibited. (c)2010, TopCoder, Inc. All rights reserved.</p></blockquote>
+<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
+
+<!-- more -->
+
+$played$, $won$が与えられる．勝率は$\displaystyle \frac{won}{played}$の百分率で表す(小数点以下は切り捨て)．これ以降プレイする場合は必ず勝つ場合に，あと何回プレイすれば勝率を$+1$することができるか．
+
+---
+
+あと何回プレイするかを$[0, 10 ^9 + 5)$で二分探索．勝率が$+1$を満たす最も小さいものを求める．$\displaystyle \frac{won}{played}$の百分率に端数が無い場合にfloorを用いると$-1$してしまうので，その場合は$+1$して戻す．
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &lt;bits/stdc++.h&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="cp">#define REP(i,k,n) for(int i=k;i&lt;n;i++)</span>
+</span><span class='line'><span class="cp">#define rep(i,n) for(int i=0;i&lt;n;i++)</span>
+</span><span class='line'><span class="cp">#define each(it,v) for(__typeof((v).begin()) it=(v).begin();it!=(v).end();it++)</span>
+</span><span class='line'><span class="cp">#define INF 1&lt;&lt;30</span>
+</span><span class='line'><span class="cp">#define mp make_pair</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="p">;</span>
+</span><span class='line'><span class="k">typedef</span> <span class="kt">long</span> <span class="kt">long</span> <span class="n">ll</span><span class="p">;</span>
+</span><span class='line'><span class="k">typedef</span> <span class="n">pair</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">P</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">ImprovingStatistics</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">public</span><span class="o">:</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kt">int</span> <span class="n">howManyGames</span><span class="p">(</span><span class="kt">int</span> <span class="n">played</span><span class="p">,</span> <span class="kt">int</span> <span class="n">won</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>		<span class="kt">double</span> <span class="n">a</span> <span class="o">=</span> <span class="n">played</span><span class="p">;</span>
+</span><span class='line'>		<span class="kt">double</span> <span class="n">b</span> <span class="o">=</span> <span class="n">won</span><span class="p">;</span>
+</span><span class='line'>		<span class="kt">double</span> <span class="n">t</span> <span class="o">=</span> <span class="n">floor</span><span class="p">(</span><span class="n">b</span> <span class="o">/</span> <span class="n">a</span> <span class="o">*</span> <span class="mi">100</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>		<span class="k">if</span><span class="p">((</span><span class="n">t</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">100</span> <span class="o">==</span> <span class="n">b</span> <span class="o">/</span> <span class="n">a</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>			<span class="n">t</span><span class="o">++</span><span class="p">;</span>
+</span><span class='line'>		<span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>		<span class="n">ll</span> <span class="n">l</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">r</span> <span class="o">=</span> <span class="mf">1e9</span> <span class="o">+</span> <span class="mi">5</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>		<span class="k">while</span><span class="p">(</span><span class="n">r</span> <span class="o">-</span> <span class="n">l</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>			<span class="n">ll</span> <span class="n">mid</span> <span class="o">=</span> <span class="p">(</span><span class="n">l</span> <span class="o">+</span> <span class="n">r</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">;</span>
+</span><span class='line'>			<span class="n">ll</span> <span class="n">f</span> <span class="o">=</span> <span class="n">floor</span><span class="p">(</span> <span class="p">((</span><span class="n">b</span> <span class="o">+</span> <span class="n">mid</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">a</span> <span class="o">+</span> <span class="n">mid</span><span class="p">))</span> <span class="o">*</span> <span class="mi">100</span> <span class="p">);</span>
+</span><span class='line'>			<span class="k">if</span><span class="p">(</span><span class="n">f</span> <span class="o">&lt;</span> <span class="n">t</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>				<span class="n">l</span> <span class="o">=</span> <span class="n">mid</span><span class="p">;</span>
+</span><span class='line'>			<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span><span class='line'>				<span class="n">r</span> <span class="o">=</span> <span class="n">mid</span><span class="p">;</span>
+</span><span class='line'>			<span class="p">}</span>
+</span><span class='line'>		<span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>		<span class="k">if</span><span class="p">(</span><span class="n">r</span> <span class="o">==</span> <span class="mf">1e9</span> <span class="o">+</span> <span class="mi">5</span><span class="p">)</span> <span class="k">return</span> <span class="o">-</span><span class="mi">1</span><span class="p">;</span>
+</span><span class='line'>		<span class="k">return</span> <span class="n">r</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[SRM337 D1M BuildingAdvertise]]></title>
@@ -799,113 +903,6 @@ $$
 </span><span class='line'>		<span class="p">}</span>
 </span><span class='line'>
 </span><span class='line'>		<span class="k">return</span> <span class="n">dp</span><span class="p">[</span><span class="n">v</span><span class="p">.</span><span class="n">size</span><span class="p">()][</span><span class="n">K</span><span class="p">];</span>
-</span><span class='line'>	<span class="p">}</span>
-</span><span class='line'><span class="p">};</span>
-</span></code></pre></td></tr></table></div></figure>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[SRM335 D1E-D2M Multifactorial]]></title>
-    <link href="http://ry0u.github.io/blog/2017/02/05/srm335-d1e-d2m-multifactorial/"/>
-    <updated>2017-02-05T19:11:41+09:00</updated>
-    <id>http://ry0u.github.io/blog/2017/02/05/srm335-d1e-d2m-multifactorial</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article-full"><h4><a href="https://community.topcoder.com/stat?c=problem_statement&pm=6835&rd=10659">TopCoder Statistics - Problem Statement</a></h4><p>This problem statement is the exclusive and proprietary property of TopCoder, Inc. Any unauthorized use or reproduction of this information without the prior written consent of TopCoder, Inc. is strictly prohibited. (c)2010, TopCoder, Inc. All rights reserved.</p></blockquote>
-<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
-
-<!-- more -->
-
-$fac\_k(n)$は次のように定義される．
-
-$$
-\begin{eqnarray}
-	fac\_k (n) &=& n\ \ \ if\ k >= n\\\
-	fac\_k (n) &=& n * fac_k(n - k)\ \ \ if\ k < n
-\end{eqnarray}
-$$
-
-$n, k$が与えられるので，$fac_k(n)$を文字列で返す．$10 ^{18}$をより大きくなる場合は$overflow$を返す．
-
----
-
-$n * fac_k(n - k)$が$10 ^{18}$より大きくなるかを判断したいが，そのままかけて比較すると実際に大きくなるときはオーバーフローしてしまうので，$10 ^ {18} >= i * ret$を$\frac{10 ^{18}}{i} >= ret$に変形する．
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &lt;bits/stdc++.h&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="cp">#define rep(i,n) for(int i=0;i&lt;(int)(n);i++)</span>
-</span><span class='line'><span class="cp">#define REP(i,k,n) for(int i=k;i&lt;(int)(n);i++)</span>
-</span><span class='line'><span class="cp">#define each(it,v) for(__typeof((v).begin()) it=(v).begin();it!=(v).end();it++)</span>
-</span><span class='line'><span class="cp">#define INF 1&lt;&lt;30</span>
-</span><span class='line'><span class="cp">#define mp make_pair</span>
-</span><span class='line'>
-</span><span class='line'><span class="cp">#define fi first</span>
-</span><span class='line'><span class="cp">#define se second</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="p">;</span>
-</span><span class='line'><span class="k">typedef</span> <span class="kt">long</span> <span class="kt">long</span> <span class="n">ll</span><span class="p">;</span>
-</span><span class='line'><span class="k">typedef</span> <span class="n">pair</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span> <span class="kt">int</span><span class="o">&gt;</span> <span class="n">P</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">Multifactorial</span> <span class="p">{</span>
-</span><span class='line'>	<span class="k">public</span><span class="o">:</span>
-</span><span class='line'>	<span class="n">string</span> <span class="n">calcMultiFact</span><span class="p">(</span><span class="kt">int</span> <span class="n">n</span><span class="p">,</span> <span class="kt">int</span> <span class="n">k</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>		<span class="kt">bool</span> <span class="n">flag</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
-</span><span class='line'>		<span class="n">ll</span> <span class="n">ret</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
-</span><span class='line'>		<span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="n">n</span><span class="p">;</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">-=</span> <span class="n">k</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>			<span class="k">if</span><span class="p">(</span><span class="mf">1e18</span> <span class="o">/</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="n">ret</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>				<span class="n">ret</span> <span class="o">*=</span> <span class="n">i</span><span class="p">;</span>
-</span><span class='line'>			<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-</span><span class='line'>				<span class="n">flag</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
-</span><span class='line'>				<span class="k">break</span><span class="p">;</span>
-</span><span class='line'>			<span class="p">}</span>
-</span><span class='line'>		<span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>		<span class="k">if</span><span class="p">(</span><span class="n">flag</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>			<span class="n">string</span> <span class="n">ans</span><span class="p">;</span>
-</span><span class='line'>			<span class="n">stringstream</span> <span class="n">ss</span><span class="p">;</span>
-</span><span class='line'>			<span class="n">ss</span> <span class="o">&lt;&lt;</span> <span class="n">ret</span><span class="p">;</span>
-</span><span class='line'>			<span class="k">return</span> <span class="n">ss</span><span class="p">.</span><span class="n">str</span><span class="p">();</span>
-</span><span class='line'>		<span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-</span><span class='line'>			<span class="k">return</span> <span class="s">&quot;overflow&quot;</span><span class="p">;</span>
-</span><span class='line'>		<span class="p">}</span>
 </span><span class='line'>	<span class="p">}</span>
 </span><span class='line'><span class="p">};</span>
 </span></code></pre></td></tr></table></div></figure>
