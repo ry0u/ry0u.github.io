@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 数学 | ry0u_ydのblog]]></title>
   <link href="http://ry0u.github.io/blog/categories/shu-xue/atom.xml" rel="self"/>
   <link href="http://ry0u.github.io/"/>
-  <updated>2017-02-10T01:42:35+09:00</updated>
+  <updated>2016-06-26T22:22:29+09:00</updated>
   <id>http://ry0u.github.io/</id>
   <author>
     <name><![CDATA[ry0u_yd]]></name>
@@ -12,115 +12,6 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
-  
-  <entry>
-    <title type="html"><![CDATA[SRM323 D1M Survived]]></title>
-    <link href="http://ry0u.github.io/blog/2016/11/18/srm323-d1m-survived/"/>
-    <updated>2016-11-18T21:40:34+09:00</updated>
-    <id>http://ry0u.github.io/blog/2016/11/18/srm323-d1m-survived</id>
-    <content type="html"><![CDATA[<blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-branding="0" data-card-type="article-full"><h4><a href="https://community.topcoder.com/stat?c=problem_statement&pm=6782&rd=10003">TopCoder Statistics - Problem Statement</a></h4><p>This problem statement is the exclusive and proprietary property of TopCoder, Inc. Any unauthorized use or reproduction of this information without the prior written consent of TopCoder, Inc. is strictly prohibited. (c)2010, TopCoder, Inc. All rights reserved.</p></blockquote>
-<script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
-
-<!-- more -->
-
-秒速$V$で動けて，$x$軸正の方向に秒速$U$で流される．$(x, y)$にまでに何秒でいけるか？行けない場合は$-1$を返す．
-
----
-
-$t$秒でいけると仮定すると，以下が成り立つはずである．
-
-$$
-\begin{eqnarray}
-	Vt {\rm cos} \theta + Ut &=& x\\\
-	Vt {\rm sin} \theta &=& y
-\end{eqnarray}
-$$
-
-三角関数を消したいので両辺を自乗して足す
-
-$$
-\begin{eqnarray}
-	y ^2 &=& V ^2t ^2 {\rm sin} ^2 \theta\\\
-	x ^2 &=& (Vt {\rm cos} \theta + Ut) ^2\\\
-		 &=& V ^2 t ^2 {\rm cos} ^2 \theta + 2VU {\rm cos} \theta t ^2 + U ^2 t ^2\\\
-	x ^2 + y ^2 &=& V ^2t ^2 {\rm sin} ^2 + V ^2 t ^2 {\rm cos} ^2 \theta + 2VU {\rm cos} \theta t ^2 + U ^2 t ^2\\\
-		&=& V ^2({\rm cos} ^2 \theta + {\rm sin} ^2 \theta) t ^2 + U ^2 t ^2 + 2VU{\rm cos} \theta t ^2\\\
-		&=& (V ^2 + U ^2)t ^2 + 2Ut \times V t{\rm cos} \theta
-\end{eqnarray}
-$$
-
-ここで，$Vt {\rm cos} \theta$は最初の式を移項して$x - Ut$であることが分かるのでこれを代入すると
-
-$$
-\begin{eqnarray}
-	x ^2 + y ^2	&=& (V ^2 + U ^2)t ^2 + 2Ut \times (x - Ut)\\\
-				&=& (V ^2 + U ^2)t ^2 + 2Uxt - 2U ^2t ^2)\\\
-				&=& (V ^2 - U ^2)t ^2 + 2Uxt\\\
-	(U ^2 - V ^2) t ^2 - 2Uxt + (x ^2 + y ^2) &=& 0
-\end{eqnarray}
-$$
-
-$t$についての二次方程式になったので，それぞれ係数を$a, b, c$とおいて解く．$a = 0$の場合，$bx + c = 0$となるので$x = -\frac{b}{c}$である．さらに$b = 0$である場合は定数項だけが残るで，$c = 0$の場合のみいけて(これは原点にいるということ)，それ以外は到達不可能．そうでない場合は$t$の解を解の公式使って求めた．  
-  
-途中で代入をしたけど，最初から移項して自乗すれば式が簡単なことに書いていて気付いた．
-
-```cpp
-#include <iostream>
-#include <sstream>
-#include <vector>
-#include <string>
-#include <cstring>
-#include <algorithm>
-#include <map>
-#include <set>
-#include <queue>
-#include <cmath>
-
-#define REP(i,k,n) for(int i=k;i<n;i++)
-#define rep(i,n) for(int i=0;i<n;i++)
-#define each(it,v) for(__typeof((v).begin()) it=(v).begin();it!=(v).end();it++)
-#define INF 1<<30
-#define mp make_pair
-#define EPS 1e-8
-#define equals(a,b) fabs((a) - (b)) < EPS
-
-using namespace std;
-typedef long long ll;
-typedef pair<int, int> P;
-
-class Survived {
-	public:
-	double minTime(int x, int y, int V, int U) {
-		double a = U * U - V * V;
-		double b = -2 * U * x;
-		double c = x * x + y * y;
-
-		if(equals(a, 0.0)) {
-			if(equals(b, 0)) {
-				if(c == 0) return 0;
-				else return -1;
-			} else {
-				double ans = -c / b;
-				if(ans >= -EPS) return ans;
-				else return -1;
-			}
-		}
-
-		double d = b * b - 4 * a * c;
-		if(d < -EPS) return -1;
-
-		double t1 = (-b + sqrt(d)) / (2 * a);
-		double t2 = (-b - sqrt(d)) / (2 * a);
-
-		if(t2 > -EPS) return t2;
-		if(t1 > -EPS) return t1;
-
-		return -1;
-	}
-};
-```
-]]></content>
-  </entry>
   
   <entry>
     <title type="html"><![CDATA[AOJ1325 Ginkgo Numbers]]></title>
@@ -132,84 +23,149 @@ class Survived {
 
 <!-- more -->
 
-与えられている {% m %} 2 {% em %}個目の性質だけを使った． {% m %} m ^2 + n ^2 {% em %}を割り切れる数が {% m %} x ^2 + y ^2 {% em %}という形で表せるか，という問題になり
+与えられている <script type="math/tex"> 2 </script>個目の性質だけを使った． <script type="math/tex"> m ^2 + n ^2 </script>を割り切れる数が <script type="math/tex"> x ^2 + y ^2 </script>という形で表せるか，という問題になり
 
 <blockquote class="embedly-card" data-card-key="39deea93f79745829254c0652225a544" data-card-controls="0" data-card-type="article" data-card-branding="0"><h4><a href="http://mathtrain.jp/twosquare">フェルマーの二平方和定理 | 高校数学の美しい物語</a></h4><p>整数論の美しい定理であるフェルマーの二平方和定理を解説します。平方剰余などの議論を用いた証明。</p></blockquote>
 <script async src="//cdn.embedly.com/widgets/platform.js" charset="UTF-8"></script>
 
-この記事通りに，素因数の{% m %} 4k + 3 {% em %}型の指数が全て偶数かどうかを見て判断する． {% m %} 1 {% em %}と {% m %} m ^2 + n ^2 {% em %}以外に存在するか，ということで合計して{% m %} 3 {% em %}つ以上あれば{% m %} C {% em %}となる．
+この記事通りに，素因数の<script type="math/tex"> 4k + 3 </script>型の指数が全て偶数かどうかを見て判断する． <script type="math/tex"> 1 </script>と <script type="math/tex"> m ^2 + n ^2 </script>以外に存在するか，ということで合計して<script type="math/tex"> 3 </script>つ以上あれば<script type="math/tex"> C </script>となる．
 
 
 # Code
 
-```cpp
-#include <iostream>
-#include <vector>
-#include <string>
-#include <cstring>
-#include <algorithm>
-#include <sstream>
-#include <map>
-#include <set>
-
-#define REP(i,k,n) for(int i=k;i<n;i++)
-#define rep(i,n) for(int i=0;i<n;i++)
-#define INF 1<<30
-#define pb push_back
-#define mp make_pair
-
-using namespace std;
-typedef long long ll;
-typedef pair<int,int> P;
-
-map<ll,ll> prime_factor(ll n) {
-	map<ll,ll> res;
-	for(ll i=2; i*i <= n; i++) {
-		while(n%i == 0) {
-			res[i]++;
-			n /= i;
-		}
-	}
-
-	if(n != 1) res[n] = 1;
-	return res;
-}
-
-int main() {
-	int n;
-	cin >> n;
-
-	rep(i, n) {
-		int m, n;
-		cin >> m >> n;
-
-		int s = m * m + n * n;
-		int cnt = 0;
-
-		REP(i, 1, s + 1) {
-			if(s % i == 0) {
-				map<ll, ll> ret = prime_factor(s / i);
-				map<ll, ll>::iterator ite;
-				bool flag = true;
-				for(ite = ret.begin(); ite != ret.end(); ite++) {
-					if(ite->first  % 4 != 3) continue;
-					if(ite->second % 2 == 0) continue;
-					flag = false;
-				}
-
-				if(flag) {
-					cnt++;
-				}
-			}
-		}
-
-		if(cnt >= 3) cout << "C" << endl;
-		else cout << "P" << endl;
-	}
-
-	return 0;
-}
-```
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+</pre></td><td class='code'><pre><code class='cpp'><span class='line'><span class="cp">#include &lt;iostream&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;vector&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;string&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;cstring&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;algorithm&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;sstream&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;map&gt;</span>
+</span><span class='line'><span class="cp">#include &lt;set&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="cp">#define REP(i,k,n) for(int i=k;i&lt;n;i++)</span>
+</span><span class='line'><span class="cp">#define rep(i,n) for(int i=0;i&lt;n;i++)</span>
+</span><span class='line'><span class="cp">#define INF 1&lt;&lt;30</span>
+</span><span class='line'><span class="cp">#define pb push_back</span>
+</span><span class='line'><span class="cp">#define mp make_pair</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">using</span> <span class="k">namespace</span> <span class="n">std</span><span class="p">;</span>
+</span><span class='line'><span class="k">typedef</span> <span class="kt">long</span> <span class="kt">long</span> <span class="n">ll</span><span class="p">;</span>
+</span><span class='line'><span class="k">typedef</span> <span class="n">pair</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="kt">int</span><span class="o">&gt;</span> <span class="n">P</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">map</span><span class="o">&lt;</span><span class="n">ll</span><span class="p">,</span><span class="n">ll</span><span class="o">&gt;</span> <span class="n">prime_factor</span><span class="p">(</span><span class="n">ll</span> <span class="n">n</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>	<span class="n">map</span><span class="o">&lt;</span><span class="n">ll</span><span class="p">,</span><span class="n">ll</span><span class="o">&gt;</span> <span class="n">res</span><span class="p">;</span>
+</span><span class='line'>	<span class="k">for</span><span class="p">(</span><span class="n">ll</span> <span class="n">i</span><span class="o">=</span><span class="mi">2</span><span class="p">;</span> <span class="n">i</span><span class="o">*</span><span class="n">i</span> <span class="o">&lt;=</span> <span class="n">n</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>		<span class="k">while</span><span class="p">(</span><span class="n">n</span><span class="o">%</span><span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>			<span class="n">res</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">++</span><span class="p">;</span>
+</span><span class='line'>			<span class="n">n</span> <span class="o">/=</span> <span class="n">i</span><span class="p">;</span>
+</span><span class='line'>		<span class="p">}</span>
+</span><span class='line'>	<span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>	<span class="k">if</span><span class="p">(</span><span class="n">n</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">)</span> <span class="n">res</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span><span class='line'>	<span class="k">return</span> <span class="n">res</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">int</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>	<span class="kt">int</span> <span class="n">n</span><span class="p">;</span>
+</span><span class='line'>	<span class="n">cin</span> <span class="o">&gt;&gt;</span> <span class="n">n</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>	<span class="n">rep</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>		<span class="kt">int</span> <span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">;</span>
+</span><span class='line'>		<span class="n">cin</span> <span class="o">&gt;&gt;</span> <span class="n">m</span> <span class="o">&gt;&gt;</span> <span class="n">n</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>		<span class="kt">int</span> <span class="n">s</span> <span class="o">=</span> <span class="n">m</span> <span class="o">*</span> <span class="n">m</span> <span class="o">+</span> <span class="n">n</span> <span class="o">*</span> <span class="n">n</span><span class="p">;</span>
+</span><span class='line'>		<span class="kt">int</span> <span class="n">cnt</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>		<span class="n">REP</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">s</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>			<span class="k">if</span><span class="p">(</span><span class="n">s</span> <span class="o">%</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>				<span class="n">map</span><span class="o">&lt;</span><span class="n">ll</span><span class="p">,</span> <span class="n">ll</span><span class="o">&gt;</span> <span class="n">ret</span> <span class="o">=</span> <span class="n">prime_factor</span><span class="p">(</span><span class="n">s</span> <span class="o">/</span> <span class="n">i</span><span class="p">);</span>
+</span><span class='line'>				<span class="n">map</span><span class="o">&lt;</span><span class="n">ll</span><span class="p">,</span> <span class="n">ll</span><span class="o">&gt;::</span><span class="n">iterator</span> <span class="n">ite</span><span class="p">;</span>
+</span><span class='line'>				<span class="kt">bool</span> <span class="n">flag</span> <span class="o">=</span> <span class="nb">true</span><span class="p">;</span>
+</span><span class='line'>				<span class="k">for</span><span class="p">(</span><span class="n">ite</span> <span class="o">=</span> <span class="n">ret</span><span class="p">.</span><span class="n">begin</span><span class="p">();</span> <span class="n">ite</span> <span class="o">!=</span> <span class="n">ret</span><span class="p">.</span><span class="n">end</span><span class="p">();</span> <span class="n">ite</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>					<span class="k">if</span><span class="p">(</span><span class="n">ite</span><span class="o">-&gt;</span><span class="n">first</span>  <span class="o">%</span> <span class="mi">4</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">)</span> <span class="k">continue</span><span class="p">;</span>
+</span><span class='line'>					<span class="k">if</span><span class="p">(</span><span class="n">ite</span><span class="o">-&gt;</span><span class="n">second</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="k">continue</span><span class="p">;</span>
+</span><span class='line'>					<span class="n">flag</span> <span class="o">=</span> <span class="nb">false</span><span class="p">;</span>
+</span><span class='line'>				<span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>				<span class="k">if</span><span class="p">(</span><span class="n">flag</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>					<span class="n">cnt</span><span class="o">++</span><span class="p">;</span>
+</span><span class='line'>				<span class="p">}</span>
+</span><span class='line'>			<span class="p">}</span>
+</span><span class='line'>		<span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>		<span class="k">if</span><span class="p">(</span><span class="n">cnt</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">)</span> <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;C&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</span><span class='line'>		<span class="k">else</span> <span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">&quot;P&quot;</span> <span class="o">&lt;&lt;</span> <span class="n">endl</span><span class="p">;</span>
+</span><span class='line'>	<span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>	<span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
 
 ]]></content>
   </entry>
