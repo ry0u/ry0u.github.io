@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Topological Sort on ry0u_ydのblog</title>
+    <link>http://ry0u.github.io/tags/topological-sort/index.xml</link>
+    <description>Recent content in Topological Sort on ry0u_ydのblog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>ja</language>
+    <atom:link href="http://ry0u.github.io/tags/topological-sort/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>SRM314 D1M LandAndSea</title>
+      <link>http://ry0u.github.io/comp/2017-02-17-SRM341-D1M-LandAndSea/</link>
+      <pubDate>Fri, 17 Feb 2017 21:46:48 +0900</pubDate>
+      
+      <guid>http://ry0u.github.io/comp/2017-02-17-SRM341-D1M-LandAndSea/</guid>
+      <description>&lt;p&gt;&lt;a href=&#34;https://community.topcoder.com/stat?c=problem_statement&amp;amp;pm=7512&#34;&gt;https://community.topcoder.com/stat?c=problem_statement&amp;amp;pm=7512&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;島が&amp;rsquo;.&amp;lsquo;，海が&amp;rsquo;.&amp;lsquo;で表された盤面が与えられる．島は上下左右斜めで隣接しているとき，同じグループの島となる．島が島を内包しているとき，内包している島のレベルの$max + 1$がその島のレベルとなる．内包している島を持っていない場合，その島のレベルは$0$である．各レベルの島の数を返す．&lt;/p&gt;
+
+&lt;p&gt;まずレベルは考えずに島の内包関係をグラフで表現する．盤面外に出ること無しで，海を伝って他の島に当たった数を保持しておき，その数が最大のものに内包されているとした．内包関係をグラフで表現した後は，トポロジカルソートをしてトポロジカル順序で島のレベルを確定させていった．&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-cpp&#34;&gt;#include &amp;lt;bits/stdc++.h&amp;gt;
+
+#define rep(i,n) for(int i=0;i&amp;lt;(int)(n);i++)
+#define REP(i,k,n) for(int i=k;i&amp;lt;(int)(n);i++)
+#define each(it,v) for(__typeof((v).begin()) it=(v).begin();it!=(v).end();it++)
+#define INF 1&amp;lt;&amp;lt;30
+#define mp make_pair
+
+#define fi first
+#define se second
+
+using namespace std;
+typedef long long ll;
+typedef pair&amp;lt;int, int&amp;gt; P;
+
+int h, w;
+int id[55][55];
+int dx[4] = { 1, 0,-1, 0};
+int dy[4] = { 0, 1, 0,-1};
+int dx2[8] = { 1, 1, 0,-1,-1,-1, 0, 1};
+int dy2[8] = { 0, 1, 1, 1, 0,-1,-1,-1};
+
+bool inside(int y, int x) {
+	if(0 &amp;lt;= y &amp;amp;&amp;amp; y &amp;lt; h &amp;amp;&amp;amp; 0 &amp;lt;= x &amp;amp;&amp;amp; x &amp;lt; w) return true;
+	return false;
+}
+
+int counter = 0;
+bool visited[55][55];
+vector&amp;lt;string&amp;gt; s;
+void dfs(int y, int x) {
+	rep(i, 8) {
+		int ny = y + dy2[i];
+		int nx = x + dx2[i];
+
+		if(inside(ny, nx) &amp;amp;&amp;amp; !visited[ny][nx] &amp;amp;&amp;amp; s[ny][nx] == &#39;x&#39;) {
+			id[ny][nx] = counter;
+			visited[ny][nx] = true;
+			dfs(ny, nx);
+		}
+	}
+}
+
+int myid = -1;
+bool outflag = false;
+map&amp;lt;int, int&amp;gt; m;
+void dfs2(int y, int x) {
+	if(outflag) return;
+
+	rep(i, 4) {
+		int ny = y + dy[i];
+		int nx = x + dx[i];
+		
+
+		if(visited[ny][nx]) continue;
+		if(!inside(ny, nx)) {
+			outflag = true;
+			return;
+		}
+
+		if(s[ny][nx] == &#39;.&#39;) {
+			visited[ny][nx] = true;
+			dfs2(ny, nx);
+		} else {
+			int t = id[ny][nx];
+
+			if(t != myid) {
+				visited[ny][nx] = true;
+				m[id[ny][nx]]++;
+			} else {
+				visited[ny][nx] = true;
+				dfs2(ny, nx);
+			}
+
+		}
+	}
+}
+
+vector&amp;lt;int&amp;gt; G[55 * 55], out;
+bool used[55 * 55];
+void tposo(int cur) { // topologicalsort-dfs
+	used[cur] = true;
+	rep(i,G[cur].size()) {
+		int v = G[cur][i];
+		if(!used[v]) tposo(v);
+	}
+
+	out.push_back(cur);
+}
+
+
+class LandAndSea {
+	public:
+	vector &amp;lt;int&amp;gt; howManyIslands(vector &amp;lt;string&amp;gt; seaMap) {
+		s = seaMap;
+		h = seaMap.size();
+		w = seaMap[0].size();
+
+		counter = 0;
+		memset(id, -1, sizeof(id));
+		memset(visited, false, sizeof(visited));
+		rep(i, 55) G[i].clear();
+		out.clear();
+
+		vector&amp;lt;P&amp;gt; start;
+		rep(i, h) {
+			rep(j, w) {
+				if(visited[i][j]) continue;
+				if(s[i][j] == &#39;.&#39;) continue;
+
+				id[i][j] = counter;
+				visited[i][j] = true;
+				start.push_back(mp(i, j));
+
+				dfs(i, j);
+				counter++;
+			}
+		}
+
+		int indeg[55 * 55];
+		memset(indeg, 0, sizeof(indeg));
+
+		rep(i, counter) {
+			m.clear();
+			myid = i;
+			outflag = false;
+			memset(visited, false, sizeof(visited));
+
+			visited[start[i].fi][start[i].se] = true;
+			dfs2(start[i].fi, start[i].se);
+
+			if(outflag) continue;
+			int parent = -1, vmax = 0;
+
+			each(it, m) {
+				if(it-&amp;gt;second &amp;gt; vmax) {
+					parent = it-&amp;gt;first;
+					vmax = it-&amp;gt;second;
+				}
+			}
+
+			G[i].push_back(parent);
+			indeg[parent]++;
+		}
+
+		memset(used, 0, sizeof(used));
+		rep(i, counter) {
+			if(!used[i]) tposo(i);
+		}
+		reverse(out.begin(), out.end());
+
+		map&amp;lt;int, int&amp;gt; ans;
+		vector&amp;lt;int&amp;gt; dp(counter);
+		rep(i, out.size()) {
+			int id = out[i];
+			ans[dp[id]]++;
+			rep(j, G[id].size()) {
+				dp[G[id][j]] = max(dp[G[id][j]], dp[id] + 1);
+			}
+		}
+
+		vector&amp;lt;int&amp;gt; res(ans.size());
+		rep(i, ans.size()) res[i] = ans[i];
+		return res;
+	}
+};
+&lt;/code&gt;&lt;/pre&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>
