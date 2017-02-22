@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Tree on ry0u_ydのblog</title>
+    <link>http://ry0u.github.io/tags/tree/index.xml</link>
+    <description>Recent content in Tree on ry0u_ydのblog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>ja</language>
+    <atom:link href="http://ry0u.github.io/tags/tree/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>University CodeSprint 2 The Story of a Tree</title>
+      <link>http://ry0u.github.io/comp/2017-02-22-University-CodeSprint-2-TheStoryofaTree/</link>
+      <pubDate>Wed, 22 Feb 2017 15:00:01 +0900</pubDate>
+      
+      <guid>http://ry0u.github.io/comp/2017-02-22-University-CodeSprint-2-TheStoryofaTree/</guid>
+      <description>&lt;p&gt;$n$個の頂点の木が与えられる．Bobはランダムでrootを選ぶ．Aliceの$parent(v_i) = u_i$であるか，という$g$個の質問が，ボブが選んだ木に対して$k$個以上正解しているかの確率を求める．&lt;/p&gt;
+
+&lt;p&gt;愚直に求める場合は，ボブが選んだ木全てに対して，つまりrootが$0 \sim n-1$である全ての木に対して，Aliceの質問が$k$個以上正解しているかを求める．これは$O(ng)$となり間に合わない．&lt;/p&gt;
+
+&lt;p&gt;親子関係が変わるのは，rootと隣接している頂点$v$とrootを変更するとき，つまり
+$$
+\begin{eqnarray}
+    parent[root] &amp;amp;=&amp;amp; -1\\&lt;br /&gt;
+    parent[v] &amp;amp;=&amp;amp; root
+\end{eqnarray}
+$$
+の場合に$v$をrootに変更するときは，
+$$
+\begin{eqnarray}
+    parent[root] &amp;amp;=&amp;amp; v\\&lt;br /&gt;
+    parent[v] &amp;amp;=&amp;amp; -1
+\end{eqnarray}
+$$
+とし，親子関係が変わるのは$2$点のみである．他は変更する必要がない．&lt;/p&gt;
+
+&lt;p&gt;まず適当にrootを$0$にして，親子関係を構築し，そこからrootをdfsでrootを変更していく．現在のrootを$cur$，次にrootに変更しようと考えている頂点を$to$とすると，$parent[to] = cur$の関係が失われ，$parent[cur] = to$の関係が生まれる．これがAliceの質問に入っているかを見ればよい．Aliceの質問を満たしている親子関係をsetで持ったので$O(n log(g))$&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-cpp&#34;&gt;#include &amp;lt;bits/stdc++.h&amp;gt;
+
+#define rep(i,n) for(int i=0;i&amp;lt;(int)(n);i++)
+#define REP(i,k,n) for(int i=k;i&amp;lt;(int)(n);i++)
+#define each(it,v) for(__typeof((v).begin()) it=(v).begin();it!=(v).end();it++)
+#define INF 1&amp;lt;&amp;lt;30
+#define mp make_pair
+#define fi first
+#define se second
+#define MAX_N 200005
+
+using namespace std;
+typedef long long ll;
+typedef pair&amp;lt;int,int&amp;gt; P;
+
+int par[MAX_N];
+vector&amp;lt;int&amp;gt; G[MAX_N];
+
+void dfs(int cur, int pre) {
+	par[cur] = pre;
+
+	rep(i, G[cur].size()) {
+		int to = G[cur][i];
+		if(to == pre) continue;
+		dfs(to, cur);
+	}
+}
+
+int ok = 0, K = 0;
+vector&amp;lt;int&amp;gt; a, b;
+set&amp;lt;P&amp;gt; st, input;
+
+void dfs2(int cur, int pre) {
+	if(st.size() &amp;gt;= K) ok++;
+
+	rep(i, G[cur].size()) {
+		int to = G[cur][i];
+		if(to == pre) continue;
+
+		// root - change (cur, to)
+		par[cur] = to;
+		par[to] = -1;
+
+		P inP = mp(cur, to);
+		P outP = mp(to, cur);
+
+		bool in = false, out = false;
+		if(st.find(outP) != st.end()) {
+			out = true;
+			st.erase(outP);
+		}
+
+		if(input.find(inP) != input.end() &amp;amp;&amp;amp; st.find(inP) == st.end()) {
+			in = true;
+			st.insert(inP);
+		}
+
+		dfs2(to, cur);
+
+		if(out) {
+			st.insert(outP);
+		}
+
+		if(in) {
+			st.erase(inP);
+		}
+
+		par[cur] = -1;
+		par[to] = cur;
+	}
+}
+
+int main() {
+	int q;
+	cin &amp;gt;&amp;gt; q;
+
+	rep(qq, q) {
+		int n;
+		cin &amp;gt;&amp;gt; n;
+
+		rep(i, MAX_N) G[i].clear();
+		rep(i, n - 1) {
+			int u, v;
+			cin &amp;gt;&amp;gt; u &amp;gt;&amp;gt; v;
+
+			u--; v--;
+			G[u].push_back(v);
+			G[v].push_back(u);
+		}
+
+		int g, k;
+		cin &amp;gt;&amp;gt; g &amp;gt;&amp;gt; k;
+		K = k;
+
+		a.clear(); a.resize(g);
+		b.clear(); b.resize(g);
+
+		rep(i, g) {
+			cin &amp;gt;&amp;gt; a[i] &amp;gt;&amp;gt; b[i];
+			a[i]--; b[i]--;
+		}
+
+		rep(i, MAX_N) par[i] = -1;
+		dfs(0, -1);
+
+		st.clear(); input.clear();
+		rep(i, g) {
+			P p = mp(b[i], a[i]);
+			input.insert(p);
+			if(par[b[i]] == a[i]) st.insert(p);
+		}
+
+		ok = 0;
+		dfs2(0, -1);
+
+		int d = __gcd(ok, n);
+
+		int x = ok / d;
+		int y = n / d;
+
+		cout &amp;lt;&amp;lt; x &amp;lt;&amp;lt; &amp;quot;/&amp;quot; &amp;lt;&amp;lt; y &amp;lt;&amp;lt; endl;
+
+		// if(x == 0) cout &amp;lt;&amp;lt; 0 &amp;lt;&amp;lt; endl;
+		// else if(x == y) cout &amp;lt;&amp;lt; 1 &amp;lt;&amp;lt; endl;
+		// else cout &amp;lt;&amp;lt; x &amp;lt;&amp;lt; &amp;quot;/&amp;quot; &amp;lt;&amp;lt; y &amp;lt;&amp;lt; endl;
+	}
+
+	return 0;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;余りの読解力の無さで&lt;code&gt;p/q&lt;/code&gt;と$q$のqの区別が分からず，ゲームを通しての確率を求めるものだと勘違いしていた．また&lt;code&gt;0/1&lt;/code&gt;が解となる時には&lt;code&gt;0&lt;/code&gt;を，&lt;code&gt;1/1&lt;/code&gt;が解となる時には&lt;code&gt;1&lt;/code&gt;を出力すると勘違いしてしまい，WAを重ねてしまった．&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

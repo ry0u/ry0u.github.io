@@ -9,6 +9,115 @@
     <atom:link href="http://ry0u.github.io/tags/dp/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
+      <title>University CodeSprint 2 Sherlocks Array Merging Algorithm</title>
+      <link>http://ry0u.github.io/comp/2017-02-22-University-CodeSprint-2-Sherlock%27s-Array-Merging-Algorithm/</link>
+      <pubDate>Wed, 22 Feb 2017 15:30:19 +0900</pubDate>
+      
+      <guid>http://ry0u.github.io/comp/2017-02-22-University-CodeSprint-2-Sherlock%27s-Array-Merging-Algorithm/</guid>
+      <description>&lt;p&gt;&lt;a href=&#34;https://www.hackerrank.com/contests/university-codesprint-2/challenges/sherlocks-array-merging-algorithm&#34;&gt;https://www.hackerrank.com/contests/university-codesprint-2/challenges/sherlocks-array-merging-algorithm&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;複数の配列から先頭1つずつを取り，取ったものをsortして$M$の末尾に加える．最終的に$V$と一致する通りを求める．&lt;/p&gt;
+
+&lt;p&gt;$$
+    dp[pos][n] := 前回n個取り，pos目まで見た時の組み合わせ
+$$&lt;/p&gt;
+
+&lt;p&gt;取る数は必ず広義単調減少となり増えることはない．前回$n$個取った場合に今回$r (0 \leq r \leq n)$個取るとすると，まず$n$個の場所に$r$個を当てはめるために$_{n}C_{r}$通りある．また$r$個はどんな順番でも良いでの$r$の並び方は$r!$通りある．現在$pos$まで見て，$r$個取ったとすると次の遷移は$(pos + r, r)$である．$r$個取る時は，$V$の$[pos, pos + r)$が単調増加になっていなければならないことに注意する．&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-cpp&#34;&gt;#include &amp;lt;bits/stdc++.h&amp;gt;
+
+#define rep(i,n) for(int i=0;i&amp;lt;(int)(n);i++)
+#define REP(i,k,n) for(int i=k;i&amp;lt;(int)(n);i++)
+#define each(it,v) for(__typeof((v).begin()) it=(v).begin();it!=(v).end();it++)
+#define INF 1&amp;lt;&amp;lt;30
+#define mp make_pair
+#define fi first
+#define se second
+#define MOD 1000000007
+
+using namespace std;
+typedef long long ll;
+typedef pair&amp;lt;int,int&amp;gt; P;
+
+ll dp[1205][1205], up[1205][1205], fact[1205];
+
+ll C[2005][2005];
+void combination(int size) {
+	for (int i = 0; i &amp;lt; size; i++) C[i][0] = 1LL;
+	for (int i = 1; i &amp;lt; size; i++) {
+		for (int j = 1; j &amp;lt;= i; j++) {
+			C[i][j] = (C[i-1][j-1] + C[i-1][j]) % MOD;
+		}
+	}
+}
+
+int n;
+
+ll dfs(int pos, int len) {
+	if(len == -1) {
+		ll res = 0;
+		for(ll i = 1; i &amp;lt;= n &amp;amp;&amp;amp; pos + i &amp;lt;= n; i++) {
+			if(up[pos][pos + i - 1]) {
+				res += dfs(pos + i, i) % MOD;
+				res %= MOD;
+
+			} else break;
+		}
+		return dp[pos][len] = res;
+	} else {
+		if(dp[pos][len] != -1) return dp[pos][len];
+		if(pos == n) return 1;
+
+		ll res = 0;
+		for(ll i = 1; i &amp;lt;= len &amp;amp;&amp;amp; pos + i &amp;lt;= n; i++) {
+			if(up[pos][pos + i - 1]) {
+				res += (((C[len][len-i] * fact[i]) % MOD) * dfs(pos + i, i)) % MOD;
+				res %= MOD;
+			} else break;
+		}
+
+		return dp[pos][len] = res;
+	}
+}
+
+int main() {
+	cin &amp;gt;&amp;gt; n;
+
+	vector&amp;lt;int&amp;gt; v(n);
+	rep(i, n) cin &amp;gt;&amp;gt; v[i];
+
+	combination(1205);
+	fact[0] = 1;
+	REP(i, 1, 1205) {
+		fact[i] = (i * fact[i-1]) % MOD;
+	}
+
+	rep(i, n + 1) {
+		rep(j, n + 1) {
+			dp[i][j] = -1;
+			up[i][j] = false;
+		}
+	}
+
+	rep(i, n) {
+		bool flag = true;
+		REP(j, i, n) {
+			up[i][j] = flag;
+			if(j &amp;lt; n-1 &amp;amp;&amp;amp; v[j] &amp;gt; v[j+1]) flag = false;
+		}
+	}
+
+	cout &amp;lt;&amp;lt; dfs(0, -1) &amp;lt;&amp;lt; endl;
+
+	return 0;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;本番中に解けなかった．悔しい．&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
       <title>SRM342 D1M ReverseResources</title>
       <link>http://ry0u.github.io/comp/2017-02-17-SRM342-D1M-ReverseResources/</link>
       <pubDate>Fri, 17 Feb 2017 22:40:34 +0900</pubDate>
