@@ -6,8 +6,145 @@
     <description>Recent content on ry0u_ydのblog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja</language>
-    <lastBuildDate>Sun, 26 Feb 2017 22:59:41 +0900</lastBuildDate>
+    <lastBuildDate>Mon, 27 Feb 2017 22:43:04 +0900</lastBuildDate>
     <atom:link href="http://ry0u.github.io/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Codeforces402-div2D String Game</title>
+      <link>http://ry0u.github.io/comp/2017-02-27-Codeforces402-div2D-String-Game/</link>
+      <pubDate>Mon, 27 Feb 2017 22:43:04 +0900</pubDate>
+      
+      <guid>http://ry0u.github.io/comp/2017-02-27-Codeforces402-div2D-String-Game/</guid>
+      <description>&lt;p&gt;文字列$t$と$t$の部分文字列$p$，文字列$t$のどの文字を消していくかのindexが与えられる．部分文字列$p$が得られなくなるため，文字を消していく作業を続ける時に，最大で何個消せるか．&lt;/p&gt;
+
+&lt;p&gt;一文字ずつ順番に消していき，その文字列が$p$を構成できるかどうか(連続している必要はない)を試すのには$O(n ^2)$なので間に合わない．配列を$p$を構成できるかできないか，を$yes / no$で持った時に，$[yes, yes, &amp;hellip;, yes, no, &amp;hellip;, no]$になるので，この$yes$の右端を二分探索で求める．二分探索で今見ている番目まで文字列を消し，$p$を構成できるかを見るので$O(n logn)$となる．&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-cpp&#34;&gt;#include &amp;lt;bits/stdc++.h&amp;gt;
+
+#define rep(i,n) for(int i=0;i&amp;lt;(int)(n);i++)
+#define REP(i,k,n) for(int i=k;i&amp;lt;(int)(n);i++)
+#define each(it,v) for(__typeof((v).begin()) it=(v).begin();it!=(v).end();it++)
+#define INF 1&amp;lt;&amp;lt;30
+#define mp make_pair
+#define fi first
+#define se second
+
+using namespace std;
+typedef long long ll;
+typedef pair&amp;lt;int,int&amp;gt; P;
+
+bool used[200005];
+
+int main() {
+	string s, t;
+	cin &amp;gt;&amp;gt; s &amp;gt;&amp;gt; t;
+
+	vector&amp;lt;int&amp;gt; a(s.size());
+	rep(i, s.size()) {
+		cin &amp;gt;&amp;gt; a[i];
+		a[i]--;
+	}
+
+	int l = -1, r = s.size() + 5;
+	while(r - l &amp;gt; 1) {
+		int med = (l + r) / 2;
+
+		memset(used, 0, sizeof(used));
+		rep(i, med) {
+			used[a[i]] = true;
+		}
+
+		string ss = &amp;quot;&amp;quot;;
+		rep(i, s.size()) {
+			if(used[i]) continue;
+			else ss += s[i];
+		}
+
+		bool flag = true;
+		int tid = 0;
+		rep(i, ss.size()) {
+			if(ss[i] == t[tid]) {
+				tid++;
+			}
+		}
+
+		if(tid == t.size()) l = med;
+		else r = med;
+	}
+
+	cout &amp;lt;&amp;lt; r - 1 &amp;lt;&amp;lt; endl;
+
+	return 0;
+}
+&lt;/code&gt;&lt;/pre&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Codeforces402 div2C Dishonest Sellers</title>
+      <link>http://ry0u.github.io/comp/2017-02-27-Codeforces402-div2C-Dishonest-Sellers/</link>
+      <pubDate>Mon, 27 Feb 2017 22:35:26 +0900</pubDate>
+      
+      <guid>http://ry0u.github.io/comp/2017-02-27-Codeforces402-div2C-Dishonest-Sellers/</guid>
+      <description>&lt;p&gt;&lt;a href=&#34;http://codeforces.com/contest/779/problem/C&#34;&gt;http://codeforces.com/contest/779/problem/C&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;$n$個のもの全てを今週と来週に分けて買いたい．$i$番目の今週の値段は$a_i$で，来週の値段は$b_i$である．少なくとも今週に$k$個買わなければならない時に，必要となる最小の金額を求める．&lt;/p&gt;
+
+&lt;p&gt;基本的に来週になると高くなるものは今週買い，安くなるものは来週買った方が良い．今週買った方が良いものが$k$個未満の場合は，来週買った方が良いものから安くなる金額が少ない順に買う．&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-cpp&#34;&gt;#include &amp;lt;bits/stdc++.h&amp;gt;
+
+#define rep(i,n) for(int i=0;i&amp;lt;(int)(n);i++)
+#define REP(i,k,n) for(int i=k;i&amp;lt;(int)(n);i++)
+#define each(it,v) for(__typeof((v).begin()) it=(v).begin();it!=(v).end();it++)
+#define INF 1&amp;lt;&amp;lt;30
+#define mp make_pair
+#define fi first
+#define se second
+
+using namespace std;
+typedef long long ll;
+typedef pair&amp;lt;int,int&amp;gt; P;
+
+bool flag[200005];
+
+int main() {
+	int n, k;
+	cin &amp;gt;&amp;gt; n &amp;gt;&amp;gt; k;
+
+	vector&amp;lt;P&amp;gt; v(n);
+	rep(i, n) cin &amp;gt;&amp;gt; v[i].fi;
+	rep(i, n) cin &amp;gt;&amp;gt; v[i].se;
+
+	memset(flag, 0, sizeof(flag));
+	priority_queue&amp;lt;P, vector&amp;lt;P&amp;gt;, greater&amp;lt;P&amp;gt; &amp;gt; que;
+	rep(i, n) {
+		if(v[i].fi - v[i].se &amp;gt; 0) {
+			que.push(mp(v[i].fi - v[i].se, i));
+			flag[i] = true;
+		}
+	}
+
+	int now = n - que.size();
+	while(now &amp;lt; k) {
+		P p = que.top(); que.pop();
+		now++;
+		flag[p.se] = false;
+	}
+	
+	ll ans = 0;
+	rep(i, n) {
+		if(flag[i]) ans += v[i].se;
+		else ans += v[i].fi;
+	}
+
+	cout &amp;lt;&amp;lt; ans &amp;lt;&amp;lt; endl;
+
+	return 0;
+}
+&lt;/code&gt;&lt;/pre&gt;
+</description>
+    </item>
     
     <item>
       <title>CSAcademy round19 Smallest Array Permutation</title>
