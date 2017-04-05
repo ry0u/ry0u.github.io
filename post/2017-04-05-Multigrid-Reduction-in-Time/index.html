@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+<meta name="pinterest" content="nopin">
+<meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+<meta name="generator" content="Hugo 0.19-DEV" />
+
+
+
+<link rel="canonical" href="http://ry0u.github.io/post/2017-04-05-Multigrid-Reduction-in-Time/">
+
+
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/solarized_dark.min.css">
+	<link rel="stylesheet" href="//cdn.jsdelivr.net/highlight.js/8.6/styles/github-gist.min.css">
+<style type="text/css">
+.hljs {
+  background: #F7F7F7;
+}
+
+</style>
+
+    <title>Multigrid Reduction in Time - ry0u_ydのblog</title>
+    
+<meta name="description" content="概要 1次元熱拡散問題をMultigrid Reduction in Timeで解く 1次元熱拡散 1次元熱伝導方程式は$u:$温度ベクトル，$k:$熱拡散係数, $S:$">
+
+<meta property="og:title" content="Multigrid Reduction in Time - ry0u_ydのblog">
+<meta property="og:type" content="article">
+<meta property="og:url" content="http://ry0u.github.io/post/2017-04-05-Multigrid-Reduction-in-Time/">
+<meta property="og:image" content="http://ry0u.github.io/images/default.png">
+<meta property="og:site_name" content="ry0u_ydのblog">
+<meta property="og:description" content="概要 1次元熱拡散問題をMultigrid Reduction in Timeで解く 1次元熱拡散 1次元熱伝導方程式は$u:$温度ベクトル，$k:$熱拡散係数, $S:$">
+<meta property="og:locale" content="ja_JP">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="ry0u_ydのblog">
+<meta name="twitter:url" content="http://ry0u.github.io/post/2017-04-05-Multigrid-Reduction-in-Time/">
+<meta name="twitter:title" content="Multigrid Reduction in Time - ry0u_ydのblog">
+<meta name="twitter:description" content="概要 1次元熱拡散問題をMultigrid Reduction in Timeで解く 1次元熱拡散 1次元熱伝導方程式は$u:$温度ベクトル，$k:$熱拡散係数, $S:$">
+<meta name="twitter:image" content="http://ry0u.github.io/images/default.png">
+
+
+<script type="application/ld+json">
+  {
+    "@context": "http://schema.org",
+    "@type": "NewsArticle",
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id":"http:\/\/ry0u.github.io\/"
+    },
+    "headline": "Multigrid Reduction in Time - ry0u_ydのblog",
+    "image": {
+      "@type": "ImageObject",
+      "url": "http:\/\/ry0u.github.io\/images\/default.png",
+      "height": 800,
+      "width": 800
+    },
+    "datePublished": "2017-04-05T14:03:08JST",
+    "dateModified": "2017-04-05T14:03:08JST",
+    "author": {
+      "@type": "Person",
+      "name": "ry0u_ydのblog"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "ry0u_ydのblog",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "http:\/\/ry0u.github.io\/images/logo.png",
+        "width": 600,
+        "height": 60
+      }
+    },
+    "description": "概要 1次元熱拡散問題をMultigrid Reduction in Timeで解く 1次元熱拡散 1次元熱伝導方程式は$u:$温度ベクトル，$k:$熱拡散係数, $S:$"
+  }
+</script>
+
+
+    <link href="http://ry0u.github.io/css/styles.css" rel="stylesheet">
+	<script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+	</script>
+	<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {
+	inlineMath: [['$','$'], ['\\(','\\)']],
+	displayMath: [['$$','$$'], ['\[','\]']],
+	processEscapes: true,
+	processEnvironments: true,
+	skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+	TeX: { 
+		equationNumbers: { autoNumber: "AMS" },
+		extensions: ["AMSmath.js", "AMSsymbols.js", "noErrors.js"],
+		noErrors : {
+			multiLine: true
+		}
+	}
+  }
+});
+	</script>
+
+  </head>
+
+  <body>
+    
+    
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65029878-1', 'auto');
+ga('send', 'pageview');
+</script>
+
+    
+
+	<header class="l-header">
+		<nav class="navbar navbar-default">
+			<div class="container">
+				<div class="navbar-header">
+					<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false">
+						<span class="sr-only">Toggle navigation</span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+					</button>
+					<a class="navbar-brand" href="http://ry0u.github.io/" style="padding-right:100px">ry0u_ydのblog</a>
+
+					
+
+					<a class="navbar-brand" href="http://ry0u.github.io/categories" style="font-size:small;padding-left:20px">categories
+					</a>
+					
+
+					<a class="navbar-brand" href="http://ry0u.github.io/tags" style="font-size:small;padding-left:20px">tags
+					</a>
+					
+				</div>
+
+				
+				<div id="navbar" class="collapse navbar-collapse">
+					
+					<ul class="nav navbar-nav navbar-right">
+						
+						
+						<li>
+								<a href="https://github.com/ry0u">
+									
+										<i class="fa fa-github" aria-hidden="true"></i>
+									
+									github
+								</a>
+						</li>
+						
+						
+						
+						<li>
+								<a href="https://twitter.com/ry0u_yd">
+									
+										<i class="fa fa-twitter" aria-hidden="true"></i>
+									
+									twitter
+								</a>
+						</li>
+						
+						
+					</ul>
+					
+				</div>
+				
+
+			</div>
+		</nav>
+	</header>
+
+    <main>
+      <div class="container">
+        
+<div class="row">
+  <div class="col-md-12">
+
+    <nav class="p-crumb">
+      <ol class="breadcrumb">
+        <li><a href="http://ry0u.github.io/"><i class="fa fa-home" aria-hidden="true"></i></a></li>
+        
+        <li itemscope="" itemtype="http://data-vocabulary.org/Breadcrumb"><a href="http://ry0u.github.io/post/" itemprop="url"><span itemprop="title">post</span></a></li>
+        
+        <li class="active">Multigrid Reduction in Time</li>
+      </ol>
+    </nav>
+
+    <article class="single">
+  <header>
+    <ul class="p-facts">
+      <li><i class="fa fa-calendar" aria-hidden="true"></i><time datetime="2017-04-05T14:03:08JST">Apr 5, 2017</time></li>
+      <li><i class="fa fa-bookmark" aria-hidden="true"></i><a href="http://ry0u.github.io/post/">post</a></li>
+      
+    </ul>
+
+    <h1 class="title">Multigrid Reduction in Time</h1>
+  </header>
+
+  
+
+  <div class="article-body">
+
+<h2 id="概要">概要</h2>
+
+<p>1次元熱拡散問題をMultigrid Reduction in Timeで解く</p>
+
+<h2 id="1次元熱拡散">1次元熱拡散</h2>
+
+<p>1次元熱伝導方程式は$u:$温度ベクトル，$k:$熱拡散係数, $S:$熱のわき出しとすると以下の式で表される．
+$$
+\displaystyle \frac{\delta u}{\delta t} = k \frac{\delta ^2 u}{\delta x ^2} + S
+$$</p>
+
+<p>これを時間を前進，空間を二次中心差分の陽解法で離散化する．上付き文字は時間，下付き文字は空間のindexである．</p>
+
+<p>$$
+    \frac{u^{n+1}_{i}-u^{n}_{i}}{\Delta t} = k \frac{u ^{n}_{i-1} - 2u^{n}_{i} + u^{n}_{i+1}}{\Delta x ^2} + S^{n}_i
+$$</p>
+
+<p>整理すると
+$$
+\begin{eqnarray}
+    u^{n+1}_{i} &amp;=&amp; \frac{k \Delta t}{\Delta x^2} (u ^{n}_{i-1} - 2u^{n}_{i} + u^{n}_{i+1}) + u^n_{i} + S^{n}_i\Delta t\\<br />
+                 &amp;=&amp; \frac{k \Delta t}{\Delta x^2} u^{n}_{i-1} + (1 - \frac{2k\Delta t}{\Delta x^2}) u^{n}_{i} + \frac{k \Delta t}{\Delta x^2} u^{n}_{i+1} + S^{n}_i\Delta t
+\end{eqnarray}
+$$</p>
+
+<p>これをディリクレ境界条件で行列を用いて表すと以下のようになる
+$$
+\left(
+    \begin{array}{c}
+        u^{n+1}_{0} \\<br />
+        u^{n+1}_{1} \\<br />
+        u^{n+1}_{2} \\<br />
+        u^{n+1}_{3} \\<br />
+        \vdots \\<br />
+        u^{n+1}_{N} \\<br />
+    \end{array}
+\right) = \left(
+    \begin{array}{cccccc}
+        1 &amp;   &amp;   &amp;   &amp;  &amp;   \\<br />
+        \frac{k \Delta t}{\Delta x^2} &amp; -\frac{2k \Delta t}{\Delta x^2} &amp; \frac{k \Delta t}{\Delta x^2} &amp;   &amp;  &amp;   \\<br />
+          &amp; \frac{k \Delta t}{\Delta x^2} &amp; -\frac{2k \Delta t}{\Delta x^2} &amp; \frac{k \Delta t}{\Delta x^2} &amp;  &amp;   \\<br />
+        &amp;  &amp; \frac{k \Delta t}{\Delta x^2} &amp; -\frac{2k \Delta t}{\Delta x^2} &amp; \frac{k \Delta t}{\Delta x^2} &amp; \\<br />
+          &amp;   &amp;   &amp;   &amp; \ddots &amp;  \\<br />
+          &amp;   &amp;   &amp;   &amp;  &amp; 1 \\<br />
+    \end{array}
+\right) \left(
+    \begin{array}{c}
+        u^{n+1}_{0} \\<br />
+        u^{n+1}_{1} \\<br />
+        u^{n+1}_{2} \\<br />
+        u^{n+1}_{3} \\<br />
+        \vdots \\<br />
+        u^{n+1}_{N} \\<br />
+    \end{array}
+\right) + \left(
+    \begin{array}{c}
+        S^{n+1}_{0}\Delta t \\<br />
+        S^{n+1}_{1}\Delta t \\<br />
+        S^{n+1}_{2}\Delta t \\<br />
+        S^{n+1}_{3}\Delta t \\<br />
+        \vdots \\<br />
+        S^{n+1}_{N}\Delta t \\<br />
+    \end{array}
+\right)
+$$</p>
+
+<p>この係数行列を$\Phi$, 熱のわき出しを$g$を用いて表せば，$u^{n+1} = \Phi u^{n} + g^n$となる．</p>
+
+<h2 id="multigrid-reduction-in-time">Multigrid Reduction in Time</h2>
+
+<p>タイムステップ$T$まで求めたいとする．$T$が巨大で逐次に1timestepずつ進めることが困難な場合を想定する．これをある区間幅$m$で依存関係を切り並列で行う．依存関係を切っているので，誤差が生じる．この誤差を時間進展が大きく，問題サイズが小さい問題を解き，その時の解を使って補正する．これを誤差が十分に小さくなるまで行う反復解法である．</p>
+
+<blockquote>
+<p>TODO:時間進展の図を作る</p>
+</blockquote>
+
+<p>この時間進展を$-\Phi u^{n} + u^{n+1} = g^n$と移項し，行列を用いて表すと以下のようになる．下付き文字は時間のindexとなっていること，初期値が熱のわき出しとなっていることに注意する($u_0 = g_0$)．</p>
+
+<p>$$
+A(\mathbf{u}) = \left( \begin{array}{cccc}
+I &amp; &amp; &amp; \\<br />
+-\Phi &amp; I &amp; &amp; \\<br />
+ &amp; \ddots &amp; \ddots &amp; \\<br />
+ &amp; &amp; -\Phi&amp; I \\<br />
+\end{array} \right) \left( \begin{array}{c}
+u_0 \\<br />
+u_1 \\<br />
+\cdots \\<br />
+u_T \\<br />
+\end{array} \right) = \left( \begin{array}{c}
+g_0 \\<br />
+g_1 \\<br />
+\cdots \\<br />
+g_T \\<br />
+\end{array} \right) = \mathbf{g}
+$$</p>
+
+<p>これを粗いレベル$\Delta$に落とす．$T_{\Delta} = \displaystyle \frac{T}{m}$, $\Delta t = m\delta t$とし，この問題を解き，上のレベルの誤差を補正する．
+$$
+A_{\Delta}(\mathbf{u}_{\Delta}) = \left( \begin{array}{cccc}
+I &amp; &amp; &amp; \\<br />
+-\Phi_{\Delta} &amp; I &amp; &amp; \\<br />
+ &amp; \ddots &amp; \ddots &amp; \\<br />
+ &amp; &amp; -\Phi_{\Delta}&amp; I \\<br />
+\end{array} \right) \left( \begin{array}{c}
+u_{_{\Delta}, 0} \\<br />
+u_{_{\Delta}, 1} \\<br />
+\cdots \\<br />
+u_{_{\Delta}, T_{\Delta}} \\<br />
+\end{array} \right) = \left( \begin{array}{c}
+g_{_{\Delta}, 0} \\<br />
+g_{_{\Delta}, 1} \\<br />
+\cdots \\<br />
+g_{_{\Delta}, T_{\Delta}} \\<br />
+\end{array} \right) = \mathbf{g}_{\Delta}
+$$</p>
+
+<p>ここで時間進展において，$F$-$Point$と$C$-$Point$を定義する．$C$-$Point$は格子点の事である．ここで区間幅を$m$とすると，$C$-$Point$となるのは，$u_{0}$, $u_{m}$, $u_{2m}$, $&hellip;$である．$F$-$Point$とは$C$-$Point$以外の点である．</p>
+
+<p>次に2つの緩和$F$-$relaxation$と$C$-$relaxation$を定義する．$F$-$relaxation$は$F-Point$を更新する緩和で，$C$-$relaxation$は$C$-$Point$を更新する緩和である．最初の区間だけに注目すれば下のようになる．</p>
+
+<p>$$
+\begin{eqnarray}
+    F-relaxation &amp;:=&amp; u_{0} \xrightarrow{\Phi} u_{1} \xrightarrow{\Phi} &hellip; u_{m-2} \xrightarrow{\Phi} u_{m-1} \\<br />
+    C-relaxation &amp;:=&amp; u_{m-1} \xrightarrow{\Phi} u_{m}
+\end{eqnarray}
+$$</p>
+
+<p>アルゴリズムは<a href="http://computation.llnl.gov/projects/parallel-time-integration-multigrid/strand2d-pit.pdf">http://computation.llnl.gov/projects/parallel-time-integration-multigrid/strand2d-pit.pdf</a> のp3そのままである．(これを言ったらそもそもこの記事全体が，この論文そのものだがそこは気にしない)</p>
+
+<ol>
+<li>$FCF$-$relaxation$をする．($F$-$relaxation$, $C$-$relaxation$, $F$-$relaxation$)</li>
+<li>粗いレベル$\Delta$を作る． $u_{\Delta, i} \leftarrow u_{mi}$, $r_{\Delta, i} \leftarrow g_{mi} - A(u)_{mi} \ \ \ \ \ \mbox{for}\ i = 0, &hellip;, T_{\Delta}$</li>
+<li>$A_{\Delta}(\mathbf{v}_{\Delta}) = A_{\Delta}(\mathbf{u}_{\Delta}) + \mathbf{r}_{\Delta}$を$v_{\Delta}$について解く</li>
+<li>errorを計算する．$e_{\Delta} = v_{\Delta} - u_{\Delta}$</li>
+<li>上のレベルに補正する．$u_{mi} = u_{mi} + e_{\Delta, i}$</li>
+<li>上のレベルで$F$-$relaxation$をする．</li>
+</ol>
+
+<p>1について，まず初めに$F$をすると，右隣の$C$-$Point$に誤差がたまる．しかし，$F$だけをしても次の格子へ値が伝搬しないため，$C$をして格子点を更新する．この状態では$C$-$Point$の右隣の$F$-$Point$に誤差がたまるが，ここで誤差がたまっても下のレベルに落ちないので，もう一回$F$をして，誤差を次の$C$-$Point$にためる．そのレベルで格子点であれば，必ず下のレベルに落ちるためである．</p>
+
+<p>2について，ここで粗いレベルを作る．現在のレベルの$m$の倍数を抜き出す．ここで多段レベルであれば，1へ戻る．レベルMAXになった時は各プロセスが1timestepしか持たない場合である．その場合は，直接解いてしまう．実装の面からすれば，$Gather$してから，問題を解き，$Scatter$する．</p>
+
+<p>3について，ここで未知の変数は$\mathbf{v}_{\Delta}$のみである．$A_{\Delta}$が二重対角のため前進代入で解ける．</p>
+
+<p>後はどれだけ補正すれば良いかのerrorを計算し，上のレベルに補正する．補正した後は$F$-$relaxation$をすることによって，上のレベルの$A(\mathbf{u})$を更新する．</p>
+
+<p>全timestepの誤差が十分に小さくなるまでにこのサイクルを続ける．このサイクルの回数は$m$に依存しているため，同じ$m$であれば，求めたいtimestep, 並列度が変わっても回数は変わらない．(当然時間は変わる)</p>
+
+<h2 id="実装">実装</h2>
+
+<p>全部貼ると長いのでmainだけ貼る．後はgithubに上げておく</p>
+
+<pre><code class="language-cpp">#include &lt;bits/stdc++.h&gt;
+#include &lt;mpi.h&gt;
+
+#include &quot;Parameter.hpp&quot;
+#include &quot;Mat.hpp&quot;
+#include &quot;Generator.hpp&quot;
+#include &quot;Relaxation.hpp&quot;
+#include &quot;Debugger.hpp&quot;
+
+#define rep(i,n) for(int i=0;i&lt;(int)(n);i++)
+#define REP(i,k,n) for(int i=k;i&lt;(int)(n);i++)
+#define each(it,v) for(__typeof((v).begin()) it=(v).begin();it!=(v).end();it++)
+
+using namespace std;
+
+int main() {
+	int myid, numprocs;
+	MPI_Init(NULL, NULL);
+
+	MPI_Status status;
+	MPI_Comm_rank(MPI_COMM_WORLD, &amp;myid);
+	MPI_Comm_size(MPI_COMM_WORLD, &amp;numprocs);
+
+	int MAX_L = get_MAX_Level();
+
+	if(myid == 0) {
+		cout &lt;&lt; &quot;============ Parameter ============&quot; &lt;&lt; endl;
+		cout &lt;&lt; &quot;N:&quot; &lt;&lt; N &lt;&lt; &quot; M:&quot; &lt;&lt; M &lt;&lt; &quot; P:&quot; &lt;&lt; P &lt;&lt; &quot; T:&quot; &lt;&lt; T &lt;&lt; &quot; MAX_L:&quot; &lt;&lt; MAX_L &lt;&lt; endl;
+	}
+
+	// local [level][time][place]
+	Mat local_u[MAX_L], local_Au[MAX_L], local_r[MAX_L], local_g[MAX_L], local_v[MAX_L];
+
+	int local_m = M;
+	int local_step = T / P; // (T / P) - 各プロセスが担当するstep数
+	double local_dt = dt;
+
+	rep(i, MAX_L) {
+		local_u[i] = Mat(local_step, Vec(N));
+		local_Au[i] = Mat(local_step, Vec(N));
+		local_r[i] = Mat(local_step, Vec(N));
+		local_g[i] = Mat(local_step, Vec(N));
+		local_v[i] = Mat(local_step, Vec(N));
+	}
+
+	if(myid == 0) { // initialize [0, 0, ..., 0, 100]
+		local_u[0][0][N-1] = 100;
+		rep(i, MAX_L) local_g[i][0] = local_u[0][0];
+	}
+
+int cycle_cnt = 0;
+while(true) {
+	if(myid == 0) {
+		cout &lt;&lt; &quot;========================== MGRIT ======================== cnt:&quot; &lt;&lt; cycle_cnt &lt;&lt; endl;
+	}
+
+	// -------------- V - Cycle Down ------------
+	rep(level, MAX_L - 1) {
+		Mat phi = Generator::phi(local_dt);
+
+		F_relaxation(phi, local_u[level], local_step, local_m);
+		C_relaxation(phi, local_u[level], local_step, local_m);
+		F_relaxation(phi, local_u[level], local_step, local_m);
+
+		MPI_Barrier(MPI_COMM_WORLD);
+
+		local_Au[level] = Generator::global_Au(phi, local_u[level], local_step);
+
+		// next level
+		local_u[level + 1] = Generator::level_down(local_u[level], local_step);
+		// local_r[level + 1] = sub(local_g[level], local_Au[level]);
+		rep(i, local_step / M) {
+			rep(j, N) {
+				local_r[level + 1][i][j] = local_g[level][i * M][j] - local_Au[level][i * M][j];
+			}
+		}
+
+		MPI_Barrier(MPI_COMM_WORLD);
+
+		local_step /= M;
+		local_dt *= M;
+	}
+
+	if(myid == 0) { // process 0に集約するために拡張
+		local_u[MAX_L - 1].resize(P);
+		REP(i, 1, P) {
+			local_u[MAX_L - 1][i] = Vec(N);
+		}
+	}
+	
+	double tmp_u[P][N];
+	memset(tmp_u, 0, sizeof(tmp_u));
+	rep(i, N) tmp_u[0][i] = local_u[MAX_L-1][0][i];
+
+	MPI_Barrier(MPI_COMM_WORLD);
+	MPI_Gather(&amp;tmp_u[0][0], N, MPI_DOUBLE, &amp;tmp_u[0][0], N, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Barrier(MPI_COMM_WORLD);
+
+	double r_delta[P][N];
+	memset(r_delta, 0, sizeof(r_delta));
+	rep(i, N) r_delta[0][i] = local_r[MAX_L-1][0][i];
+
+	MPI_Barrier(MPI_COMM_WORLD);
+	MPI_Gather(&amp;r_delta[0][0], N, MPI_DOUBLE, &amp;r_delta[0][0], N, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Barrier(MPI_COMM_WORLD);
+
+	//本来ならばgも集めるが，今回はg0 = u0, その他は全て0のため結果が変わらないので飛ばす
+	// double tmp_g[P][N];
+	// memset(tmp_g, 0, sizeof(tmp_g));
+	// rep(i, N) tmp_g[0][i] = local_g[MAX_L-1][0][i];
+	//
+	// MPI_Barrier(MPI_COMM_WORLD);
+	// MPI_Gather(&amp;tmp_g[0][0], N, MPI_DOUBLE, &amp;tmp_g[0][0], N, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	// MPI_Barrier(MPI_COMM_WORLD);
+
+	if(myid == 0) {
+		rep(i, P) {
+			rep(j, N) {
+				local_u[MAX_L-1][i][j] = tmp_u[i][j];
+			}
+		}
+
+		Mat MAX_L_phi = Generator::phi(local_dt);
+
+		//ここは直接解いてしまい，このMAX_L-1でのuを決定する
+		rep(i, P - 1) {
+			local_u[MAX_L-1][i+1] = mul(MAX_L_phi, local_u[MAX_L-1][i]);
+		}
+		
+		local_Au[MAX_L-1] = Generator::local_Au(MAX_L_phi, local_u[MAX_L-1], P);
+
+		Mat right_vec(P, Vec(N));
+		rep(i, P) {
+			rep(j, N) {
+				right_vec[i][j] = local_Au[MAX_L-1][i][j] + r_delta[i][j];
+			}
+		}
+
+		local_v[MAX_L-1][0] = right_vec[0];
+		rep(i, P - 1) {
+			local_v[MAX_L-1][i+1] = add(right_vec[i+1], mul(MAX_L_phi, local_v[MAX_L-1][i]));
+		}
+		
+		Mat error(P, Vec(N));
+		rep(i, P) {
+			rep(j, N) {
+				error[i][j] = local_v[MAX_L-1][i][j] - local_u[MAX_L-1][i][j];
+			}
+		}
+		
+		rep(i, P) {
+			rep(j, N) {
+				tmp_u[i][j] = tmp_u[i][j] + error[i][j];
+			}
+		}
+
+		//本来のprocess1にする
+		REP(i, 1, N) {
+			rep(j, N) {
+				local_u[MAX_L-1][i][j] = 0; local_Au[MAX_L-1][i][j] = 0;
+				local_v[MAX_L-1][i][j] = 0; local_r[MAX_L-1][i][j] = 0;
+			}
+		}
+	}
+
+	MPI_Barrier(MPI_COMM_WORLD);
+	MPI_Scatter(&amp;tmp_u[0][0], N, MPI_DOUBLE, &amp;tmp_u[0][0], N, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Barrier(MPI_COMM_WORLD);
+
+	rep(i, N) {
+		local_u[MAX_L-2][0][i] = tmp_u[0][i];
+	}
+
+	local_step *= M;
+	local_dt /= M;
+
+	Mat phi = Generator::phi(local_dt);
+	F_relaxation(phi, local_u[MAX_L-2], local_step, local_m);
+
+	// -------------- V - Cycle Up ------------
+	for(int level = MAX_L - 2; level &gt;= 1; level--) {
+		// uが更新されているので，Auも変わる
+		local_Au[level] = Generator::global_Au(phi, local_u[level], local_step);
+
+		Mat right_vec(local_step, Vec(N));
+		rep(i, local_step) {
+			rep(j, N) {
+				right_vec[i][j] = local_Au[level][i][j] + local_r[level][i][j];
+			}
+		}
+
+		Vec pre(N);
+		if(myid) {
+			MPI_Recv(&amp;pre[0], N, MPI_DOUBLE, myid - 1, 0, MPI_COMM_WORLD, &amp;status);
+		}
+
+		rep(i, local_step) {
+			local_v[level][i] = add(right_vec[i], mul(phi, pre));
+			pre = local_v[level][i];
+		}
+
+		if(myid &lt; P - 1) {
+			MPI_Send(&amp;local_v[level][local_step-1][0], N, MPI_DOUBLE, myid + 1, 0, MPI_COMM_WORLD);
+		}
+
+		Mat error(local_step, Vec(N));
+		rep(i, local_step) {
+			rep(j, N) {
+				error[i][j] = local_v[level][i][j] - local_u[level][i][j];
+			}
+		}
+		
+		rep(i, local_step) {
+			rep(j, N) {
+				local_u[level-1][i * M][j] += error[i][j];
+			}
+		}
+
+		local_step *= M;
+		local_dt /= M;
+
+		phi = Generator::phi(local_dt);
+		F_relaxation(phi, local_u[level-1], local_step, local_m);
+	}
+
+	local_Au[0] = Generator::global_Au(phi, local_u[0], local_step);
+
+	double local_error = 0;
+	rep(i, local_step) {
+		rep(j, N) {
+			local_error += (local_g[0][i][j] - local_Au[0][i][j]) * (local_g[0][i][j] - local_Au[0][i][j]);
+		}
+	}
+
+	local_error = sqrt(local_error);
+
+	double check = 0;
+	MPI_Allreduce(&amp;local_error, &amp;check, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+
+	if(myid == 0) {
+		cout &lt;&lt; &quot; -------- MGRIT check:&quot; &lt;&lt; check &lt;&lt; endl;
+	}
+
+	if(check &lt; EPS) {
+		if(myid == 0) {
+			cout &lt;&lt; &quot;================== simulation end ===================&quot; &lt;&lt; endl;
+		}
+		break;
+	}
+
+	cycle_cnt++;
+}
+
+	MPI_Finalize();
+
+	return 0;
+}
+</code></pre>
+
+<h2 id="参照したもの">参照したもの</h2>
+
+<ul>
+<li><a href="http://computation.llnl.gov/projects/parallel-time-integration-multigrid/strand2d-pit.pdf">http://computation.llnl.gov/projects/parallel-time-integration-multigrid/strand2d-pit.pdf</a></li>
+<li><a href="http://www.math.mun.ca/~smaclachlan/research/spacetimeMG.pdf">http://www.math.mun.ca/~smaclachlan/research/spacetimeMG.pdf</a></li>
+<li><a href="http://conferences.computer.org/pmbs/2016/papers/5218a022.pdf">http://conferences.computer.org/pmbs/2016/papers/5218a022.pdf</a></li>
+</ul>
+
+<h2 id="todo">TODO</h2>
+
+<p>また後で色々追記をしようを思っている(思っているだけ)</p>
+</div>
+
+  <footer class="article-footer">
+    
+    
+    
+	<section class="bordered">
+		
+		
+		
+		<div>
+			<ul class="p-terms">
+				
+					<i class="fa fa-desktop fa-fw" aria-hidden="true"></i>
+				
+				
+				<li><a href="http://ry0u.github.io/categories/poem/">poem</a></li>
+				
+			</ul>
+		</div>
+	</section>
+    
+    
+    
+	<section class="bordered">
+		
+		
+		
+		<div>
+			<ul class="p-terms">
+				
+					<i class="fa fa-tag fa-fw" aria-hidden="true"></i>
+				
+				
+				<li><a href="http://ry0u.github.io/tags/mgrit/">MGRIT</a></li>
+				
+			</ul>
+		</div>
+	</section>
+    
+    
+  </footer>
+
+</article>
+
+
+	<section class="bordered">
+		<a class="btn btn-default" href="http://twitter.com/intent/tweet?text=Multigrid%20Reduction%20in%20Time%20http%3a%2f%2fry0u.github.io%2fpost%2f2017-04-05-Multigrid-Reduction-in-Time%2f%20%40ry0u_yd" style="font-size:10px"><i class="fa fa-twitter fa-fw"></i>tweet</a>
+	</section>
+
+    
+  </div>
+
+  
+  
+  
+</div>
+
+      </div>
+    </main>
+
+    <footer class="l-footer">
+      <div class="container">
+        <p><span class="h-logo">&copy; ry0u_ydのblog</span></p>
+        <aside>
+          <p>Powered by <a href="https://gohugo.io/">Hugo</a>.</p>
+          <p><a href="https://github.com/dim0627/hugo_theme_beg">Beg</a> designed by <a href="http://yet.unresolved.xyz/">Daisuke Tsuji</a>.</p>
+        </aside>
+      </div>
+    </footer>
+
+    <script src="//code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </body>
+</html>
+

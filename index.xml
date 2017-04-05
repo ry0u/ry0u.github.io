@@ -6,8 +6,442 @@
     <description>Recent content on ry0u_ydのblog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja</language>
-    <lastBuildDate>Mon, 27 Feb 2017 22:43:04 +0900</lastBuildDate>
+    <lastBuildDate>Wed, 05 Apr 2017 14:03:08 +0900</lastBuildDate>
     <atom:link href="http://ry0u.github.io/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Multigrid Reduction in Time</title>
+      <link>http://ry0u.github.io/post/2017-04-05-Multigrid-Reduction-in-Time/</link>
+      <pubDate>Wed, 05 Apr 2017 14:03:08 +0900</pubDate>
+      
+      <guid>http://ry0u.github.io/post/2017-04-05-Multigrid-Reduction-in-Time/</guid>
+      <description>
+
+&lt;h2 id=&#34;概要&#34;&gt;概要&lt;/h2&gt;
+
+&lt;p&gt;1次元熱拡散問題をMultigrid Reduction in Timeで解く&lt;/p&gt;
+
+&lt;h2 id=&#34;1次元熱拡散&#34;&gt;1次元熱拡散&lt;/h2&gt;
+
+&lt;p&gt;1次元熱伝導方程式は$u:$温度ベクトル，$k:$熱拡散係数, $S:$熱のわき出しとすると以下の式で表される．
+$$
+\displaystyle \frac{\delta u}{\delta t} = k \frac{\delta ^2 u}{\delta x ^2} + S
+$$&lt;/p&gt;
+
+&lt;p&gt;これを時間を前進，空間を二次中心差分の陽解法で離散化する．上付き文字は時間，下付き文字は空間のindexである．&lt;/p&gt;
+
+&lt;p&gt;$$
+    \frac{u^{n+1}_{i}-u^{n}_{i}}{\Delta t} = k \frac{u ^{n}_{i-1} - 2u^{n}_{i} + u^{n}_{i+1}}{\Delta x ^2} + S^{n}_i
+$$&lt;/p&gt;
+
+&lt;p&gt;整理すると
+$$
+\begin{eqnarray}
+    u^{n+1}_{i} &amp;amp;=&amp;amp; \frac{k \Delta t}{\Delta x^2} (u ^{n}_{i-1} - 2u^{n}_{i} + u^{n}_{i+1}) + u^n_{i} + S^{n}_i\Delta t\\&lt;br /&gt;
+                 &amp;amp;=&amp;amp; \frac{k \Delta t}{\Delta x^2} u^{n}_{i-1} + (1 - \frac{2k\Delta t}{\Delta x^2}) u^{n}_{i} + \frac{k \Delta t}{\Delta x^2} u^{n}_{i+1} + S^{n}_i\Delta t
+\end{eqnarray}
+$$&lt;/p&gt;
+
+&lt;p&gt;これをディリクレ境界条件で行列を用いて表すと以下のようになる
+$$
+\left(
+    \begin{array}{c}
+        u^{n+1}_{0} \\&lt;br /&gt;
+        u^{n+1}_{1} \\&lt;br /&gt;
+        u^{n+1}_{2} \\&lt;br /&gt;
+        u^{n+1}_{3} \\&lt;br /&gt;
+        \vdots \\&lt;br /&gt;
+        u^{n+1}_{N} \\&lt;br /&gt;
+    \end{array}
+\right) = \left(
+    \begin{array}{cccccc}
+        1 &amp;amp;   &amp;amp;   &amp;amp;   &amp;amp;  &amp;amp;   \\&lt;br /&gt;
+        \frac{k \Delta t}{\Delta x^2} &amp;amp; -\frac{2k \Delta t}{\Delta x^2} &amp;amp; \frac{k \Delta t}{\Delta x^2} &amp;amp;   &amp;amp;  &amp;amp;   \\&lt;br /&gt;
+          &amp;amp; \frac{k \Delta t}{\Delta x^2} &amp;amp; -\frac{2k \Delta t}{\Delta x^2} &amp;amp; \frac{k \Delta t}{\Delta x^2} &amp;amp;  &amp;amp;   \\&lt;br /&gt;
+        &amp;amp;  &amp;amp; \frac{k \Delta t}{\Delta x^2} &amp;amp; -\frac{2k \Delta t}{\Delta x^2} &amp;amp; \frac{k \Delta t}{\Delta x^2} &amp;amp; \\&lt;br /&gt;
+          &amp;amp;   &amp;amp;   &amp;amp;   &amp;amp; \ddots &amp;amp;  \\&lt;br /&gt;
+          &amp;amp;   &amp;amp;   &amp;amp;   &amp;amp;  &amp;amp; 1 \\&lt;br /&gt;
+    \end{array}
+\right) \left(
+    \begin{array}{c}
+        u^{n+1}_{0} \\&lt;br /&gt;
+        u^{n+1}_{1} \\&lt;br /&gt;
+        u^{n+1}_{2} \\&lt;br /&gt;
+        u^{n+1}_{3} \\&lt;br /&gt;
+        \vdots \\&lt;br /&gt;
+        u^{n+1}_{N} \\&lt;br /&gt;
+    \end{array}
+\right) + \left(
+    \begin{array}{c}
+        S^{n+1}_{0}\Delta t \\&lt;br /&gt;
+        S^{n+1}_{1}\Delta t \\&lt;br /&gt;
+        S^{n+1}_{2}\Delta t \\&lt;br /&gt;
+        S^{n+1}_{3}\Delta t \\&lt;br /&gt;
+        \vdots \\&lt;br /&gt;
+        S^{n+1}_{N}\Delta t \\&lt;br /&gt;
+    \end{array}
+\right)
+$$&lt;/p&gt;
+
+&lt;p&gt;この係数行列を$\Phi$, 熱のわき出しを$g$を用いて表せば，$u^{n+1} = \Phi u^{n} + g^n$となる．&lt;/p&gt;
+
+&lt;h2 id=&#34;multigrid-reduction-in-time&#34;&gt;Multigrid Reduction in Time&lt;/h2&gt;
+
+&lt;p&gt;タイムステップ$T$まで求めたいとする．$T$が巨大で逐次に1timestepずつ進めることが困難な場合を想定する．これをある区間幅$m$で依存関係を切り並列で行う．依存関係を切っているので，誤差が生じる．この誤差を時間進展が大きく，問題サイズが小さい問題を解き，その時の解を使って補正する．これを誤差が十分に小さくなるまで行う反復解法である．&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;TODO:時間進展の図を作る&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;この時間進展を$-\Phi u^{n} + u^{n+1} = g^n$と移項し，行列を用いて表すと以下のようになる．下付き文字は時間のindexとなっていること，初期値が熱のわき出しとなっていることに注意する($u_0 = g_0$)．&lt;/p&gt;
+
+&lt;p&gt;$$
+A(\mathbf{u}) = \left( \begin{array}{cccc}
+I &amp;amp; &amp;amp; &amp;amp; \\&lt;br /&gt;
+-\Phi &amp;amp; I &amp;amp; &amp;amp; \\&lt;br /&gt;
+ &amp;amp; \ddots &amp;amp; \ddots &amp;amp; \\&lt;br /&gt;
+ &amp;amp; &amp;amp; -\Phi&amp;amp; I \\&lt;br /&gt;
+\end{array} \right) \left( \begin{array}{c}
+u_0 \\&lt;br /&gt;
+u_1 \\&lt;br /&gt;
+\cdots \\&lt;br /&gt;
+u_T \\&lt;br /&gt;
+\end{array} \right) = \left( \begin{array}{c}
+g_0 \\&lt;br /&gt;
+g_1 \\&lt;br /&gt;
+\cdots \\&lt;br /&gt;
+g_T \\&lt;br /&gt;
+\end{array} \right) = \mathbf{g}
+$$&lt;/p&gt;
+
+&lt;p&gt;これを粗いレベル$\Delta$に落とす．$T_{\Delta} = \displaystyle \frac{T}{m}$, $\Delta t = m\delta t$とし，この問題を解き，上のレベルの誤差を補正する．
+$$
+A_{\Delta}(\mathbf{u}_{\Delta}) = \left( \begin{array}{cccc}
+I &amp;amp; &amp;amp; &amp;amp; \\&lt;br /&gt;
+-\Phi_{\Delta} &amp;amp; I &amp;amp; &amp;amp; \\&lt;br /&gt;
+ &amp;amp; \ddots &amp;amp; \ddots &amp;amp; \\&lt;br /&gt;
+ &amp;amp; &amp;amp; -\Phi_{\Delta}&amp;amp; I \\&lt;br /&gt;
+\end{array} \right) \left( \begin{array}{c}
+u_{_{\Delta}, 0} \\&lt;br /&gt;
+u_{_{\Delta}, 1} \\&lt;br /&gt;
+\cdots \\&lt;br /&gt;
+u_{_{\Delta}, T_{\Delta}} \\&lt;br /&gt;
+\end{array} \right) = \left( \begin{array}{c}
+g_{_{\Delta}, 0} \\&lt;br /&gt;
+g_{_{\Delta}, 1} \\&lt;br /&gt;
+\cdots \\&lt;br /&gt;
+g_{_{\Delta}, T_{\Delta}} \\&lt;br /&gt;
+\end{array} \right) = \mathbf{g}_{\Delta}
+$$&lt;/p&gt;
+
+&lt;p&gt;ここで時間進展において，$F$-$Point$と$C$-$Point$を定義する．$C$-$Point$は格子点の事である．ここで区間幅を$m$とすると，$C$-$Point$となるのは，$u_{0}$, $u_{m}$, $u_{2m}$, $&amp;hellip;$である．$F$-$Point$とは$C$-$Point$以外の点である．&lt;/p&gt;
+
+&lt;p&gt;次に2つの緩和$F$-$relaxation$と$C$-$relaxation$を定義する．$F$-$relaxation$は$F-Point$を更新する緩和で，$C$-$relaxation$は$C$-$Point$を更新する緩和である．最初の区間だけに注目すれば下のようになる．&lt;/p&gt;
+
+&lt;p&gt;$$
+\begin{eqnarray}
+    F-relaxation &amp;amp;:=&amp;amp; u_{0} \xrightarrow{\Phi} u_{1} \xrightarrow{\Phi} &amp;hellip; u_{m-2} \xrightarrow{\Phi} u_{m-1} \\&lt;br /&gt;
+    C-relaxation &amp;amp;:=&amp;amp; u_{m-1} \xrightarrow{\Phi} u_{m}
+\end{eqnarray}
+$$&lt;/p&gt;
+
+&lt;p&gt;アルゴリズムは&lt;a href=&#34;http://computation.llnl.gov/projects/parallel-time-integration-multigrid/strand2d-pit.pdf&#34;&gt;http://computation.llnl.gov/projects/parallel-time-integration-multigrid/strand2d-pit.pdf&lt;/a&gt; のp3そのままである．(これを言ったらそもそもこの記事全体が，この論文そのものだがそこは気にしない)&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;$FCF$-$relaxation$をする．($F$-$relaxation$, $C$-$relaxation$, $F$-$relaxation$)&lt;/li&gt;
+&lt;li&gt;粗いレベル$\Delta$を作る． $u_{\Delta, i} \leftarrow u_{mi}$, $r_{\Delta, i} \leftarrow g_{mi} - A(u)_{mi} \ \ \ \ \ \mbox{for}\ i = 0, &amp;hellip;, T_{\Delta}$&lt;/li&gt;
+&lt;li&gt;$A_{\Delta}(\mathbf{v}_{\Delta}) = A_{\Delta}(\mathbf{u}_{\Delta}) + \mathbf{r}_{\Delta}$を$v_{\Delta}$について解く&lt;/li&gt;
+&lt;li&gt;errorを計算する．$e_{\Delta} = v_{\Delta} - u_{\Delta}$&lt;/li&gt;
+&lt;li&gt;上のレベルに補正する．$u_{mi} = u_{mi} + e_{\Delta, i}$&lt;/li&gt;
+&lt;li&gt;上のレベルで$F$-$relaxation$をする．&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;1について，まず初めに$F$をすると，右隣の$C$-$Point$に誤差がたまる．しかし，$F$だけをしても次の格子へ値が伝搬しないため，$C$をして格子点を更新する．この状態では$C$-$Point$の右隣の$F$-$Point$に誤差がたまるが，ここで誤差がたまっても下のレベルに落ちないので，もう一回$F$をして，誤差を次の$C$-$Point$にためる．そのレベルで格子点であれば，必ず下のレベルに落ちるためである．&lt;/p&gt;
+
+&lt;p&gt;2について，ここで粗いレベルを作る．現在のレベルの$m$の倍数を抜き出す．ここで多段レベルであれば，1へ戻る．レベルMAXになった時は各プロセスが1timestepしか持たない場合である．その場合は，直接解いてしまう．実装の面からすれば，$Gather$してから，問題を解き，$Scatter$する．&lt;/p&gt;
+
+&lt;p&gt;3について，ここで未知の変数は$\mathbf{v}_{\Delta}$のみである．$A_{\Delta}$が二重対角のため前進代入で解ける．&lt;/p&gt;
+
+&lt;p&gt;後はどれだけ補正すれば良いかのerrorを計算し，上のレベルに補正する．補正した後は$F$-$relaxation$をすることによって，上のレベルの$A(\mathbf{u})$を更新する．&lt;/p&gt;
+
+&lt;p&gt;全timestepの誤差が十分に小さくなるまでにこのサイクルを続ける．このサイクルの回数は$m$に依存しているため，同じ$m$であれば，求めたいtimestep, 並列度が変わっても回数は変わらない．(当然時間は変わる)&lt;/p&gt;
+
+&lt;h2 id=&#34;実装&#34;&gt;実装&lt;/h2&gt;
+
+&lt;p&gt;全部貼ると長いのでmainだけ貼る．後はgithubに上げておく&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-cpp&#34;&gt;#include &amp;lt;bits/stdc++.h&amp;gt;
+#include &amp;lt;mpi.h&amp;gt;
+
+#include &amp;quot;Parameter.hpp&amp;quot;
+#include &amp;quot;Mat.hpp&amp;quot;
+#include &amp;quot;Generator.hpp&amp;quot;
+#include &amp;quot;Relaxation.hpp&amp;quot;
+#include &amp;quot;Debugger.hpp&amp;quot;
+
+#define rep(i,n) for(int i=0;i&amp;lt;(int)(n);i++)
+#define REP(i,k,n) for(int i=k;i&amp;lt;(int)(n);i++)
+#define each(it,v) for(__typeof((v).begin()) it=(v).begin();it!=(v).end();it++)
+
+using namespace std;
+
+int main() {
+	int myid, numprocs;
+	MPI_Init(NULL, NULL);
+
+	MPI_Status status;
+	MPI_Comm_rank(MPI_COMM_WORLD, &amp;amp;myid);
+	MPI_Comm_size(MPI_COMM_WORLD, &amp;amp;numprocs);
+
+	int MAX_L = get_MAX_Level();
+
+	if(myid == 0) {
+		cout &amp;lt;&amp;lt; &amp;quot;============ Parameter ============&amp;quot; &amp;lt;&amp;lt; endl;
+		cout &amp;lt;&amp;lt; &amp;quot;N:&amp;quot; &amp;lt;&amp;lt; N &amp;lt;&amp;lt; &amp;quot; M:&amp;quot; &amp;lt;&amp;lt; M &amp;lt;&amp;lt; &amp;quot; P:&amp;quot; &amp;lt;&amp;lt; P &amp;lt;&amp;lt; &amp;quot; T:&amp;quot; &amp;lt;&amp;lt; T &amp;lt;&amp;lt; &amp;quot; MAX_L:&amp;quot; &amp;lt;&amp;lt; MAX_L &amp;lt;&amp;lt; endl;
+	}
+
+	// local [level][time][place]
+	Mat local_u[MAX_L], local_Au[MAX_L], local_r[MAX_L], local_g[MAX_L], local_v[MAX_L];
+
+	int local_m = M;
+	int local_step = T / P; // (T / P) - 各プロセスが担当するstep数
+	double local_dt = dt;
+
+	rep(i, MAX_L) {
+		local_u[i] = Mat(local_step, Vec(N));
+		local_Au[i] = Mat(local_step, Vec(N));
+		local_r[i] = Mat(local_step, Vec(N));
+		local_g[i] = Mat(local_step, Vec(N));
+		local_v[i] = Mat(local_step, Vec(N));
+	}
+
+	if(myid == 0) { // initialize [0, 0, ..., 0, 100]
+		local_u[0][0][N-1] = 100;
+		rep(i, MAX_L) local_g[i][0] = local_u[0][0];
+	}
+
+int cycle_cnt = 0;
+while(true) {
+	if(myid == 0) {
+		cout &amp;lt;&amp;lt; &amp;quot;========================== MGRIT ======================== cnt:&amp;quot; &amp;lt;&amp;lt; cycle_cnt &amp;lt;&amp;lt; endl;
+	}
+
+	// -------------- V - Cycle Down ------------
+	rep(level, MAX_L - 1) {
+		Mat phi = Generator::phi(local_dt);
+
+		F_relaxation(phi, local_u[level], local_step, local_m);
+		C_relaxation(phi, local_u[level], local_step, local_m);
+		F_relaxation(phi, local_u[level], local_step, local_m);
+
+		MPI_Barrier(MPI_COMM_WORLD);
+
+		local_Au[level] = Generator::global_Au(phi, local_u[level], local_step);
+
+		// next level
+		local_u[level + 1] = Generator::level_down(local_u[level], local_step);
+		// local_r[level + 1] = sub(local_g[level], local_Au[level]);
+		rep(i, local_step / M) {
+			rep(j, N) {
+				local_r[level + 1][i][j] = local_g[level][i * M][j] - local_Au[level][i * M][j];
+			}
+		}
+
+		MPI_Barrier(MPI_COMM_WORLD);
+
+		local_step /= M;
+		local_dt *= M;
+	}
+
+	if(myid == 0) { // process 0に集約するために拡張
+		local_u[MAX_L - 1].resize(P);
+		REP(i, 1, P) {
+			local_u[MAX_L - 1][i] = Vec(N);
+		}
+	}
+	
+	double tmp_u[P][N];
+	memset(tmp_u, 0, sizeof(tmp_u));
+	rep(i, N) tmp_u[0][i] = local_u[MAX_L-1][0][i];
+
+	MPI_Barrier(MPI_COMM_WORLD);
+	MPI_Gather(&amp;amp;tmp_u[0][0], N, MPI_DOUBLE, &amp;amp;tmp_u[0][0], N, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Barrier(MPI_COMM_WORLD);
+
+	double r_delta[P][N];
+	memset(r_delta, 0, sizeof(r_delta));
+	rep(i, N) r_delta[0][i] = local_r[MAX_L-1][0][i];
+
+	MPI_Barrier(MPI_COMM_WORLD);
+	MPI_Gather(&amp;amp;r_delta[0][0], N, MPI_DOUBLE, &amp;amp;r_delta[0][0], N, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Barrier(MPI_COMM_WORLD);
+
+	//本来ならばgも集めるが，今回はg0 = u0, その他は全て0のため結果が変わらないので飛ばす
+	// double tmp_g[P][N];
+	// memset(tmp_g, 0, sizeof(tmp_g));
+	// rep(i, N) tmp_g[0][i] = local_g[MAX_L-1][0][i];
+	//
+	// MPI_Barrier(MPI_COMM_WORLD);
+	// MPI_Gather(&amp;amp;tmp_g[0][0], N, MPI_DOUBLE, &amp;amp;tmp_g[0][0], N, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	// MPI_Barrier(MPI_COMM_WORLD);
+
+	if(myid == 0) {
+		rep(i, P) {
+			rep(j, N) {
+				local_u[MAX_L-1][i][j] = tmp_u[i][j];
+			}
+		}
+
+		Mat MAX_L_phi = Generator::phi(local_dt);
+
+		//ここは直接解いてしまい，このMAX_L-1でのuを決定する
+		rep(i, P - 1) {
+			local_u[MAX_L-1][i+1] = mul(MAX_L_phi, local_u[MAX_L-1][i]);
+		}
+		
+		local_Au[MAX_L-1] = Generator::local_Au(MAX_L_phi, local_u[MAX_L-1], P);
+
+		Mat right_vec(P, Vec(N));
+		rep(i, P) {
+			rep(j, N) {
+				right_vec[i][j] = local_Au[MAX_L-1][i][j] + r_delta[i][j];
+			}
+		}
+
+		local_v[MAX_L-1][0] = right_vec[0];
+		rep(i, P - 1) {
+			local_v[MAX_L-1][i+1] = add(right_vec[i+1], mul(MAX_L_phi, local_v[MAX_L-1][i]));
+		}
+		
+		Mat error(P, Vec(N));
+		rep(i, P) {
+			rep(j, N) {
+				error[i][j] = local_v[MAX_L-1][i][j] - local_u[MAX_L-1][i][j];
+			}
+		}
+		
+		rep(i, P) {
+			rep(j, N) {
+				tmp_u[i][j] = tmp_u[i][j] + error[i][j];
+			}
+		}
+
+		//本来のprocess1にする
+		REP(i, 1, N) {
+			rep(j, N) {
+				local_u[MAX_L-1][i][j] = 0; local_Au[MAX_L-1][i][j] = 0;
+				local_v[MAX_L-1][i][j] = 0; local_r[MAX_L-1][i][j] = 0;
+			}
+		}
+	}
+
+	MPI_Barrier(MPI_COMM_WORLD);
+	MPI_Scatter(&amp;amp;tmp_u[0][0], N, MPI_DOUBLE, &amp;amp;tmp_u[0][0], N, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	MPI_Barrier(MPI_COMM_WORLD);
+
+	rep(i, N) {
+		local_u[MAX_L-2][0][i] = tmp_u[0][i];
+	}
+
+	local_step *= M;
+	local_dt /= M;
+
+	Mat phi = Generator::phi(local_dt);
+	F_relaxation(phi, local_u[MAX_L-2], local_step, local_m);
+
+	// -------------- V - Cycle Up ------------
+	for(int level = MAX_L - 2; level &amp;gt;= 1; level--) {
+		// uが更新されているので，Auも変わる
+		local_Au[level] = Generator::global_Au(phi, local_u[level], local_step);
+
+		Mat right_vec(local_step, Vec(N));
+		rep(i, local_step) {
+			rep(j, N) {
+				right_vec[i][j] = local_Au[level][i][j] + local_r[level][i][j];
+			}
+		}
+
+		Vec pre(N);
+		if(myid) {
+			MPI_Recv(&amp;amp;pre[0], N, MPI_DOUBLE, myid - 1, 0, MPI_COMM_WORLD, &amp;amp;status);
+		}
+
+		rep(i, local_step) {
+			local_v[level][i] = add(right_vec[i], mul(phi, pre));
+			pre = local_v[level][i];
+		}
+
+		if(myid &amp;lt; P - 1) {
+			MPI_Send(&amp;amp;local_v[level][local_step-1][0], N, MPI_DOUBLE, myid + 1, 0, MPI_COMM_WORLD);
+		}
+
+		Mat error(local_step, Vec(N));
+		rep(i, local_step) {
+			rep(j, N) {
+				error[i][j] = local_v[level][i][j] - local_u[level][i][j];
+			}
+		}
+		
+		rep(i, local_step) {
+			rep(j, N) {
+				local_u[level-1][i * M][j] += error[i][j];
+			}
+		}
+
+		local_step *= M;
+		local_dt /= M;
+
+		phi = Generator::phi(local_dt);
+		F_relaxation(phi, local_u[level-1], local_step, local_m);
+	}
+
+	local_Au[0] = Generator::global_Au(phi, local_u[0], local_step);
+
+	double local_error = 0;
+	rep(i, local_step) {
+		rep(j, N) {
+			local_error += (local_g[0][i][j] - local_Au[0][i][j]) * (local_g[0][i][j] - local_Au[0][i][j]);
+		}
+	}
+
+	local_error = sqrt(local_error);
+
+	double check = 0;
+	MPI_Allreduce(&amp;amp;local_error, &amp;amp;check, 1, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+
+	if(myid == 0) {
+		cout &amp;lt;&amp;lt; &amp;quot; -------- MGRIT check:&amp;quot; &amp;lt;&amp;lt; check &amp;lt;&amp;lt; endl;
+	}
+
+	if(check &amp;lt; EPS) {
+		if(myid == 0) {
+			cout &amp;lt;&amp;lt; &amp;quot;================== simulation end ===================&amp;quot; &amp;lt;&amp;lt; endl;
+		}
+		break;
+	}
+
+	cycle_cnt++;
+}
+
+	MPI_Finalize();
+
+	return 0;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;参照したもの&#34;&gt;参照したもの&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;http://computation.llnl.gov/projects/parallel-time-integration-multigrid/strand2d-pit.pdf&#34;&gt;http://computation.llnl.gov/projects/parallel-time-integration-multigrid/strand2d-pit.pdf&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.math.mun.ca/~smaclachlan/research/spacetimeMG.pdf&#34;&gt;http://www.math.mun.ca/~smaclachlan/research/spacetimeMG.pdf&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://conferences.computer.org/pmbs/2016/papers/5218a022.pdf&#34;&gt;http://conferences.computer.org/pmbs/2016/papers/5218a022.pdf&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;todo&#34;&gt;TODO&lt;/h2&gt;
+
+&lt;p&gt;また後で色々追記をしようを思っている(思っているだけ)&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>Codeforces402-div2D String Game</title>
