@@ -37,137 +37,136 @@ $$
 とし，親子関係が変わるのは$2$点のみである．他は変更する必要がない．&lt;/p&gt;
 
 &lt;p&gt;まず適当にrootを$0$にして，親子関係を構築し，そこからrootをdfsでrootを変更していく．現在のrootを$cur$，次にrootに変更しようと考えている頂点を$to$とすると，$parent[to] = cur$の関係が失われ，$parent[cur] = to$の関係が生まれる．これがAliceの質問に入っているかを見ればよい．Aliceの質問を満たしている親子関係をsetで持ったので$O(n log(g))$&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f8f8f8&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span style=&#34;color: #8f5902; font-style: italic&#34;&gt;#include&lt;/span&gt; &lt;span style=&#34;color: #8f5902; font-style: italic&#34;&gt;&amp;lt;bits/stdc++.h&amp;gt;&lt;/span&gt;
 
-&lt;pre&gt;&lt;code class=&#34;language-cpp&#34;&gt;#include &amp;lt;bits/stdc++.h&amp;gt;
+&lt;span style=&#34;color: #8f5902; font-style: italic&#34;&gt;#define rep(i,n) for(int i=0;i&amp;lt;(int)(n);i++)&lt;/span&gt;
+&lt;span style=&#34;color: #8f5902; font-style: italic&#34;&gt;#define REP(i,k,n) for(int i=k;i&amp;lt;(int)(n);i++)&lt;/span&gt;
+&lt;span style=&#34;color: #8f5902; font-style: italic&#34;&gt;#define each(it,v) for(__typeof((v).begin()) it=(v).begin();it!=(v).end();it++)&lt;/span&gt;
+&lt;span style=&#34;color: #8f5902; font-style: italic&#34;&gt;#define INF 1&amp;lt;&amp;lt;30&lt;/span&gt;
+&lt;span style=&#34;color: #8f5902; font-style: italic&#34;&gt;#define mp make_pair&lt;/span&gt;
+&lt;span style=&#34;color: #8f5902; font-style: italic&#34;&gt;#define fi first&lt;/span&gt;
+&lt;span style=&#34;color: #8f5902; font-style: italic&#34;&gt;#define se second&lt;/span&gt;
+&lt;span style=&#34;color: #8f5902; font-style: italic&#34;&gt;#define MAX_N 200005&lt;/span&gt;
 
-#define rep(i,n) for(int i=0;i&amp;lt;(int)(n);i++)
-#define REP(i,k,n) for(int i=k;i&amp;lt;(int)(n);i++)
-#define each(it,v) for(__typeof((v).begin()) it=(v).begin();it!=(v).end();it++)
-#define INF 1&amp;lt;&amp;lt;30
-#define mp make_pair
-#define fi first
-#define se second
-#define MAX_N 200005
+&lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;using&lt;/span&gt; &lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;namespace&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;std&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;;&lt;/span&gt;
+&lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;typedef&lt;/span&gt; &lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;long&lt;/span&gt; &lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;long&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;ll&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;;&lt;/span&gt;
+&lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;typedef&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;pair&lt;/span&gt;&lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;int&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;,&lt;/span&gt;&lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;int&lt;/span&gt;&lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;P&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;;&lt;/span&gt;
 
-using namespace std;
-typedef long long ll;
-typedef pair&amp;lt;int,int&amp;gt; P;
+&lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;int&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;par&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;MAX_N&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;];&lt;/span&gt;
+&lt;span style=&#34;color: #000000&#34;&gt;vector&lt;/span&gt;&lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;int&lt;/span&gt;&lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;G&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;MAX_N&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;];&lt;/span&gt;
 
-int par[MAX_N];
-vector&amp;lt;int&amp;gt; G[MAX_N];
+&lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;dfs&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;int&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;cur&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;int&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;pre&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;{&lt;/span&gt;
+	&lt;span style=&#34;color: #000000&#34;&gt;par&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;cur&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;pre&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;;&lt;/span&gt;
 
-void dfs(int cur, int pre) {
-	par[cur] = pre;
+	&lt;span style=&#34;color: #000000&#34;&gt;rep&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;i&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;G&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;cur&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;].&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;size&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;())&lt;/span&gt; &lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;{&lt;/span&gt;
+		&lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;int&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;to&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;G&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;cur&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;][&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;i&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;];&lt;/span&gt;
+		&lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;if&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;to&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;pre&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;continue&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;;&lt;/span&gt;
+		&lt;span style=&#34;color: #000000&#34;&gt;dfs&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;to&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;cur&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;);&lt;/span&gt;
+	&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;}&lt;/span&gt;
 
-	rep(i, G[cur].size()) {
-		int to = G[cur][i];
-		if(to == pre) continue;
-		dfs(to, cur);
-	}
-}
+&lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;int&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;ok&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #0000cf; font-weight: bold&#34;&gt;0&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;K&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #0000cf; font-weight: bold&#34;&gt;0&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;;&lt;/span&gt;
+&lt;span style=&#34;color: #000000&#34;&gt;vector&lt;/span&gt;&lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;int&lt;/span&gt;&lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;a&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;b&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;;&lt;/span&gt;
+&lt;span style=&#34;color: #000000&#34;&gt;set&lt;/span&gt;&lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;P&lt;/span&gt;&lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;st&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;input&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;;&lt;/span&gt;
 
-int ok = 0, K = 0;
-vector&amp;lt;int&amp;gt; a, b;
-set&amp;lt;P&amp;gt; st, input;
+&lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;void&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;dfs2&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;int&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;cur&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;int&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;pre&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;{&lt;/span&gt;
+	&lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;if&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;st&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;size&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;&amp;gt;=&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;K&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;ok&lt;/span&gt;&lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;++&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;;&lt;/span&gt;
 
-void dfs2(int cur, int pre) {
-	if(st.size() &amp;gt;= K) ok++;
+	&lt;span style=&#34;color: #000000&#34;&gt;rep&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;i&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;G&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;cur&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;].&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;size&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;())&lt;/span&gt; &lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;{&lt;/span&gt;
+		&lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;int&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;to&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;G&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;cur&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;][&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;i&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;];&lt;/span&gt;
+		&lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;if&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;to&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;pre&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;continue&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;;&lt;/span&gt;
 
-	rep(i, G[cur].size()) {
-		int to = G[cur][i];
-		if(to == pre) continue;
+		&lt;span style=&#34;color: #8f5902; font-style: italic&#34;&gt;// root - change (cur, to)&lt;/span&gt;
+		&lt;span style=&#34;color: #000000&#34;&gt;par&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;cur&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;to&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;;&lt;/span&gt;
+		&lt;span style=&#34;color: #000000&#34;&gt;par&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;to&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #0000cf; font-weight: bold&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;;&lt;/span&gt;
 
-		// root - change (cur, to)
-		par[cur] = to;
-		par[to] = -1;
+		&lt;span style=&#34;color: #000000&#34;&gt;P&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;inP&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;mp&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;cur&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;to&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;);&lt;/span&gt;
+		&lt;span style=&#34;color: #000000&#34;&gt;P&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;outP&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;mp&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;to&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;cur&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;);&lt;/span&gt;
 
-		P inP = mp(cur, to);
-		P outP = mp(to, cur);
+		&lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;bool&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;in&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #204a87&#34;&gt;false&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;out&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #204a87&#34;&gt;false&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;;&lt;/span&gt;
+		&lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;if&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;st&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;find&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;outP&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;!=&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;st&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;end&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;())&lt;/span&gt; &lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;{&lt;/span&gt;
+			&lt;span style=&#34;color: #000000&#34;&gt;out&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #204a87&#34;&gt;true&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;;&lt;/span&gt;
+			&lt;span style=&#34;color: #000000&#34;&gt;st&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;erase&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;outP&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;);&lt;/span&gt;
+		&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;}&lt;/span&gt;
 
-		bool in = false, out = false;
-		if(st.find(outP) != st.end()) {
-			out = true;
-			st.erase(outP);
-		}
+		&lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;if&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;input&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;find&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;inP&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;!=&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;input&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;end&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;st&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;find&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;inP&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;st&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;end&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;())&lt;/span&gt; &lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;{&lt;/span&gt;
+			&lt;span style=&#34;color: #000000&#34;&gt;in&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #204a87&#34;&gt;true&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;;&lt;/span&gt;
+			&lt;span style=&#34;color: #000000&#34;&gt;st&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;insert&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;inP&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;);&lt;/span&gt;
+		&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;}&lt;/span&gt;
 
-		if(input.find(inP) != input.end() &amp;amp;&amp;amp; st.find(inP) == st.end()) {
-			in = true;
-			st.insert(inP);
-		}
+		&lt;span style=&#34;color: #000000&#34;&gt;dfs2&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;to&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;cur&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;);&lt;/span&gt;
 
-		dfs2(to, cur);
+		&lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;if&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;out&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;{&lt;/span&gt;
+			&lt;span style=&#34;color: #000000&#34;&gt;st&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;insert&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;outP&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;);&lt;/span&gt;
+		&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;}&lt;/span&gt;
 
-		if(out) {
-			st.insert(outP);
-		}
+		&lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;if&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;in&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;{&lt;/span&gt;
+			&lt;span style=&#34;color: #000000&#34;&gt;st&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;erase&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;inP&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;);&lt;/span&gt;
+		&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;}&lt;/span&gt;
 
-		if(in) {
-			st.erase(inP);
-		}
+		&lt;span style=&#34;color: #000000&#34;&gt;par&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;cur&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #0000cf; font-weight: bold&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;;&lt;/span&gt;
+		&lt;span style=&#34;color: #000000&#34;&gt;par&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;to&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;cur&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;;&lt;/span&gt;
+	&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;}&lt;/span&gt;
+&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;}&lt;/span&gt;
 
-		par[cur] = -1;
-		par[to] = cur;
-	}
-}
+&lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;int&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;main&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;()&lt;/span&gt; &lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;{&lt;/span&gt;
+	&lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;int&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;q&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;;&lt;/span&gt;
+	&lt;span style=&#34;color: #000000&#34;&gt;cin&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;q&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;;&lt;/span&gt;
 
-int main() {
-	int q;
-	cin &amp;gt;&amp;gt; q;
+	&lt;span style=&#34;color: #000000&#34;&gt;rep&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;qq&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;q&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;{&lt;/span&gt;
+		&lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;int&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;n&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;;&lt;/span&gt;
+		&lt;span style=&#34;color: #000000&#34;&gt;cin&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;n&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;;&lt;/span&gt;
 
-	rep(qq, q) {
-		int n;
-		cin &amp;gt;&amp;gt; n;
+		&lt;span style=&#34;color: #000000&#34;&gt;rep&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;i&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;MAX_N&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;G&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;i&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;].&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;clear&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;();&lt;/span&gt;
+		&lt;span style=&#34;color: #000000&#34;&gt;rep&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;i&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;n&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;-&lt;/span&gt; &lt;span style=&#34;color: #0000cf; font-weight: bold&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;{&lt;/span&gt;
+			&lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;int&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;u&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;v&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;;&lt;/span&gt;
+			&lt;span style=&#34;color: #000000&#34;&gt;cin&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;u&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;v&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;;&lt;/span&gt;
 
-		rep(i, MAX_N) G[i].clear();
-		rep(i, n - 1) {
-			int u, v;
-			cin &amp;gt;&amp;gt; u &amp;gt;&amp;gt; v;
+			&lt;span style=&#34;color: #000000&#34;&gt;u&lt;/span&gt;&lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;--&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;;&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;v&lt;/span&gt;&lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;--&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;;&lt;/span&gt;
+			&lt;span style=&#34;color: #000000&#34;&gt;G&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;u&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;].&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;push_back&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;v&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;);&lt;/span&gt;
+			&lt;span style=&#34;color: #000000&#34;&gt;G&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;v&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;].&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;push_back&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;u&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;);&lt;/span&gt;
+		&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;}&lt;/span&gt;
 
-			u--; v--;
-			G[u].push_back(v);
-			G[v].push_back(u);
-		}
+		&lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;int&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;g&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;k&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;;&lt;/span&gt;
+		&lt;span style=&#34;color: #000000&#34;&gt;cin&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;g&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;k&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;;&lt;/span&gt;
+		&lt;span style=&#34;color: #000000&#34;&gt;K&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;k&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;;&lt;/span&gt;
 
-		int g, k;
-		cin &amp;gt;&amp;gt; g &amp;gt;&amp;gt; k;
-		K = k;
+		&lt;span style=&#34;color: #000000&#34;&gt;a&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;clear&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;();&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;a&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;resize&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;g&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;);&lt;/span&gt;
+		&lt;span style=&#34;color: #000000&#34;&gt;b&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;clear&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;();&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;b&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;resize&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;g&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;);&lt;/span&gt;
 
-		a.clear(); a.resize(g);
-		b.clear(); b.resize(g);
+		&lt;span style=&#34;color: #000000&#34;&gt;rep&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;i&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;g&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;{&lt;/span&gt;
+			&lt;span style=&#34;color: #000000&#34;&gt;cin&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;a&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;i&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;b&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;i&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;];&lt;/span&gt;
+			&lt;span style=&#34;color: #000000&#34;&gt;a&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;i&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;]&lt;/span&gt;&lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;--&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;;&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;b&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;i&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;]&lt;/span&gt;&lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;--&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;;&lt;/span&gt;
+		&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;}&lt;/span&gt;
 
-		rep(i, g) {
-			cin &amp;gt;&amp;gt; a[i] &amp;gt;&amp;gt; b[i];
-			a[i]--; b[i]--;
-		}
+		&lt;span style=&#34;color: #000000&#34;&gt;rep&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;i&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;MAX_N&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;par&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;i&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #0000cf; font-weight: bold&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;;&lt;/span&gt;
+		&lt;span style=&#34;color: #000000&#34;&gt;dfs&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #0000cf; font-weight: bold&#34;&gt;0&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #0000cf; font-weight: bold&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;);&lt;/span&gt;
 
-		rep(i, MAX_N) par[i] = -1;
-		dfs(0, -1);
+		&lt;span style=&#34;color: #000000&#34;&gt;st&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;clear&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;();&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;input&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;clear&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;();&lt;/span&gt;
+		&lt;span style=&#34;color: #000000&#34;&gt;rep&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;i&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;g&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;)&lt;/span&gt; &lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;{&lt;/span&gt;
+			&lt;span style=&#34;color: #000000&#34;&gt;P&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;p&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;mp&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;b&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;i&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;],&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;a&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;i&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;]);&lt;/span&gt;
+			&lt;span style=&#34;color: #000000&#34;&gt;input&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;insert&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;p&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;);&lt;/span&gt;
+			&lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;if&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;par&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;b&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;i&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;]]&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;==&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;a&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;i&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;])&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;st&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;insert&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;p&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;);&lt;/span&gt;
+		&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;}&lt;/span&gt;
 
-		st.clear(); input.clear();
-		rep(i, g) {
-			P p = mp(b[i], a[i]);
-			input.insert(p);
-			if(par[b[i]] == a[i]) st.insert(p);
-		}
+		&lt;span style=&#34;color: #000000&#34;&gt;ok&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #0000cf; font-weight: bold&#34;&gt;0&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;;&lt;/span&gt;
+		&lt;span style=&#34;color: #000000&#34;&gt;dfs2&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #0000cf; font-weight: bold&#34;&gt;0&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;-&lt;/span&gt;&lt;span style=&#34;color: #0000cf; font-weight: bold&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;);&lt;/span&gt;
 
-		ok = 0;
-		dfs2(0, -1);
+		&lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;int&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;d&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;__gcd&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;ok&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;n&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;);&lt;/span&gt;
 
-		int d = __gcd(ok, n);
+		&lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;int&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;x&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;ok&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;/&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;d&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;;&lt;/span&gt;
+		&lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;int&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;y&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;n&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;/&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;d&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;;&lt;/span&gt;
 
-		int x = ok / d;
-		int y = n / d;
+		&lt;span style=&#34;color: #000000&#34;&gt;cout&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;x&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span style=&#34;color: #4e9a06&#34;&gt;&amp;quot;/&amp;quot;&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;y&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;&amp;lt;&amp;lt;&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;endl&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;;&lt;/span&gt;
 
-		cout &amp;lt;&amp;lt; x &amp;lt;&amp;lt; &amp;quot;/&amp;quot; &amp;lt;&amp;lt; y &amp;lt;&amp;lt; endl;
+		&lt;span style=&#34;color: #8f5902; font-style: italic&#34;&gt;// if(x == 0) cout &amp;lt;&amp;lt; 0 &amp;lt;&amp;lt; endl;&lt;/span&gt;
+		&lt;span style=&#34;color: #8f5902; font-style: italic&#34;&gt;// else if(x == y) cout &amp;lt;&amp;lt; 1 &amp;lt;&amp;lt; endl;&lt;/span&gt;
+		&lt;span style=&#34;color: #8f5902; font-style: italic&#34;&gt;// else cout &amp;lt;&amp;lt; x &amp;lt;&amp;lt; &amp;quot;/&amp;quot; &amp;lt;&amp;lt; y &amp;lt;&amp;lt; endl;&lt;/span&gt;
+	&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;}&lt;/span&gt;
 
-		// if(x == 0) cout &amp;lt;&amp;lt; 0 &amp;lt;&amp;lt; endl;
-		// else if(x == y) cout &amp;lt;&amp;lt; 1 &amp;lt;&amp;lt; endl;
-		// else cout &amp;lt;&amp;lt; x &amp;lt;&amp;lt; &amp;quot;/&amp;quot; &amp;lt;&amp;lt; y &amp;lt;&amp;lt; endl;
-	}
-
-	return 0;
-}
-&lt;/code&gt;&lt;/pre&gt;
+	&lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color: #0000cf; font-weight: bold&#34;&gt;0&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;;&lt;/span&gt;
+&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;}&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
 
 &lt;p&gt;余りの読解力の無さで&lt;code&gt;p/q&lt;/code&gt;と$q$のqの区別が分からず，ゲームを通しての確率を求めるものだと勘違いしていた．また&lt;code&gt;0/1&lt;/code&gt;が解となる時には&lt;code&gt;0&lt;/code&gt;を，&lt;code&gt;1/1&lt;/code&gt;が解となる時には&lt;code&gt;1&lt;/code&gt;を出力すると勘違いしてしまい，WAを重ねてしまった．&lt;/p&gt;
 </description>

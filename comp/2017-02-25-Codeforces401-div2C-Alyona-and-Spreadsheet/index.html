@@ -14,7 +14,7 @@
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet">
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/solarized_dark.min.css">
-	<link rel="stylesheet" href="//cdn.jsdelivr.net/highlight.js/8.6/styles/github-gist.min.css">
+	<link rel="stylesheet" href="//cdn.jsdelivr.net/highlight.js/8.6/styles/">
 <style type="text/css">
 .hljs {
   background: #F7F7F7;
@@ -210,74 +210,73 @@ ga('send', 'pageview');
 <p>$n$行$m$列の行列が与えられる．列方向の$[l, r]$が広義の単調増加になっている列がある場合は$Yes$を，そうではない場合は$No$を返す．</p>
 
 <p>一列ずつどこからどこまでが単調増加になっているかの区間を求める．区間の小さい方が同じ場合は$max$を取ってより大きい区間にする．小さい方から順番に見ていく時に，それよりも前に見た区間の右端の方が大きい場合は，覆われている場合なので，今までみた$max$の値を持っておき，その値より小さければ更新する．区間の中に質問の$[l, r]$が含まれているかの問題になるので，$l$を含む区間の最大の右端が$r$より大きければ，その区間が単調増加になっていることが分かる．</p>
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span style="color: #8f5902; font-style: italic">#include</span> <span style="color: #8f5902; font-style: italic">&lt;bits/stdc++.h&gt;</span>
 
-<pre><code class="language-cpp">#include &lt;bits/stdc++.h&gt;
+<span style="color: #8f5902; font-style: italic">#define rep(i,n) for(int i=0;i&lt;(int)(n);i++)</span>
+<span style="color: #8f5902; font-style: italic">#define REP(i,k,n) for(int i=k;i&lt;(int)(n);i++)</span>
+<span style="color: #8f5902; font-style: italic">#define each(it,v) for(__typeof((v).begin()) it=(v).begin();it!=(v).end();it++)</span>
+<span style="color: #8f5902; font-style: italic">#define INF 1&lt;&lt;30</span>
+<span style="color: #8f5902; font-style: italic">#define mp make_pair</span>
+<span style="color: #8f5902; font-style: italic">#define fi first</span>
+<span style="color: #8f5902; font-style: italic">#define se second</span>
 
-#define rep(i,n) for(int i=0;i&lt;(int)(n);i++)
-#define REP(i,k,n) for(int i=k;i&lt;(int)(n);i++)
-#define each(it,v) for(__typeof((v).begin()) it=(v).begin();it!=(v).end();it++)
-#define INF 1&lt;&lt;30
-#define mp make_pair
-#define fi first
-#define se second
+<span style="color: #204a87; font-weight: bold">using</span> <span style="color: #204a87; font-weight: bold">namespace</span> <span style="color: #000000">std</span><span style="color: #000000; font-weight: bold">;</span>
+<span style="color: #204a87; font-weight: bold">typedef</span> <span style="color: #204a87; font-weight: bold">long</span> <span style="color: #204a87; font-weight: bold">long</span> <span style="color: #000000">ll</span><span style="color: #000000; font-weight: bold">;</span>
+<span style="color: #204a87; font-weight: bold">typedef</span> <span style="color: #000000">pair</span><span style="color: #ce5c00; font-weight: bold">&lt;</span><span style="color: #204a87; font-weight: bold">int</span><span style="color: #000000; font-weight: bold">,</span><span style="color: #204a87; font-weight: bold">int</span><span style="color: #ce5c00; font-weight: bold">&gt;</span> <span style="color: #000000">P</span><span style="color: #000000; font-weight: bold">;</span>
 
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
+<span style="color: #204a87; font-weight: bold">int</span> <span style="color: #000000">ma</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #0000cf; font-weight: bold">100005</span><span style="color: #000000; font-weight: bold">],</span> <span style="color: #000000">cnt</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #0000cf; font-weight: bold">100005</span><span style="color: #000000; font-weight: bold">];</span>
 
-int ma[100005], cnt[100005];
+<span style="color: #204a87; font-weight: bold">int</span> <span style="color: #000000">main</span><span style="color: #000000; font-weight: bold">()</span> <span style="color: #000000; font-weight: bold">{</span>
+	<span style="color: #000000">cin</span><span style="color: #000000; font-weight: bold">.</span><span style="color: #000000">tie</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #0000cf; font-weight: bold">0</span><span style="color: #000000; font-weight: bold">);</span>
+    <span style="color: #000000">ios</span><span style="color: #ce5c00; font-weight: bold">::</span><span style="color: #000000">sync_with_stdio</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #204a87">false</span><span style="color: #000000; font-weight: bold">);</span>
 
-int main() {
-	cin.tie(0);
-    ios::sync_with_stdio(false);
+	<span style="color: #204a87; font-weight: bold">int</span> <span style="color: #000000">n</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">m</span><span style="color: #000000; font-weight: bold">;</span>
+	<span style="color: #000000">cin</span> <span style="color: #ce5c00; font-weight: bold">&gt;&gt;</span> <span style="color: #000000">n</span> <span style="color: #ce5c00; font-weight: bold">&gt;&gt;</span> <span style="color: #000000">m</span><span style="color: #000000; font-weight: bold">;</span>
 
-	int n, m;
-	cin &gt;&gt; n &gt;&gt; m;
+	<span style="color: #000000">vector</span><span style="color: #ce5c00; font-weight: bold">&lt;</span><span style="color: #000000">ll</span><span style="color: #ce5c00; font-weight: bold">&gt;</span> <span style="color: #000000">pre</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">m</span><span style="color: #000000; font-weight: bold">),</span> <span style="color: #000000">now</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">m</span><span style="color: #000000; font-weight: bold">);</span>
+	<span style="color: #000000">rep</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">m</span><span style="color: #000000; font-weight: bold">)</span> <span style="color: #000000">cin</span> <span style="color: #ce5c00; font-weight: bold">&gt;&gt;</span> <span style="color: #000000">pre</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">];</span>
 
-	vector&lt;ll&gt; pre(m), now(m);
-	rep(i, m) cin &gt;&gt; pre[i];
+	<span style="color: #000000">memset</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">ma</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #0000cf; font-weight: bold">0</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #204a87; font-weight: bold">sizeof</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">ma</span><span style="color: #000000; font-weight: bold">));</span>
+	<span style="color: #000000">memset</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">cnt</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #0000cf; font-weight: bold">0</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #204a87; font-weight: bold">sizeof</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">cnt</span><span style="color: #000000; font-weight: bold">));</span>
 
-	memset(ma, 0, sizeof(ma));
-	memset(cnt, 0, sizeof(cnt));
+	<span style="color: #000000">rep</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">n</span><span style="color: #000000; font-weight: bold">)</span> <span style="color: #000000; font-weight: bold">{</span>
+		<span style="color: #000000">ma</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #ce5c00; font-weight: bold">+</span><span style="color: #0000cf; font-weight: bold">1</span><span style="color: #000000; font-weight: bold">]</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000">i</span><span style="color: #ce5c00; font-weight: bold">+</span><span style="color: #0000cf; font-weight: bold">1</span><span style="color: #000000; font-weight: bold">;</span>
+	<span style="color: #000000; font-weight: bold">}</span>
 
-	rep(i, n) {
-		ma[i+1] = i+1;
-	}
+	<span style="color: #000000">rep</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">n</span><span style="color: #ce5c00; font-weight: bold">-</span><span style="color: #0000cf; font-weight: bold">1</span><span style="color: #000000; font-weight: bold">)</span> <span style="color: #000000; font-weight: bold">{</span>
+		<span style="color: #000000">rep</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">j</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">m</span><span style="color: #000000; font-weight: bold">)</span> <span style="color: #000000">cin</span> <span style="color: #ce5c00; font-weight: bold">&gt;&gt;</span> <span style="color: #000000">now</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">j</span><span style="color: #000000; font-weight: bold">];</span>
 
-	rep(i, n-1) {
-		rep(j, m) cin &gt;&gt; now[j];
+		<span style="color: #000000">rep</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">j</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">m</span><span style="color: #000000; font-weight: bold">)</span> <span style="color: #000000; font-weight: bold">{</span>
+			<span style="color: #204a87; font-weight: bold">if</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">pre</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">j</span><span style="color: #000000; font-weight: bold">]</span> <span style="color: #ce5c00; font-weight: bold">&lt;=</span> <span style="color: #000000">now</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">j</span><span style="color: #000000; font-weight: bold">])</span> <span style="color: #000000; font-weight: bold">{</span>
+				<span style="color: #000000">cnt</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">j</span><span style="color: #000000; font-weight: bold">]</span><span style="color: #ce5c00; font-weight: bold">++</span><span style="color: #000000; font-weight: bold">;</span>
+				<span style="color: #204a87; font-weight: bold">int</span> <span style="color: #000000">d</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000">ma</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #ce5c00; font-weight: bold">+</span><span style="color: #0000cf; font-weight: bold">2</span><span style="color: #ce5c00; font-weight: bold">-</span><span style="color: #000000">cnt</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">j</span><span style="color: #000000; font-weight: bold">]];</span>
+				<span style="color: #000000">ma</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #ce5c00; font-weight: bold">+</span><span style="color: #0000cf; font-weight: bold">2</span><span style="color: #ce5c00; font-weight: bold">-</span><span style="color: #000000">cnt</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">j</span><span style="color: #000000; font-weight: bold">]]</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000">max</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">d</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">i</span> <span style="color: #ce5c00; font-weight: bold">+</span> <span style="color: #0000cf; font-weight: bold">2</span><span style="color: #000000; font-weight: bold">);</span>
+			<span style="color: #000000; font-weight: bold">}</span> <span style="color: #204a87; font-weight: bold">else</span> <span style="color: #000000; font-weight: bold">{</span>
+				<span style="color: #000000">cnt</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">j</span><span style="color: #000000; font-weight: bold">]</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #0000cf; font-weight: bold">0</span><span style="color: #000000; font-weight: bold">;</span>
+			<span style="color: #000000; font-weight: bold">}</span>
+		<span style="color: #000000; font-weight: bold">}</span>
+		<span style="color: #000000">pre</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000">now</span><span style="color: #000000; font-weight: bold">;</span>
+	<span style="color: #000000; font-weight: bold">}</span>
 
-		rep(j, m) {
-			if(pre[j] &lt;= now[j]) {
-				cnt[j]++;
-				int d = ma[i+2-cnt[j]];
-				ma[i+2-cnt[j]] = max(d, i + 2);
-			} else {
-				cnt[j] = 0;
-			}
-		}
-		pre = now;
-	}
+	<span style="color: #204a87; font-weight: bold">int</span> <span style="color: #000000">t</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #0000cf; font-weight: bold">0</span><span style="color: #000000; font-weight: bold">;</span>
+	<span style="color: #000000">rep</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">n</span> <span style="color: #ce5c00; font-weight: bold">+</span> <span style="color: #0000cf; font-weight: bold">1</span><span style="color: #000000; font-weight: bold">)</span> <span style="color: #000000; font-weight: bold">{</span>
+		<span style="color: #000000">t</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000">max</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">ma</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">],</span> <span style="color: #000000">t</span><span style="color: #000000; font-weight: bold">);</span>
+		<span style="color: #000000">ma</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">]</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000">max</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">ma</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">],</span> <span style="color: #000000">t</span><span style="color: #000000; font-weight: bold">);</span>
+	<span style="color: #000000; font-weight: bold">}</span>
 
-	int t = 0;
-	rep(i, n + 1) {
-		t = max(ma[i], t);
-		ma[i] = max(ma[i], t);
-	}
+	<span style="color: #204a87; font-weight: bold">int</span> <span style="color: #000000">k</span><span style="color: #000000; font-weight: bold">;</span>
+	<span style="color: #000000">cin</span> <span style="color: #ce5c00; font-weight: bold">&gt;&gt;</span> <span style="color: #000000">k</span><span style="color: #000000; font-weight: bold">;</span>
+	<span style="color: #000000">rep</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">k</span><span style="color: #000000; font-weight: bold">)</span> <span style="color: #000000; font-weight: bold">{</span>
+		<span style="color: #204a87; font-weight: bold">int</span> <span style="color: #000000">l</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">r</span><span style="color: #000000; font-weight: bold">;</span>
+		<span style="color: #000000">cin</span> <span style="color: #ce5c00; font-weight: bold">&gt;&gt;</span> <span style="color: #000000">l</span> <span style="color: #ce5c00; font-weight: bold">&gt;&gt;</span> <span style="color: #000000">r</span><span style="color: #000000; font-weight: bold">;</span>
 
-	int k;
-	cin &gt;&gt; k;
-	rep(i, k) {
-		int l, r;
-		cin &gt;&gt; l &gt;&gt; r;
+		<span style="color: #204a87; font-weight: bold">if</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">r</span> <span style="color: #ce5c00; font-weight: bold">&lt;=</span> <span style="color: #000000">ma</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">l</span><span style="color: #000000; font-weight: bold">])</span> <span style="color: #000000">cout</span> <span style="color: #ce5c00; font-weight: bold">&lt;&lt;</span> <span style="color: #4e9a06">&quot;Yes&quot;</span> <span style="color: #ce5c00; font-weight: bold">&lt;&lt;</span> <span style="color: #000000">endl</span><span style="color: #000000; font-weight: bold">;</span>
+		<span style="color: #204a87; font-weight: bold">else</span> <span style="color: #000000">cout</span> <span style="color: #ce5c00; font-weight: bold">&lt;&lt;</span> <span style="color: #4e9a06">&quot;No&quot;</span> <span style="color: #ce5c00; font-weight: bold">&lt;&lt;</span> <span style="color: #000000">endl</span><span style="color: #000000; font-weight: bold">;</span>
+	<span style="color: #000000; font-weight: bold">}</span>
 
-		if(r &lt;= ma[l]) cout &lt;&lt; &quot;Yes&quot; &lt;&lt; endl;
-		else cout &lt;&lt; &quot;No&quot; &lt;&lt; endl;
-	}
-
-	return 0;
-}
-</code></pre>
+	<span style="color: #204a87; font-weight: bold">return</span> <span style="color: #0000cf; font-weight: bold">0</span><span style="color: #000000; font-weight: bold">;</span>
+<span style="color: #000000; font-weight: bold">}</span>
+</pre></div>
 </div>
 
   <footer class="article-footer">

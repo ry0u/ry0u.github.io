@@ -14,7 +14,7 @@
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet">
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/solarized_dark.min.css">
-	<link rel="stylesheet" href="//cdn.jsdelivr.net/highlight.js/8.6/styles/github-gist.min.css">
+	<link rel="stylesheet" href="//cdn.jsdelivr.net/highlight.js/8.6/styles/">
 <style type="text/css">
 .hljs {
   background: #F7F7F7;
@@ -210,53 +210,52 @@ ga('send', 'pageview');
 <p>内周の半径を$a_i$，外周の半径を$b_i$，高さを$h_i$とした輪っかがある．$i$番目の上に$j$番目が乗ることができる条件は$b_j \leq b_i$かつ，$b_j &gt; a_i$である．内周の半径より，上に乗せようと考えている外周の半径が小さい場合は，重ねることができない．高さの合計の最大値を求めよ．</p>
 
 <p>まず条件より外周が大きい順，さらに外周が同じ場合は内周が大きい順にsortすると良さそう．stackで現在乗せているものを表す．stackのtopと$i$番目を比較して，乗る状態であるならば乗せる．そうでないならば，乗せられる状態になるまでstackをpopする．このようにすることで，以前の高さの和を持っておくことができ，乗せられないものが出ても対応できる．</p>
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span style="color: #8f5902; font-style: italic">#include</span> <span style="color: #8f5902; font-style: italic">&lt;bits/stdc++.h&gt;</span>
 
-<pre><code class="language-cpp">#include &lt;bits/stdc++.h&gt;
+<span style="color: #8f5902; font-style: italic">#define rep(i,n) for(int i=0;i&lt;(int)(n);i++)</span>
+<span style="color: #8f5902; font-style: italic">#define REP(i,k,n) for(int i=k;i&lt;(int)(n);i++)</span>
+<span style="color: #8f5902; font-style: italic">#define each(it,v) for(__typeof((v).begin()) it=(v).begin();it!=(v).end();it++)</span>
+<span style="color: #8f5902; font-style: italic">#define INF 1&lt;&lt;30</span>
+<span style="color: #8f5902; font-style: italic">#define mp make_pair</span>
+<span style="color: #8f5902; font-style: italic">#define fi first</span>
+<span style="color: #8f5902; font-style: italic">#define se second</span>
 
-#define rep(i,n) for(int i=0;i&lt;(int)(n);i++)
-#define REP(i,k,n) for(int i=k;i&lt;(int)(n);i++)
-#define each(it,v) for(__typeof((v).begin()) it=(v).begin();it!=(v).end();it++)
-#define INF 1&lt;&lt;30
-#define mp make_pair
-#define fi first
-#define se second
+<span style="color: #204a87; font-weight: bold">using</span> <span style="color: #204a87; font-weight: bold">namespace</span> <span style="color: #000000">std</span><span style="color: #000000; font-weight: bold">;</span>
+<span style="color: #204a87; font-weight: bold">typedef</span> <span style="color: #204a87; font-weight: bold">long</span> <span style="color: #204a87; font-weight: bold">long</span> <span style="color: #000000">ll</span><span style="color: #000000; font-weight: bold">;</span>
+<span style="color: #204a87; font-weight: bold">typedef</span> <span style="color: #000000">pair</span><span style="color: #ce5c00; font-weight: bold">&lt;</span><span style="color: #204a87; font-weight: bold">int</span><span style="color: #000000; font-weight: bold">,</span><span style="color: #204a87; font-weight: bold">int</span><span style="color: #ce5c00; font-weight: bold">&gt;</span> <span style="color: #000000">P</span><span style="color: #000000; font-weight: bold">;</span>
+<span style="color: #204a87; font-weight: bold">typedef</span> <span style="color: #000000">pair</span><span style="color: #ce5c00; font-weight: bold">&lt;</span><span style="color: #000000">P</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #204a87; font-weight: bold">int</span><span style="color: #ce5c00; font-weight: bold">&gt;</span> <span style="color: #000000">PI</span><span style="color: #000000; font-weight: bold">;</span>
 
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
-typedef pair&lt;P, int&gt; PI;
+<span style="color: #204a87; font-weight: bold">int</span> <span style="color: #000000">main</span><span style="color: #000000; font-weight: bold">()</span> <span style="color: #000000; font-weight: bold">{</span>
+	<span style="color: #204a87; font-weight: bold">int</span> <span style="color: #000000">n</span><span style="color: #000000; font-weight: bold">;</span>
+	<span style="color: #000000">cin</span> <span style="color: #ce5c00; font-weight: bold">&gt;&gt;</span> <span style="color: #000000">n</span><span style="color: #000000; font-weight: bold">;</span>
 
-int main() {
-	int n;
-	cin &gt;&gt; n;
+	<span style="color: #000000">vector</span><span style="color: #ce5c00; font-weight: bold">&lt;</span><span style="color: #000000">PI</span><span style="color: #ce5c00; font-weight: bold">&gt;</span> <span style="color: #000000">v</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">n</span><span style="color: #000000; font-weight: bold">);</span>
+	<span style="color: #000000">rep</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">n</span><span style="color: #000000; font-weight: bold">)</span> <span style="color: #000000">cin</span> <span style="color: #ce5c00; font-weight: bold">&gt;&gt;</span> <span style="color: #000000">v</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">].</span><span style="color: #000000">fi</span><span style="color: #000000; font-weight: bold">.</span><span style="color: #000000">se</span> <span style="color: #ce5c00; font-weight: bold">&gt;&gt;</span> <span style="color: #000000">v</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">].</span><span style="color: #000000">fi</span><span style="color: #000000; font-weight: bold">.</span><span style="color: #000000">fi</span> <span style="color: #ce5c00; font-weight: bold">&gt;&gt;</span> <span style="color: #000000">v</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">].</span><span style="color: #000000">se</span><span style="color: #000000; font-weight: bold">;</span>
 
-	vector&lt;PI&gt; v(n);
-	rep(i, n) cin &gt;&gt; v[i].fi.se &gt;&gt; v[i].fi.fi &gt;&gt; v[i].se;
+	<span style="color: #000000">sort</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">v</span><span style="color: #000000; font-weight: bold">.</span><span style="color: #000000">begin</span><span style="color: #000000; font-weight: bold">(),</span> <span style="color: #000000">v</span><span style="color: #000000; font-weight: bold">.</span><span style="color: #000000">end</span><span style="color: #000000; font-weight: bold">(),</span> <span style="color: #000000">greater</span><span style="color: #ce5c00; font-weight: bold">&lt;</span><span style="color: #000000">PI</span><span style="color: #ce5c00; font-weight: bold">&gt;</span><span style="color: #000000; font-weight: bold">());</span>
 
-	sort(v.begin(), v.end(), greater&lt;PI&gt;());
+	<span style="color: #000000">ll</span> <span style="color: #000000">ans</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #0000cf; font-weight: bold">0</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">sum</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #0000cf; font-weight: bold">0</span><span style="color: #000000; font-weight: bold">;</span>
+	<span style="color: #000000">stack</span><span style="color: #ce5c00; font-weight: bold">&lt;</span><span style="color: #000000">PI</span><span style="color: #ce5c00; font-weight: bold">&gt;</span> <span style="color: #000000">st</span><span style="color: #000000; font-weight: bold">;</span>
+	<span style="color: #000000">rep</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">n</span><span style="color: #000000; font-weight: bold">)</span> <span style="color: #000000; font-weight: bold">{</span>
+		<span style="color: #204a87; font-weight: bold">while</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">st</span><span style="color: #000000; font-weight: bold">.</span><span style="color: #000000">size</span><span style="color: #000000; font-weight: bold">())</span> <span style="color: #000000; font-weight: bold">{</span>
+			<span style="color: #000000">PI</span> <span style="color: #000000">p</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000">st</span><span style="color: #000000; font-weight: bold">.</span><span style="color: #000000">top</span><span style="color: #000000; font-weight: bold">();</span>
+			<span style="color: #204a87; font-weight: bold">if</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">v</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">].</span><span style="color: #000000">fi</span><span style="color: #000000; font-weight: bold">.</span><span style="color: #000000">fi</span> <span style="color: #ce5c00; font-weight: bold">&lt;=</span> <span style="color: #000000">p</span><span style="color: #000000; font-weight: bold">.</span><span style="color: #000000">fi</span><span style="color: #000000; font-weight: bold">.</span><span style="color: #000000">fi</span> <span style="color: #ce5c00; font-weight: bold">&amp;&amp;</span> <span style="color: #000000">v</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">].</span><span style="color: #000000">fi</span><span style="color: #000000; font-weight: bold">.</span><span style="color: #000000">fi</span> <span style="color: #ce5c00; font-weight: bold">&gt;</span> <span style="color: #000000">p</span><span style="color: #000000; font-weight: bold">.</span><span style="color: #000000">fi</span><span style="color: #000000; font-weight: bold">.</span><span style="color: #000000">se</span><span style="color: #000000; font-weight: bold">)</span> <span style="color: #204a87; font-weight: bold">break</span><span style="color: #000000; font-weight: bold">;</span>
 
-	ll ans = 0, sum = 0;
-	stack&lt;PI&gt; st;
-	rep(i, n) {
-		while(st.size()) {
-			PI p = st.top();
-			if(v[i].fi.fi &lt;= p.fi.fi &amp;&amp; v[i].fi.fi &gt; p.fi.se) break;
+			<span style="color: #000000">sum</span> <span style="color: #ce5c00; font-weight: bold">-=</span> <span style="color: #000000">p</span><span style="color: #000000; font-weight: bold">.</span><span style="color: #000000">se</span><span style="color: #000000; font-weight: bold">;</span>
+			<span style="color: #000000">st</span><span style="color: #000000; font-weight: bold">.</span><span style="color: #000000">pop</span><span style="color: #000000; font-weight: bold">();</span>
+		<span style="color: #000000; font-weight: bold">}</span>
 
-			sum -= p.se;
-			st.pop();
-		}
+		<span style="color: #000000">sum</span> <span style="color: #ce5c00; font-weight: bold">+=</span> <span style="color: #000000">v</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">].</span><span style="color: #000000">se</span><span style="color: #000000; font-weight: bold">;</span>
+		<span style="color: #000000">st</span><span style="color: #000000; font-weight: bold">.</span><span style="color: #000000">push</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">v</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">]);</span>
 
-		sum += v[i].se;
-		st.push(v[i]);
+		<span style="color: #000000">ans</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000">max</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">ans</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">sum</span><span style="color: #000000; font-weight: bold">);</span>
+	<span style="color: #000000; font-weight: bold">}</span>
 
-		ans = max(ans, sum);
-	}
+	<span style="color: #000000">cout</span> <span style="color: #ce5c00; font-weight: bold">&lt;&lt;</span> <span style="color: #000000">ans</span> <span style="color: #ce5c00; font-weight: bold">&lt;&lt;</span> <span style="color: #000000">endl</span><span style="color: #000000; font-weight: bold">;</span>
 
-	cout &lt;&lt; ans &lt;&lt; endl;
-
-	return 0;
-}
-</code></pre>
+	<span style="color: #204a87; font-weight: bold">return</span> <span style="color: #0000cf; font-weight: bold">0</span><span style="color: #000000; font-weight: bold">;</span>
+<span style="color: #000000; font-weight: bold">}</span>
+</pre></div>
 </div>
 
   <footer class="article-footer">

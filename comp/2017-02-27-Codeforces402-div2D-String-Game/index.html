@@ -14,7 +14,7 @@
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet">
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/solarized_dark.min.css">
-	<link rel="stylesheet" href="//cdn.jsdelivr.net/highlight.js/8.6/styles/github-gist.min.css">
+	<link rel="stylesheet" href="//cdn.jsdelivr.net/highlight.js/8.6/styles/">
 <style type="text/css">
 .hljs {
   background: #F7F7F7;
@@ -208,65 +208,64 @@ ga('send', 'pageview');
   <div class="article-body"><p>文字列$t$と$t$の部分文字列$p$，文字列$t$のどの文字を消していくかのindexが与えられる．部分文字列$p$が得られなくなるため，文字を消していく作業を続ける時に，最大で何個消せるか．</p>
 
 <p>一文字ずつ順番に消していき，その文字列が$p$を構成できるかどうか(連続している必要はない)を試すのには$O(n ^2)$なので間に合わない．配列を$p$を構成できるかできないか，を$yes / no$で持った時に，$[yes, yes, &hellip;, yes, no, &hellip;, no]$になるので，この$yes$の右端を二分探索で求める．二分探索で今見ている番目まで文字列を消し，$p$を構成できるかを見るので$O(n logn)$となる．</p>
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span style="color: #8f5902; font-style: italic">#include</span> <span style="color: #8f5902; font-style: italic">&lt;bits/stdc++.h&gt;</span>
 
-<pre><code class="language-cpp">#include &lt;bits/stdc++.h&gt;
+<span style="color: #8f5902; font-style: italic">#define rep(i,n) for(int i=0;i&lt;(int)(n);i++)</span>
+<span style="color: #8f5902; font-style: italic">#define REP(i,k,n) for(int i=k;i&lt;(int)(n);i++)</span>
+<span style="color: #8f5902; font-style: italic">#define each(it,v) for(__typeof((v).begin()) it=(v).begin();it!=(v).end();it++)</span>
+<span style="color: #8f5902; font-style: italic">#define INF 1&lt;&lt;30</span>
+<span style="color: #8f5902; font-style: italic">#define mp make_pair</span>
+<span style="color: #8f5902; font-style: italic">#define fi first</span>
+<span style="color: #8f5902; font-style: italic">#define se second</span>
 
-#define rep(i,n) for(int i=0;i&lt;(int)(n);i++)
-#define REP(i,k,n) for(int i=k;i&lt;(int)(n);i++)
-#define each(it,v) for(__typeof((v).begin()) it=(v).begin();it!=(v).end();it++)
-#define INF 1&lt;&lt;30
-#define mp make_pair
-#define fi first
-#define se second
+<span style="color: #204a87; font-weight: bold">using</span> <span style="color: #204a87; font-weight: bold">namespace</span> <span style="color: #000000">std</span><span style="color: #000000; font-weight: bold">;</span>
+<span style="color: #204a87; font-weight: bold">typedef</span> <span style="color: #204a87; font-weight: bold">long</span> <span style="color: #204a87; font-weight: bold">long</span> <span style="color: #000000">ll</span><span style="color: #000000; font-weight: bold">;</span>
+<span style="color: #204a87; font-weight: bold">typedef</span> <span style="color: #000000">pair</span><span style="color: #ce5c00; font-weight: bold">&lt;</span><span style="color: #204a87; font-weight: bold">int</span><span style="color: #000000; font-weight: bold">,</span><span style="color: #204a87; font-weight: bold">int</span><span style="color: #ce5c00; font-weight: bold">&gt;</span> <span style="color: #000000">P</span><span style="color: #000000; font-weight: bold">;</span>
 
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
+<span style="color: #204a87; font-weight: bold">bool</span> <span style="color: #000000">used</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #0000cf; font-weight: bold">200005</span><span style="color: #000000; font-weight: bold">];</span>
 
-bool used[200005];
+<span style="color: #204a87; font-weight: bold">int</span> <span style="color: #000000">main</span><span style="color: #000000; font-weight: bold">()</span> <span style="color: #000000; font-weight: bold">{</span>
+	<span style="color: #000000">string</span> <span style="color: #000000">s</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">t</span><span style="color: #000000; font-weight: bold">;</span>
+	<span style="color: #000000">cin</span> <span style="color: #ce5c00; font-weight: bold">&gt;&gt;</span> <span style="color: #000000">s</span> <span style="color: #ce5c00; font-weight: bold">&gt;&gt;</span> <span style="color: #000000">t</span><span style="color: #000000; font-weight: bold">;</span>
 
-int main() {
-	string s, t;
-	cin &gt;&gt; s &gt;&gt; t;
+	<span style="color: #000000">vector</span><span style="color: #ce5c00; font-weight: bold">&lt;</span><span style="color: #204a87; font-weight: bold">int</span><span style="color: #ce5c00; font-weight: bold">&gt;</span> <span style="color: #000000">a</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">s</span><span style="color: #000000; font-weight: bold">.</span><span style="color: #000000">size</span><span style="color: #000000; font-weight: bold">());</span>
+	<span style="color: #000000">rep</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">s</span><span style="color: #000000; font-weight: bold">.</span><span style="color: #000000">size</span><span style="color: #000000; font-weight: bold">())</span> <span style="color: #000000; font-weight: bold">{</span>
+		<span style="color: #000000">cin</span> <span style="color: #ce5c00; font-weight: bold">&gt;&gt;</span> <span style="color: #000000">a</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">];</span>
+		<span style="color: #000000">a</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">]</span><span style="color: #ce5c00; font-weight: bold">--</span><span style="color: #000000; font-weight: bold">;</span>
+	<span style="color: #000000; font-weight: bold">}</span>
 
-	vector&lt;int&gt; a(s.size());
-	rep(i, s.size()) {
-		cin &gt;&gt; a[i];
-		a[i]--;
-	}
+	<span style="color: #204a87; font-weight: bold">int</span> <span style="color: #000000">l</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #ce5c00; font-weight: bold">-</span><span style="color: #0000cf; font-weight: bold">1</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">r</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000">s</span><span style="color: #000000; font-weight: bold">.</span><span style="color: #000000">size</span><span style="color: #000000; font-weight: bold">()</span> <span style="color: #ce5c00; font-weight: bold">+</span> <span style="color: #0000cf; font-weight: bold">5</span><span style="color: #000000; font-weight: bold">;</span>
+	<span style="color: #204a87; font-weight: bold">while</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">r</span> <span style="color: #ce5c00; font-weight: bold">-</span> <span style="color: #000000">l</span> <span style="color: #ce5c00; font-weight: bold">&gt;</span> <span style="color: #0000cf; font-weight: bold">1</span><span style="color: #000000; font-weight: bold">)</span> <span style="color: #000000; font-weight: bold">{</span>
+		<span style="color: #204a87; font-weight: bold">int</span> <span style="color: #000000">med</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">l</span> <span style="color: #ce5c00; font-weight: bold">+</span> <span style="color: #000000">r</span><span style="color: #000000; font-weight: bold">)</span> <span style="color: #ce5c00; font-weight: bold">/</span> <span style="color: #0000cf; font-weight: bold">2</span><span style="color: #000000; font-weight: bold">;</span>
 
-	int l = -1, r = s.size() + 5;
-	while(r - l &gt; 1) {
-		int med = (l + r) / 2;
+		<span style="color: #000000">memset</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">used</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #0000cf; font-weight: bold">0</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #204a87; font-weight: bold">sizeof</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">used</span><span style="color: #000000; font-weight: bold">));</span>
+		<span style="color: #000000">rep</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">med</span><span style="color: #000000; font-weight: bold">)</span> <span style="color: #000000; font-weight: bold">{</span>
+			<span style="color: #000000">used</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">a</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">]]</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #204a87">true</span><span style="color: #000000; font-weight: bold">;</span>
+		<span style="color: #000000; font-weight: bold">}</span>
 
-		memset(used, 0, sizeof(used));
-		rep(i, med) {
-			used[a[i]] = true;
-		}
+		<span style="color: #000000">string</span> <span style="color: #000000">ss</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #4e9a06">&quot;&quot;</span><span style="color: #000000; font-weight: bold">;</span>
+		<span style="color: #000000">rep</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">s</span><span style="color: #000000; font-weight: bold">.</span><span style="color: #000000">size</span><span style="color: #000000; font-weight: bold">())</span> <span style="color: #000000; font-weight: bold">{</span>
+			<span style="color: #204a87; font-weight: bold">if</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">used</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">])</span> <span style="color: #204a87; font-weight: bold">continue</span><span style="color: #000000; font-weight: bold">;</span>
+			<span style="color: #204a87; font-weight: bold">else</span> <span style="color: #000000">ss</span> <span style="color: #ce5c00; font-weight: bold">+=</span> <span style="color: #000000">s</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">];</span>
+		<span style="color: #000000; font-weight: bold">}</span>
 
-		string ss = &quot;&quot;;
-		rep(i, s.size()) {
-			if(used[i]) continue;
-			else ss += s[i];
-		}
+		<span style="color: #204a87; font-weight: bold">bool</span> <span style="color: #000000">flag</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #204a87">true</span><span style="color: #000000; font-weight: bold">;</span>
+		<span style="color: #204a87; font-weight: bold">int</span> <span style="color: #000000">tid</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #0000cf; font-weight: bold">0</span><span style="color: #000000; font-weight: bold">;</span>
+		<span style="color: #000000">rep</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">ss</span><span style="color: #000000; font-weight: bold">.</span><span style="color: #000000">size</span><span style="color: #000000; font-weight: bold">())</span> <span style="color: #000000; font-weight: bold">{</span>
+			<span style="color: #204a87; font-weight: bold">if</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">ss</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">]</span> <span style="color: #ce5c00; font-weight: bold">==</span> <span style="color: #000000">t</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">tid</span><span style="color: #000000; font-weight: bold">])</span> <span style="color: #000000; font-weight: bold">{</span>
+				<span style="color: #000000">tid</span><span style="color: #ce5c00; font-weight: bold">++</span><span style="color: #000000; font-weight: bold">;</span>
+			<span style="color: #000000; font-weight: bold">}</span>
+		<span style="color: #000000; font-weight: bold">}</span>
 
-		bool flag = true;
-		int tid = 0;
-		rep(i, ss.size()) {
-			if(ss[i] == t[tid]) {
-				tid++;
-			}
-		}
+		<span style="color: #204a87; font-weight: bold">if</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">tid</span> <span style="color: #ce5c00; font-weight: bold">==</span> <span style="color: #000000">t</span><span style="color: #000000; font-weight: bold">.</span><span style="color: #000000">size</span><span style="color: #000000; font-weight: bold">())</span> <span style="color: #000000">l</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000">med</span><span style="color: #000000; font-weight: bold">;</span>
+		<span style="color: #204a87; font-weight: bold">else</span> <span style="color: #000000">r</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000">med</span><span style="color: #000000; font-weight: bold">;</span>
+	<span style="color: #000000; font-weight: bold">}</span>
 
-		if(tid == t.size()) l = med;
-		else r = med;
-	}
+	<span style="color: #000000">cout</span> <span style="color: #ce5c00; font-weight: bold">&lt;&lt;</span> <span style="color: #000000">r</span> <span style="color: #ce5c00; font-weight: bold">-</span> <span style="color: #0000cf; font-weight: bold">1</span> <span style="color: #ce5c00; font-weight: bold">&lt;&lt;</span> <span style="color: #000000">endl</span><span style="color: #000000; font-weight: bold">;</span>
 
-	cout &lt;&lt; r - 1 &lt;&lt; endl;
-
-	return 0;
-}
-</code></pre>
+	<span style="color: #204a87; font-weight: bold">return</span> <span style="color: #0000cf; font-weight: bold">0</span><span style="color: #000000; font-weight: bold">;</span>
+<span style="color: #000000; font-weight: bold">}</span>
+</pre></div>
 </div>
 
   <footer class="article-footer">

@@ -14,7 +14,7 @@
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet">
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/solarized_dark.min.css">
-	<link rel="stylesheet" href="//cdn.jsdelivr.net/highlight.js/8.6/styles/github-gist.min.css">
+	<link rel="stylesheet" href="//cdn.jsdelivr.net/highlight.js/8.6/styles/">
 <style type="text/css">
 .hljs {
   background: #F7F7F7;
@@ -210,112 +210,111 @@ ga('send', 'pageview');
 <p>$1$次元上に$N$個の都市があり，それぞれ座標が$x_i$で価値が$w_i$である．$X$にいて，$K$動くことが出来るときに，得られる価値の和を最大化する．</p>
 
 <p>現在の位置よりも右側にいるのか，左側にいるのかで分けて持つ．右側を折り返して左側に行くパターンと，左側を折り返して右側に行くパターンの$2$つに分かれる．何個まで持つかを配列にして持っておけば，価値にマイナスはないので単調増加列になるため，片方を決め打ちすると，残りの距離からその場合の最大の価値を二分探索で求めることができる．$(0, 0)$を追加して片方を何も取らない場合も一緒にした．</p>
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span style="color: #8f5902; font-style: italic">#include</span> <span style="color: #8f5902; font-style: italic">&lt;bits/stdc++.h&gt;</span>
 
-<pre><code class="language-cpp">#include &lt;bits/stdc++.h&gt;
+<span style="color: #8f5902; font-style: italic">#define rep(i,n) for(int i=0;i&lt;(int)(n);i++)</span>
+<span style="color: #8f5902; font-style: italic">#define REP(i,k,n) for(int i=k;i&lt;(int)(n);i++)</span>
+<span style="color: #8f5902; font-style: italic">#define each(it,v) for(__typeof((v).begin()) it=(v).begin();it!=(v).end();it++)</span>
+<span style="color: #8f5902; font-style: italic">#define INF 1&lt;&lt;30</span>
+<span style="color: #8f5902; font-style: italic">#define mp make_pair</span>
+<span style="color: #8f5902; font-style: italic">#define fi first</span>
+<span style="color: #8f5902; font-style: italic">#define se second</span>
 
-#define rep(i,n) for(int i=0;i&lt;(int)(n);i++)
-#define REP(i,k,n) for(int i=k;i&lt;(int)(n);i++)
-#define each(it,v) for(__typeof((v).begin()) it=(v).begin();it!=(v).end();it++)
-#define INF 1&lt;&lt;30
-#define mp make_pair
-#define fi first
-#define se second
+<span style="color: #204a87; font-weight: bold">using</span> <span style="color: #204a87; font-weight: bold">namespace</span> <span style="color: #000000">std</span><span style="color: #000000; font-weight: bold">;</span>
+<span style="color: #204a87; font-weight: bold">typedef</span> <span style="color: #204a87; font-weight: bold">long</span> <span style="color: #204a87; font-weight: bold">long</span> <span style="color: #000000">ll</span><span style="color: #000000; font-weight: bold">;</span>
+<span style="color: #204a87; font-weight: bold">typedef</span> <span style="color: #000000">pair</span><span style="color: #ce5c00; font-weight: bold">&lt;</span><span style="color: #204a87; font-weight: bold">int</span><span style="color: #000000; font-weight: bold">,</span><span style="color: #000000">ll</span><span style="color: #ce5c00; font-weight: bold">&gt;</span> <span style="color: #000000">P</span><span style="color: #000000; font-weight: bold">;</span>
 
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,ll&gt; P;
+<span style="color: #204a87; font-weight: bold">int</span> <span style="color: #000000">main</span><span style="color: #000000; font-weight: bold">()</span> <span style="color: #000000; font-weight: bold">{</span>
+	<span style="color: #204a87; font-weight: bold">int</span> <span style="color: #000000">n</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">x</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">k</span><span style="color: #000000; font-weight: bold">;</span>
+	<span style="color: #000000">cin</span> <span style="color: #ce5c00; font-weight: bold">&gt;&gt;</span> <span style="color: #000000">n</span> <span style="color: #ce5c00; font-weight: bold">&gt;&gt;</span> <span style="color: #000000">x</span> <span style="color: #ce5c00; font-weight: bold">&gt;&gt;</span> <span style="color: #000000">k</span><span style="color: #000000; font-weight: bold">;</span>
 
-int main() {
-	int n, x, k;
-	cin &gt;&gt; n &gt;&gt; x &gt;&gt; k;
+	<span style="color: #000000">ll</span> <span style="color: #000000">start</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #0000cf; font-weight: bold">0</span><span style="color: #000000; font-weight: bold">;</span>
+	<span style="color: #000000">vector</span><span style="color: #ce5c00; font-weight: bold">&lt;</span><span style="color: #000000">P</span><span style="color: #ce5c00; font-weight: bold">&gt;</span> <span style="color: #000000">v</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">n</span><span style="color: #000000; font-weight: bold">);</span>
+	<span style="color: #000000">rep</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">n</span><span style="color: #000000; font-weight: bold">)</span> <span style="color: #000000; font-weight: bold">{</span>
+		<span style="color: #000000">cin</span> <span style="color: #ce5c00; font-weight: bold">&gt;&gt;</span> <span style="color: #000000">v</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">].</span><span style="color: #000000">fi</span> <span style="color: #ce5c00; font-weight: bold">&gt;&gt;</span> <span style="color: #000000">v</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">].</span><span style="color: #000000">se</span><span style="color: #000000; font-weight: bold">;</span>
+		<span style="color: #000000">v</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">].</span><span style="color: #000000">fi</span> <span style="color: #ce5c00; font-weight: bold">-=</span> <span style="color: #000000">x</span><span style="color: #000000; font-weight: bold">;</span>
+	<span style="color: #000000; font-weight: bold">}</span>
 
-	ll start = 0;
-	vector&lt;P&gt; v(n);
-	rep(i, n) {
-		cin &gt;&gt; v[i].fi &gt;&gt; v[i].se;
-		v[i].fi -= x;
-	}
+	<span style="color: #000000">vector</span><span style="color: #ce5c00; font-weight: bold">&lt;</span><span style="color: #000000">P</span><span style="color: #ce5c00; font-weight: bold">&gt;</span> <span style="color: #000000">a</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">b</span><span style="color: #000000; font-weight: bold">;</span>
+	<span style="color: #000000">rep</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">n</span><span style="color: #000000; font-weight: bold">)</span> <span style="color: #000000; font-weight: bold">{</span>
+		<span style="color: #204a87; font-weight: bold">if</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">v</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">].</span><span style="color: #000000">fi</span> <span style="color: #ce5c00; font-weight: bold">==</span> <span style="color: #0000cf; font-weight: bold">0</span><span style="color: #000000; font-weight: bold">)</span> <span style="color: #000000">start</span> <span style="color: #ce5c00; font-weight: bold">+=</span> <span style="color: #000000">v</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">].</span><span style="color: #000000">se</span><span style="color: #000000; font-weight: bold">;</span>
 
-	vector&lt;P&gt; a, b;
-	rep(i, n) {
-		if(v[i].fi == 0) start += v[i].se;
+		<span style="color: #204a87; font-weight: bold">if</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">v</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">].</span><span style="color: #000000">fi</span> <span style="color: #ce5c00; font-weight: bold">&lt;</span> <span style="color: #0000cf; font-weight: bold">0</span><span style="color: #000000; font-weight: bold">)</span> <span style="color: #000000">a</span><span style="color: #000000; font-weight: bold">.</span><span style="color: #000000">push_back</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">mp</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #ce5c00; font-weight: bold">-</span><span style="color: #000000">v</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">].</span><span style="color: #000000">fi</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">v</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">].</span><span style="color: #000000">se</span><span style="color: #000000; font-weight: bold">));</span>
+		<span style="color: #204a87; font-weight: bold">else</span> <span style="color: #000000">b</span><span style="color: #000000; font-weight: bold">.</span><span style="color: #000000">push_back</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">v</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">]);</span>
+	<span style="color: #000000; font-weight: bold">}</span>
 
-		if(v[i].fi &lt; 0) a.push_back(mp(-v[i].fi, v[i].se));
-		else b.push_back(v[i]);
-	}
+	<span style="color: #000000">a</span><span style="color: #000000; font-weight: bold">.</span><span style="color: #000000">push_back</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">mp</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #0000cf; font-weight: bold">0</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #0000cf; font-weight: bold">0</span><span style="color: #000000; font-weight: bold">));</span>
+	<span style="color: #000000">sort</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">a</span><span style="color: #000000; font-weight: bold">.</span><span style="color: #000000">begin</span><span style="color: #000000; font-weight: bold">(),</span> <span style="color: #000000">a</span><span style="color: #000000; font-weight: bold">.</span><span style="color: #000000">end</span><span style="color: #000000; font-weight: bold">());</span>
 
-	a.push_back(mp(0, 0));
-	sort(a.begin(), a.end());
+	<span style="color: #000000">b</span><span style="color: #000000; font-weight: bold">.</span><span style="color: #000000">push_back</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">mp</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #0000cf; font-weight: bold">0</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #0000cf; font-weight: bold">0</span><span style="color: #000000; font-weight: bold">));</span>
+	<span style="color: #000000">sort</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">b</span><span style="color: #000000; font-weight: bold">.</span><span style="color: #000000">begin</span><span style="color: #000000; font-weight: bold">(),</span> <span style="color: #000000">b</span><span style="color: #000000; font-weight: bold">.</span><span style="color: #000000">end</span><span style="color: #000000; font-weight: bold">());</span>
 
-	b.push_back(mp(0, 0));
-	sort(b.begin(), b.end());
+	<span style="color: #000000">vector</span><span style="color: #ce5c00; font-weight: bold">&lt;</span><span style="color: #000000">ll</span><span style="color: #ce5c00; font-weight: bold">&gt;</span> <span style="color: #000000">aid</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">a</span><span style="color: #000000; font-weight: bold">.</span><span style="color: #000000">size</span><span style="color: #000000; font-weight: bold">());</span>
+	<span style="color: #000000">vector</span><span style="color: #ce5c00; font-weight: bold">&lt;</span><span style="color: #000000">ll</span><span style="color: #ce5c00; font-weight: bold">&gt;</span> <span style="color: #000000">aval</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">a</span><span style="color: #000000; font-weight: bold">.</span><span style="color: #000000">size</span><span style="color: #000000; font-weight: bold">());</span>
+	<span style="color: #000000">rep</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">a</span><span style="color: #000000; font-weight: bold">.</span><span style="color: #000000">size</span><span style="color: #000000; font-weight: bold">())</span> <span style="color: #000000; font-weight: bold">{</span>
+		<span style="color: #000000">aid</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">]</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000">a</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">].</span><span style="color: #000000">fi</span><span style="color: #000000; font-weight: bold">;</span>
+		<span style="color: #000000">aval</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">]</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000">a</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">].</span><span style="color: #000000">se</span><span style="color: #000000; font-weight: bold">;</span>
+	<span style="color: #000000; font-weight: bold">}</span>
 
-	vector&lt;ll&gt; aid(a.size());
-	vector&lt;ll&gt; aval(a.size());
-	rep(i, a.size()) {
-		aid[i] = a[i].fi;
-		aval[i] = a[i].se;
-	}
+	<span style="color: #000000">REP</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #0000cf; font-weight: bold">1</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">a</span><span style="color: #000000; font-weight: bold">.</span><span style="color: #000000">size</span><span style="color: #000000; font-weight: bold">())</span> <span style="color: #000000">aval</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">]</span> <span style="color: #ce5c00; font-weight: bold">+=</span> <span style="color: #000000">aval</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #ce5c00; font-weight: bold">-</span><span style="color: #0000cf; font-weight: bold">1</span><span style="color: #000000; font-weight: bold">];</span>
 
-	REP(i, 1, a.size()) aval[i] += aval[i-1];
+	<span style="color: #000000">vector</span><span style="color: #ce5c00; font-weight: bold">&lt;</span><span style="color: #000000">ll</span><span style="color: #ce5c00; font-weight: bold">&gt;</span> <span style="color: #000000">bid</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">b</span><span style="color: #000000; font-weight: bold">.</span><span style="color: #000000">size</span><span style="color: #000000; font-weight: bold">());</span>
+	<span style="color: #000000">vector</span><span style="color: #ce5c00; font-weight: bold">&lt;</span><span style="color: #000000">ll</span><span style="color: #ce5c00; font-weight: bold">&gt;</span> <span style="color: #000000">bval</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">b</span><span style="color: #000000; font-weight: bold">.</span><span style="color: #000000">size</span><span style="color: #000000; font-weight: bold">());</span>
+	<span style="color: #000000">rep</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">b</span><span style="color: #000000; font-weight: bold">.</span><span style="color: #000000">size</span><span style="color: #000000; font-weight: bold">())</span> <span style="color: #000000; font-weight: bold">{</span>
+		<span style="color: #000000">bid</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">]</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000">b</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">].</span><span style="color: #000000">fi</span><span style="color: #000000; font-weight: bold">;</span>
+		<span style="color: #000000">bval</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">]</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000">b</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">].</span><span style="color: #000000">se</span><span style="color: #000000; font-weight: bold">;</span>
+	<span style="color: #000000; font-weight: bold">}</span>
 
-	vector&lt;ll&gt; bid(b.size());
-	vector&lt;ll&gt; bval(b.size());
-	rep(i, b.size()) {
-		bid[i] = b[i].fi;
-		bval[i] = b[i].se;
-	}
+	<span style="color: #000000">REP</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #0000cf; font-weight: bold">1</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">b</span><span style="color: #000000; font-weight: bold">.</span><span style="color: #000000">size</span><span style="color: #000000; font-weight: bold">())</span> <span style="color: #000000">bval</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">]</span> <span style="color: #ce5c00; font-weight: bold">+=</span> <span style="color: #000000">bval</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #ce5c00; font-weight: bold">-</span><span style="color: #0000cf; font-weight: bold">1</span><span style="color: #000000; font-weight: bold">];</span>
 
-	REP(i, 1, b.size()) bval[i] += bval[i-1];
+	<span style="color: #000000">ll</span> <span style="color: #000000">ans</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #0000cf; font-weight: bold">0</span><span style="color: #000000; font-weight: bold">;</span>
+	<span style="color: #000000">rep</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">a</span><span style="color: #000000; font-weight: bold">.</span><span style="color: #000000">size</span><span style="color: #000000; font-weight: bold">())</span> <span style="color: #000000; font-weight: bold">{</span>
+		<span style="color: #204a87; font-weight: bold">if</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">aid</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">]</span> <span style="color: #ce5c00; font-weight: bold">&gt;</span> <span style="color: #000000">k</span><span style="color: #000000; font-weight: bold">)</span> <span style="color: #204a87; font-weight: bold">break</span><span style="color: #000000; font-weight: bold">;</span>
+		<span style="color: #000000">ans</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000">max</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">ans</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">aval</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">]</span> <span style="color: #ce5c00; font-weight: bold">+</span> <span style="color: #000000">start</span><span style="color: #000000; font-weight: bold">);</span>
 
-	ll ans = 0;
-	rep(i, a.size()) {
-		if(aid[i] &gt; k) break;
-		ans = max(ans, aval[i] + start);
-
-		// aからi個とる
-		ll diff = k - 2 * aid[i];
+		<span style="color: #8f5902; font-style: italic">// aからi個とる</span>
+		<span style="color: #000000">ll</span> <span style="color: #000000">diff</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000">k</span> <span style="color: #ce5c00; font-weight: bold">-</span> <span style="color: #0000cf; font-weight: bold">2</span> <span style="color: #ce5c00; font-weight: bold">*</span> <span style="color: #000000">aid</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">];</span>
 		
-		if(diff &lt; 0) continue;
+		<span style="color: #204a87; font-weight: bold">if</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">diff</span> <span style="color: #ce5c00; font-weight: bold">&lt;</span> <span style="color: #0000cf; font-weight: bold">0</span><span style="color: #000000; font-weight: bold">)</span> <span style="color: #204a87; font-weight: bold">continue</span><span style="color: #000000; font-weight: bold">;</span>
 
-		vector&lt;ll&gt;::iterator it = upper_bound(bid.begin(), bid.end(), diff);
-		if(it == bid.end()) {
-			ans = max(ans, aval[i] + start + bval[bval.size()-1]);
-		} else {
-			int id = (it - bid.begin());
-			if(id == 0) continue;
-			id--;
+		<span style="color: #000000">vector</span><span style="color: #ce5c00; font-weight: bold">&lt;</span><span style="color: #000000">ll</span><span style="color: #ce5c00; font-weight: bold">&gt;::</span><span style="color: #000000">iterator</span> <span style="color: #000000">it</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000">upper_bound</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">bid</span><span style="color: #000000; font-weight: bold">.</span><span style="color: #000000">begin</span><span style="color: #000000; font-weight: bold">(),</span> <span style="color: #000000">bid</span><span style="color: #000000; font-weight: bold">.</span><span style="color: #000000">end</span><span style="color: #000000; font-weight: bold">(),</span> <span style="color: #000000">diff</span><span style="color: #000000; font-weight: bold">);</span>
+		<span style="color: #204a87; font-weight: bold">if</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">it</span> <span style="color: #ce5c00; font-weight: bold">==</span> <span style="color: #000000">bid</span><span style="color: #000000; font-weight: bold">.</span><span style="color: #000000">end</span><span style="color: #000000; font-weight: bold">())</span> <span style="color: #000000; font-weight: bold">{</span>
+			<span style="color: #000000">ans</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000">max</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">ans</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">aval</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">]</span> <span style="color: #ce5c00; font-weight: bold">+</span> <span style="color: #000000">start</span> <span style="color: #ce5c00; font-weight: bold">+</span> <span style="color: #000000">bval</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">bval</span><span style="color: #000000; font-weight: bold">.</span><span style="color: #000000">size</span><span style="color: #000000; font-weight: bold">()</span><span style="color: #ce5c00; font-weight: bold">-</span><span style="color: #0000cf; font-weight: bold">1</span><span style="color: #000000; font-weight: bold">]);</span>
+		<span style="color: #000000; font-weight: bold">}</span> <span style="color: #204a87; font-weight: bold">else</span> <span style="color: #000000; font-weight: bold">{</span>
+			<span style="color: #204a87; font-weight: bold">int</span> <span style="color: #000000">id</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">it</span> <span style="color: #ce5c00; font-weight: bold">-</span> <span style="color: #000000">bid</span><span style="color: #000000; font-weight: bold">.</span><span style="color: #000000">begin</span><span style="color: #000000; font-weight: bold">());</span>
+			<span style="color: #204a87; font-weight: bold">if</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">id</span> <span style="color: #ce5c00; font-weight: bold">==</span> <span style="color: #0000cf; font-weight: bold">0</span><span style="color: #000000; font-weight: bold">)</span> <span style="color: #204a87; font-weight: bold">continue</span><span style="color: #000000; font-weight: bold">;</span>
+			<span style="color: #000000">id</span><span style="color: #ce5c00; font-weight: bold">--</span><span style="color: #000000; font-weight: bold">;</span>
 
-			ans = max(ans, aval[i] + start + bval[id]);
-		}
-	}
+			<span style="color: #000000">ans</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000">max</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">ans</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">aval</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">]</span> <span style="color: #ce5c00; font-weight: bold">+</span> <span style="color: #000000">start</span> <span style="color: #ce5c00; font-weight: bold">+</span> <span style="color: #000000">bval</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">id</span><span style="color: #000000; font-weight: bold">]);</span>
+		<span style="color: #000000; font-weight: bold">}</span>
+	<span style="color: #000000; font-weight: bold">}</span>
 
-	rep(i, b.size()) {
-		if(bid[i] &gt; k) break;
-		ans = max(ans, bval[i] + start);
+	<span style="color: #000000">rep</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">b</span><span style="color: #000000; font-weight: bold">.</span><span style="color: #000000">size</span><span style="color: #000000; font-weight: bold">())</span> <span style="color: #000000; font-weight: bold">{</span>
+		<span style="color: #204a87; font-weight: bold">if</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">bid</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">]</span> <span style="color: #ce5c00; font-weight: bold">&gt;</span> <span style="color: #000000">k</span><span style="color: #000000; font-weight: bold">)</span> <span style="color: #204a87; font-weight: bold">break</span><span style="color: #000000; font-weight: bold">;</span>
+		<span style="color: #000000">ans</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000">max</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">ans</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">bval</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">]</span> <span style="color: #ce5c00; font-weight: bold">+</span> <span style="color: #000000">start</span><span style="color: #000000; font-weight: bold">);</span>
 
-		// aからi個とる
-		ll diff = k - 2 * bid[i];
+		<span style="color: #8f5902; font-style: italic">// aからi個とる</span>
+		<span style="color: #000000">ll</span> <span style="color: #000000">diff</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000">k</span> <span style="color: #ce5c00; font-weight: bold">-</span> <span style="color: #0000cf; font-weight: bold">2</span> <span style="color: #ce5c00; font-weight: bold">*</span> <span style="color: #000000">bid</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">];</span>
 
-		if(diff &lt; 0) continue;
+		<span style="color: #204a87; font-weight: bold">if</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">diff</span> <span style="color: #ce5c00; font-weight: bold">&lt;</span> <span style="color: #0000cf; font-weight: bold">0</span><span style="color: #000000; font-weight: bold">)</span> <span style="color: #204a87; font-weight: bold">continue</span><span style="color: #000000; font-weight: bold">;</span>
 
-		vector&lt;ll&gt;::iterator it = upper_bound(aid.begin(), aid.end(), diff);
-		if(it == aid.end()) {
-			ans = max(ans, bval[i] + start + aval[aval.size()-1]);
-		} else {
-			int id = (it - aid.begin());
-			if(id == 0) continue;
-			id--;
+		<span style="color: #000000">vector</span><span style="color: #ce5c00; font-weight: bold">&lt;</span><span style="color: #000000">ll</span><span style="color: #ce5c00; font-weight: bold">&gt;::</span><span style="color: #000000">iterator</span> <span style="color: #000000">it</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000">upper_bound</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">aid</span><span style="color: #000000; font-weight: bold">.</span><span style="color: #000000">begin</span><span style="color: #000000; font-weight: bold">(),</span> <span style="color: #000000">aid</span><span style="color: #000000; font-weight: bold">.</span><span style="color: #000000">end</span><span style="color: #000000; font-weight: bold">(),</span> <span style="color: #000000">diff</span><span style="color: #000000; font-weight: bold">);</span>
+		<span style="color: #204a87; font-weight: bold">if</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">it</span> <span style="color: #ce5c00; font-weight: bold">==</span> <span style="color: #000000">aid</span><span style="color: #000000; font-weight: bold">.</span><span style="color: #000000">end</span><span style="color: #000000; font-weight: bold">())</span> <span style="color: #000000; font-weight: bold">{</span>
+			<span style="color: #000000">ans</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000">max</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">ans</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">bval</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">]</span> <span style="color: #ce5c00; font-weight: bold">+</span> <span style="color: #000000">start</span> <span style="color: #ce5c00; font-weight: bold">+</span> <span style="color: #000000">aval</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">aval</span><span style="color: #000000; font-weight: bold">.</span><span style="color: #000000">size</span><span style="color: #000000; font-weight: bold">()</span><span style="color: #ce5c00; font-weight: bold">-</span><span style="color: #0000cf; font-weight: bold">1</span><span style="color: #000000; font-weight: bold">]);</span>
+		<span style="color: #000000; font-weight: bold">}</span> <span style="color: #204a87; font-weight: bold">else</span> <span style="color: #000000; font-weight: bold">{</span>
+			<span style="color: #204a87; font-weight: bold">int</span> <span style="color: #000000">id</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">it</span> <span style="color: #ce5c00; font-weight: bold">-</span> <span style="color: #000000">aid</span><span style="color: #000000; font-weight: bold">.</span><span style="color: #000000">begin</span><span style="color: #000000; font-weight: bold">());</span>
+			<span style="color: #204a87; font-weight: bold">if</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">id</span> <span style="color: #ce5c00; font-weight: bold">==</span> <span style="color: #0000cf; font-weight: bold">0</span><span style="color: #000000; font-weight: bold">)</span> <span style="color: #204a87; font-weight: bold">continue</span><span style="color: #000000; font-weight: bold">;</span>
+			<span style="color: #000000">id</span><span style="color: #ce5c00; font-weight: bold">--</span><span style="color: #000000; font-weight: bold">;</span>
 
-			ans = max(ans, bval[i] + start + aval[id]);
-		}
-	}
+			<span style="color: #000000">ans</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000">max</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">ans</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">bval</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">]</span> <span style="color: #ce5c00; font-weight: bold">+</span> <span style="color: #000000">start</span> <span style="color: #ce5c00; font-weight: bold">+</span> <span style="color: #000000">aval</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">id</span><span style="color: #000000; font-weight: bold">]);</span>
+		<span style="color: #000000; font-weight: bold">}</span>
+	<span style="color: #000000; font-weight: bold">}</span>
 
-	cout &lt;&lt; ans &lt;&lt; endl;
+	<span style="color: #000000">cout</span> <span style="color: #ce5c00; font-weight: bold">&lt;&lt;</span> <span style="color: #000000">ans</span> <span style="color: #ce5c00; font-weight: bold">&lt;&lt;</span> <span style="color: #000000">endl</span><span style="color: #000000; font-weight: bold">;</span>
 
-	return 0;
-}
-</code></pre>
+	<span style="color: #204a87; font-weight: bold">return</span> <span style="color: #0000cf; font-weight: bold">0</span><span style="color: #000000; font-weight: bold">;</span>
+<span style="color: #000000; font-weight: bold">}</span>
+</pre></div>
 </div>
 
   <footer class="article-footer">

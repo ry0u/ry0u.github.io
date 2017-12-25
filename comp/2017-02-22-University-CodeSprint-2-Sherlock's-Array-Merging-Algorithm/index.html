@@ -14,7 +14,7 @@
     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet">
     <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/solarized_dark.min.css">
-	<link rel="stylesheet" href="//cdn.jsdelivr.net/highlight.js/8.6/styles/github-gist.min.css">
+	<link rel="stylesheet" href="//cdn.jsdelivr.net/highlight.js/8.6/styles/">
 <style type="text/css">
 .hljs {
   background: #F7F7F7;
@@ -214,95 +214,94 @@ ga('send', 'pageview');
 $$</p>
 
 <p>取る数は必ず広義単調減少となり増えることはない．前回$n$個取った場合に今回$r (0 \leq r \leq n)$個取るとすると，まず$n$個の場所に$r$個を当てはめるために$_{n}C_{r}$通り，また$r$個はどんな順番でも良いので$r$の並び方$r!$通りある．現在$pos$まで見て，$r$個取ったとすると次の遷移は$(pos + r, r)$である．$r$個取る時は，$V$の$[pos, pos + r)$が単調増加になっていなければならないことに注意する．</p>
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span style="color: #8f5902; font-style: italic">#include</span> <span style="color: #8f5902; font-style: italic">&lt;bits/stdc++.h&gt;</span>
 
-<pre><code class="language-cpp">#include &lt;bits/stdc++.h&gt;
+<span style="color: #8f5902; font-style: italic">#define rep(i,n) for(int i=0;i&lt;(int)(n);i++)</span>
+<span style="color: #8f5902; font-style: italic">#define REP(i,k,n) for(int i=k;i&lt;(int)(n);i++)</span>
+<span style="color: #8f5902; font-style: italic">#define each(it,v) for(__typeof((v).begin()) it=(v).begin();it!=(v).end();it++)</span>
+<span style="color: #8f5902; font-style: italic">#define INF 1&lt;&lt;30</span>
+<span style="color: #8f5902; font-style: italic">#define mp make_pair</span>
+<span style="color: #8f5902; font-style: italic">#define fi first</span>
+<span style="color: #8f5902; font-style: italic">#define se second</span>
+<span style="color: #8f5902; font-style: italic">#define MOD 1000000007</span>
 
-#define rep(i,n) for(int i=0;i&lt;(int)(n);i++)
-#define REP(i,k,n) for(int i=k;i&lt;(int)(n);i++)
-#define each(it,v) for(__typeof((v).begin()) it=(v).begin();it!=(v).end();it++)
-#define INF 1&lt;&lt;30
-#define mp make_pair
-#define fi first
-#define se second
-#define MOD 1000000007
+<span style="color: #204a87; font-weight: bold">using</span> <span style="color: #204a87; font-weight: bold">namespace</span> <span style="color: #000000">std</span><span style="color: #000000; font-weight: bold">;</span>
+<span style="color: #204a87; font-weight: bold">typedef</span> <span style="color: #204a87; font-weight: bold">long</span> <span style="color: #204a87; font-weight: bold">long</span> <span style="color: #000000">ll</span><span style="color: #000000; font-weight: bold">;</span>
+<span style="color: #204a87; font-weight: bold">typedef</span> <span style="color: #000000">pair</span><span style="color: #ce5c00; font-weight: bold">&lt;</span><span style="color: #204a87; font-weight: bold">int</span><span style="color: #000000; font-weight: bold">,</span><span style="color: #204a87; font-weight: bold">int</span><span style="color: #ce5c00; font-weight: bold">&gt;</span> <span style="color: #000000">P</span><span style="color: #000000; font-weight: bold">;</span>
 
-using namespace std;
-typedef long long ll;
-typedef pair&lt;int,int&gt; P;
+<span style="color: #000000">ll</span> <span style="color: #000000">dp</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #0000cf; font-weight: bold">1205</span><span style="color: #000000; font-weight: bold">][</span><span style="color: #0000cf; font-weight: bold">1205</span><span style="color: #000000; font-weight: bold">],</span> <span style="color: #000000">up</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #0000cf; font-weight: bold">1205</span><span style="color: #000000; font-weight: bold">][</span><span style="color: #0000cf; font-weight: bold">1205</span><span style="color: #000000; font-weight: bold">],</span> <span style="color: #000000">fact</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #0000cf; font-weight: bold">1205</span><span style="color: #000000; font-weight: bold">];</span>
 
-ll dp[1205][1205], up[1205][1205], fact[1205];
+<span style="color: #000000">ll</span> <span style="color: #000000">C</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #0000cf; font-weight: bold">2005</span><span style="color: #000000; font-weight: bold">][</span><span style="color: #0000cf; font-weight: bold">2005</span><span style="color: #000000; font-weight: bold">];</span>
+<span style="color: #204a87; font-weight: bold">void</span> <span style="color: #000000">combination</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #204a87; font-weight: bold">int</span> <span style="color: #000000">size</span><span style="color: #000000; font-weight: bold">)</span> <span style="color: #000000; font-weight: bold">{</span>
+	<span style="color: #204a87; font-weight: bold">for</span> <span style="color: #000000; font-weight: bold">(</span><span style="color: #204a87; font-weight: bold">int</span> <span style="color: #000000">i</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #0000cf; font-weight: bold">0</span><span style="color: #000000; font-weight: bold">;</span> <span style="color: #000000">i</span> <span style="color: #ce5c00; font-weight: bold">&lt;</span> <span style="color: #000000">size</span><span style="color: #000000; font-weight: bold">;</span> <span style="color: #000000">i</span><span style="color: #ce5c00; font-weight: bold">++</span><span style="color: #000000; font-weight: bold">)</span> <span style="color: #000000">C</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">][</span><span style="color: #0000cf; font-weight: bold">0</span><span style="color: #000000; font-weight: bold">]</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #0000cf; font-weight: bold">1LL</span><span style="color: #000000; font-weight: bold">;</span>
+	<span style="color: #204a87; font-weight: bold">for</span> <span style="color: #000000; font-weight: bold">(</span><span style="color: #204a87; font-weight: bold">int</span> <span style="color: #000000">i</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #0000cf; font-weight: bold">1</span><span style="color: #000000; font-weight: bold">;</span> <span style="color: #000000">i</span> <span style="color: #ce5c00; font-weight: bold">&lt;</span> <span style="color: #000000">size</span><span style="color: #000000; font-weight: bold">;</span> <span style="color: #000000">i</span><span style="color: #ce5c00; font-weight: bold">++</span><span style="color: #000000; font-weight: bold">)</span> <span style="color: #000000; font-weight: bold">{</span>
+		<span style="color: #204a87; font-weight: bold">for</span> <span style="color: #000000; font-weight: bold">(</span><span style="color: #204a87; font-weight: bold">int</span> <span style="color: #000000">j</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #0000cf; font-weight: bold">1</span><span style="color: #000000; font-weight: bold">;</span> <span style="color: #000000">j</span> <span style="color: #ce5c00; font-weight: bold">&lt;=</span> <span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">;</span> <span style="color: #000000">j</span><span style="color: #ce5c00; font-weight: bold">++</span><span style="color: #000000; font-weight: bold">)</span> <span style="color: #000000; font-weight: bold">{</span>
+			<span style="color: #000000">C</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">][</span><span style="color: #000000">j</span><span style="color: #000000; font-weight: bold">]</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">C</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #ce5c00; font-weight: bold">-</span><span style="color: #0000cf; font-weight: bold">1</span><span style="color: #000000; font-weight: bold">][</span><span style="color: #000000">j</span><span style="color: #ce5c00; font-weight: bold">-</span><span style="color: #0000cf; font-weight: bold">1</span><span style="color: #000000; font-weight: bold">]</span> <span style="color: #ce5c00; font-weight: bold">+</span> <span style="color: #000000">C</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #ce5c00; font-weight: bold">-</span><span style="color: #0000cf; font-weight: bold">1</span><span style="color: #000000; font-weight: bold">][</span><span style="color: #000000">j</span><span style="color: #000000; font-weight: bold">])</span> <span style="color: #ce5c00; font-weight: bold">%</span> <span style="color: #000000">MOD</span><span style="color: #000000; font-weight: bold">;</span>
+		<span style="color: #000000; font-weight: bold">}</span>
+	<span style="color: #000000; font-weight: bold">}</span>
+<span style="color: #000000; font-weight: bold">}</span>
 
-ll C[2005][2005];
-void combination(int size) {
-	for (int i = 0; i &lt; size; i++) C[i][0] = 1LL;
-	for (int i = 1; i &lt; size; i++) {
-		for (int j = 1; j &lt;= i; j++) {
-			C[i][j] = (C[i-1][j-1] + C[i-1][j]) % MOD;
-		}
-	}
-}
+<span style="color: #204a87; font-weight: bold">int</span> <span style="color: #000000">n</span><span style="color: #000000; font-weight: bold">;</span>
 
-int n;
+<span style="color: #000000">ll</span> <span style="color: #000000">dfs</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #204a87; font-weight: bold">int</span> <span style="color: #000000">pos</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #204a87; font-weight: bold">int</span> <span style="color: #000000">len</span><span style="color: #000000; font-weight: bold">)</span> <span style="color: #000000; font-weight: bold">{</span>
+	<span style="color: #204a87; font-weight: bold">if</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">len</span> <span style="color: #ce5c00; font-weight: bold">==</span> <span style="color: #ce5c00; font-weight: bold">-</span><span style="color: #0000cf; font-weight: bold">1</span><span style="color: #000000; font-weight: bold">)</span> <span style="color: #000000; font-weight: bold">{</span>
+		<span style="color: #000000">ll</span> <span style="color: #000000">res</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #0000cf; font-weight: bold">0</span><span style="color: #000000; font-weight: bold">;</span>
+		<span style="color: #204a87; font-weight: bold">for</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">ll</span> <span style="color: #000000">i</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #0000cf; font-weight: bold">1</span><span style="color: #000000; font-weight: bold">;</span> <span style="color: #000000">i</span> <span style="color: #ce5c00; font-weight: bold">&lt;=</span> <span style="color: #000000">n</span> <span style="color: #ce5c00; font-weight: bold">&amp;&amp;</span> <span style="color: #000000">pos</span> <span style="color: #ce5c00; font-weight: bold">+</span> <span style="color: #000000">i</span> <span style="color: #ce5c00; font-weight: bold">&lt;=</span> <span style="color: #000000">n</span><span style="color: #000000; font-weight: bold">;</span> <span style="color: #000000">i</span><span style="color: #ce5c00; font-weight: bold">++</span><span style="color: #000000; font-weight: bold">)</span> <span style="color: #000000; font-weight: bold">{</span>
+			<span style="color: #204a87; font-weight: bold">if</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">up</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">pos</span><span style="color: #000000; font-weight: bold">][</span><span style="color: #000000">pos</span> <span style="color: #ce5c00; font-weight: bold">+</span> <span style="color: #000000">i</span> <span style="color: #ce5c00; font-weight: bold">-</span> <span style="color: #0000cf; font-weight: bold">1</span><span style="color: #000000; font-weight: bold">])</span> <span style="color: #000000; font-weight: bold">{</span>
+				<span style="color: #000000">res</span> <span style="color: #ce5c00; font-weight: bold">+=</span> <span style="color: #000000">dfs</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">pos</span> <span style="color: #ce5c00; font-weight: bold">+</span> <span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">)</span> <span style="color: #ce5c00; font-weight: bold">%</span> <span style="color: #000000">MOD</span><span style="color: #000000; font-weight: bold">;</span>
+				<span style="color: #000000">res</span> <span style="color: #ce5c00; font-weight: bold">%=</span> <span style="color: #000000">MOD</span><span style="color: #000000; font-weight: bold">;</span>
 
-ll dfs(int pos, int len) {
-	if(len == -1) {
-		ll res = 0;
-		for(ll i = 1; i &lt;= n &amp;&amp; pos + i &lt;= n; i++) {
-			if(up[pos][pos + i - 1]) {
-				res += dfs(pos + i, i) % MOD;
-				res %= MOD;
+			<span style="color: #000000; font-weight: bold">}</span> <span style="color: #204a87; font-weight: bold">else</span> <span style="color: #204a87; font-weight: bold">break</span><span style="color: #000000; font-weight: bold">;</span>
+		<span style="color: #000000; font-weight: bold">}</span>
+		<span style="color: #204a87; font-weight: bold">return</span> <span style="color: #000000">dp</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">pos</span><span style="color: #000000; font-weight: bold">][</span><span style="color: #000000">len</span><span style="color: #000000; font-weight: bold">]</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000">res</span><span style="color: #000000; font-weight: bold">;</span>
+	<span style="color: #000000; font-weight: bold">}</span> <span style="color: #204a87; font-weight: bold">else</span> <span style="color: #000000; font-weight: bold">{</span>
+		<span style="color: #204a87; font-weight: bold">if</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">dp</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">pos</span><span style="color: #000000; font-weight: bold">][</span><span style="color: #000000">len</span><span style="color: #000000; font-weight: bold">]</span> <span style="color: #ce5c00; font-weight: bold">!=</span> <span style="color: #ce5c00; font-weight: bold">-</span><span style="color: #0000cf; font-weight: bold">1</span><span style="color: #000000; font-weight: bold">)</span> <span style="color: #204a87; font-weight: bold">return</span> <span style="color: #000000">dp</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">pos</span><span style="color: #000000; font-weight: bold">][</span><span style="color: #000000">len</span><span style="color: #000000; font-weight: bold">];</span>
+		<span style="color: #204a87; font-weight: bold">if</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">pos</span> <span style="color: #ce5c00; font-weight: bold">==</span> <span style="color: #000000">n</span><span style="color: #000000; font-weight: bold">)</span> <span style="color: #204a87; font-weight: bold">return</span> <span style="color: #0000cf; font-weight: bold">1</span><span style="color: #000000; font-weight: bold">;</span>
 
-			} else break;
-		}
-		return dp[pos][len] = res;
-	} else {
-		if(dp[pos][len] != -1) return dp[pos][len];
-		if(pos == n) return 1;
+		<span style="color: #000000">ll</span> <span style="color: #000000">res</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #0000cf; font-weight: bold">0</span><span style="color: #000000; font-weight: bold">;</span>
+		<span style="color: #204a87; font-weight: bold">for</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">ll</span> <span style="color: #000000">i</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #0000cf; font-weight: bold">1</span><span style="color: #000000; font-weight: bold">;</span> <span style="color: #000000">i</span> <span style="color: #ce5c00; font-weight: bold">&lt;=</span> <span style="color: #000000">len</span> <span style="color: #ce5c00; font-weight: bold">&amp;&amp;</span> <span style="color: #000000">pos</span> <span style="color: #ce5c00; font-weight: bold">+</span> <span style="color: #000000">i</span> <span style="color: #ce5c00; font-weight: bold">&lt;=</span> <span style="color: #000000">n</span><span style="color: #000000; font-weight: bold">;</span> <span style="color: #000000">i</span><span style="color: #ce5c00; font-weight: bold">++</span><span style="color: #000000; font-weight: bold">)</span> <span style="color: #000000; font-weight: bold">{</span>
+			<span style="color: #204a87; font-weight: bold">if</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">up</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">pos</span><span style="color: #000000; font-weight: bold">][</span><span style="color: #000000">pos</span> <span style="color: #ce5c00; font-weight: bold">+</span> <span style="color: #000000">i</span> <span style="color: #ce5c00; font-weight: bold">-</span> <span style="color: #0000cf; font-weight: bold">1</span><span style="color: #000000; font-weight: bold">])</span> <span style="color: #000000; font-weight: bold">{</span>
+				<span style="color: #000000">res</span> <span style="color: #ce5c00; font-weight: bold">+=</span> <span style="color: #000000; font-weight: bold">(((</span><span style="color: #000000">C</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">len</span><span style="color: #000000; font-weight: bold">][</span><span style="color: #000000">len</span><span style="color: #ce5c00; font-weight: bold">-</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">]</span> <span style="color: #ce5c00; font-weight: bold">*</span> <span style="color: #000000">fact</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">])</span> <span style="color: #ce5c00; font-weight: bold">%</span> <span style="color: #000000">MOD</span><span style="color: #000000; font-weight: bold">)</span> <span style="color: #ce5c00; font-weight: bold">*</span> <span style="color: #000000">dfs</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">pos</span> <span style="color: #ce5c00; font-weight: bold">+</span> <span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">))</span> <span style="color: #ce5c00; font-weight: bold">%</span> <span style="color: #000000">MOD</span><span style="color: #000000; font-weight: bold">;</span>
+				<span style="color: #000000">res</span> <span style="color: #ce5c00; font-weight: bold">%=</span> <span style="color: #000000">MOD</span><span style="color: #000000; font-weight: bold">;</span>
+			<span style="color: #000000; font-weight: bold">}</span> <span style="color: #204a87; font-weight: bold">else</span> <span style="color: #204a87; font-weight: bold">break</span><span style="color: #000000; font-weight: bold">;</span>
+		<span style="color: #000000; font-weight: bold">}</span>
 
-		ll res = 0;
-		for(ll i = 1; i &lt;= len &amp;&amp; pos + i &lt;= n; i++) {
-			if(up[pos][pos + i - 1]) {
-				res += (((C[len][len-i] * fact[i]) % MOD) * dfs(pos + i, i)) % MOD;
-				res %= MOD;
-			} else break;
-		}
+		<span style="color: #204a87; font-weight: bold">return</span> <span style="color: #000000">dp</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">pos</span><span style="color: #000000; font-weight: bold">][</span><span style="color: #000000">len</span><span style="color: #000000; font-weight: bold">]</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000">res</span><span style="color: #000000; font-weight: bold">;</span>
+	<span style="color: #000000; font-weight: bold">}</span>
+<span style="color: #000000; font-weight: bold">}</span>
 
-		return dp[pos][len] = res;
-	}
-}
+<span style="color: #204a87; font-weight: bold">int</span> <span style="color: #000000">main</span><span style="color: #000000; font-weight: bold">()</span> <span style="color: #000000; font-weight: bold">{</span>
+	<span style="color: #000000">cin</span> <span style="color: #ce5c00; font-weight: bold">&gt;&gt;</span> <span style="color: #000000">n</span><span style="color: #000000; font-weight: bold">;</span>
 
-int main() {
-	cin &gt;&gt; n;
+	<span style="color: #000000">vector</span><span style="color: #ce5c00; font-weight: bold">&lt;</span><span style="color: #204a87; font-weight: bold">int</span><span style="color: #ce5c00; font-weight: bold">&gt;</span> <span style="color: #000000">v</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">n</span><span style="color: #000000; font-weight: bold">);</span>
+	<span style="color: #000000">rep</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">n</span><span style="color: #000000; font-weight: bold">)</span> <span style="color: #000000">cin</span> <span style="color: #ce5c00; font-weight: bold">&gt;&gt;</span> <span style="color: #000000">v</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">];</span>
 
-	vector&lt;int&gt; v(n);
-	rep(i, n) cin &gt;&gt; v[i];
+	<span style="color: #000000">combination</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #0000cf; font-weight: bold">1205</span><span style="color: #000000; font-weight: bold">);</span>
+	<span style="color: #000000">fact</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #0000cf; font-weight: bold">0</span><span style="color: #000000; font-weight: bold">]</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #0000cf; font-weight: bold">1</span><span style="color: #000000; font-weight: bold">;</span>
+	<span style="color: #000000">REP</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #0000cf; font-weight: bold">1</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #0000cf; font-weight: bold">1205</span><span style="color: #000000; font-weight: bold">)</span> <span style="color: #000000; font-weight: bold">{</span>
+		<span style="color: #000000">fact</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">]</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">i</span> <span style="color: #ce5c00; font-weight: bold">*</span> <span style="color: #000000">fact</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #ce5c00; font-weight: bold">-</span><span style="color: #0000cf; font-weight: bold">1</span><span style="color: #000000; font-weight: bold">])</span> <span style="color: #ce5c00; font-weight: bold">%</span> <span style="color: #000000">MOD</span><span style="color: #000000; font-weight: bold">;</span>
+	<span style="color: #000000; font-weight: bold">}</span>
 
-	combination(1205);
-	fact[0] = 1;
-	REP(i, 1, 1205) {
-		fact[i] = (i * fact[i-1]) % MOD;
-	}
+	<span style="color: #000000">rep</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">n</span> <span style="color: #ce5c00; font-weight: bold">+</span> <span style="color: #0000cf; font-weight: bold">1</span><span style="color: #000000; font-weight: bold">)</span> <span style="color: #000000; font-weight: bold">{</span>
+		<span style="color: #000000">rep</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">j</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">n</span> <span style="color: #ce5c00; font-weight: bold">+</span> <span style="color: #0000cf; font-weight: bold">1</span><span style="color: #000000; font-weight: bold">)</span> <span style="color: #000000; font-weight: bold">{</span>
+			<span style="color: #000000">dp</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">][</span><span style="color: #000000">j</span><span style="color: #000000; font-weight: bold">]</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #ce5c00; font-weight: bold">-</span><span style="color: #0000cf; font-weight: bold">1</span><span style="color: #000000; font-weight: bold">;</span>
+			<span style="color: #000000">up</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">][</span><span style="color: #000000">j</span><span style="color: #000000; font-weight: bold">]</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #204a87">false</span><span style="color: #000000; font-weight: bold">;</span>
+		<span style="color: #000000; font-weight: bold">}</span>
+	<span style="color: #000000; font-weight: bold">}</span>
 
-	rep(i, n + 1) {
-		rep(j, n + 1) {
-			dp[i][j] = -1;
-			up[i][j] = false;
-		}
-	}
+	<span style="color: #000000">rep</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">n</span><span style="color: #000000; font-weight: bold">)</span> <span style="color: #000000; font-weight: bold">{</span>
+		<span style="color: #204a87; font-weight: bold">bool</span> <span style="color: #000000">flag</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #204a87">true</span><span style="color: #000000; font-weight: bold">;</span>
+		<span style="color: #000000">REP</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">j</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">n</span><span style="color: #000000; font-weight: bold">)</span> <span style="color: #000000; font-weight: bold">{</span>
+			<span style="color: #000000">up</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">][</span><span style="color: #000000">j</span><span style="color: #000000; font-weight: bold">]</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000">flag</span><span style="color: #000000; font-weight: bold">;</span>
+			<span style="color: #204a87; font-weight: bold">if</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">j</span> <span style="color: #ce5c00; font-weight: bold">&lt;</span> <span style="color: #000000">n</span><span style="color: #ce5c00; font-weight: bold">-</span><span style="color: #0000cf; font-weight: bold">1</span> <span style="color: #ce5c00; font-weight: bold">&amp;&amp;</span> <span style="color: #000000">v</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">j</span><span style="color: #000000; font-weight: bold">]</span> <span style="color: #ce5c00; font-weight: bold">&gt;</span> <span style="color: #000000">v</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">j</span><span style="color: #ce5c00; font-weight: bold">+</span><span style="color: #0000cf; font-weight: bold">1</span><span style="color: #000000; font-weight: bold">])</span> <span style="color: #000000">flag</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #204a87">false</span><span style="color: #000000; font-weight: bold">;</span>
+		<span style="color: #000000; font-weight: bold">}</span>
+	<span style="color: #000000; font-weight: bold">}</span>
 
-	rep(i, n) {
-		bool flag = true;
-		REP(j, i, n) {
-			up[i][j] = flag;
-			if(j &lt; n-1 &amp;&amp; v[j] &gt; v[j+1]) flag = false;
-		}
-	}
+	<span style="color: #000000">cout</span> <span style="color: #ce5c00; font-weight: bold">&lt;&lt;</span> <span style="color: #000000">dfs</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #0000cf; font-weight: bold">0</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #ce5c00; font-weight: bold">-</span><span style="color: #0000cf; font-weight: bold">1</span><span style="color: #000000; font-weight: bold">)</span> <span style="color: #ce5c00; font-weight: bold">&lt;&lt;</span> <span style="color: #000000">endl</span><span style="color: #000000; font-weight: bold">;</span>
 
-	cout &lt;&lt; dfs(0, -1) &lt;&lt; endl;
-
-	return 0;
-}
-</code></pre>
+	<span style="color: #204a87; font-weight: bold">return</span> <span style="color: #0000cf; font-weight: bold">0</span><span style="color: #000000; font-weight: bold">;</span>
+<span style="color: #000000; font-weight: bold">}</span>
+</pre></div>
 
 <p>本番中に解けなかった．悔しい．</p>
 </div>
