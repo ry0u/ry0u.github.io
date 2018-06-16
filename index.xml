@@ -6,8 +6,247 @@
     <description>Recent content on ry0u_ydのblog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ja</language>
-    <lastBuildDate>Mon, 25 Dec 2017 02:05:20 +0900</lastBuildDate>
+    <lastBuildDate>Fri, 15 Jun 2018 19:05:00 +0900</lastBuildDate>
     <atom:link href="http://ry0u.github.io/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Arnoldi法と固有値の近似</title>
+      <link>http://ry0u.github.io/post/2018-06-16-arnoldi-and-eigenvalues/</link>
+      <pubDate>Fri, 15 Jun 2018 19:05:00 +0900</pubDate>
+      
+      <guid>http://ry0u.github.io/post/2018-06-16-arnoldi-and-eigenvalues/</guid>
+      <description>
+
+&lt;p&gt;この内容は&lt;a href=&#34;https://www.amazon.co.jp/Numerical-Linear-Algebra-Lloyd-Trefethen/dp/0898713617&#34;&gt;Numerical Linear Algebra&lt;/a&gt;内の以下のLectureに相当します．&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Lecture 33, The Arnoldi Iteration&lt;/li&gt;
+&lt;li&gt;Lecture 34, How Arnoldi Locates Eigenvalues&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;しかし，この本にはどのように多項式$p(z)$を求めるかが(明示的に)書いてありません．&lt;br /&gt;
+また，自分のググり力では，多項式の求め方を見つけることができませんでした．&lt;/p&gt;
+
+&lt;p&gt;考えてみると，こうすれば多項式が求まるのでは，という方法がでました．&lt;br /&gt;
+これが正しいのかは分かりませんが，結果をプロットしてみると，確かに性質を満たしていました．&lt;br /&gt;
+もっとスマートな方法があるに違いないと思いますが，情報をまとめようと思いblogに書きました．&lt;/p&gt;
+
+&lt;h2 id=&#34;arnoldi法&#34;&gt;Arnoldi法&lt;/h2&gt;
+
+&lt;p&gt;Arnoldi法とは，Krylov部分空間$\mathcal{K}(A, b)$に対して正規直交基底を求める方法です．&lt;br /&gt;
+これは単純に$\mathcal{K}(A, b)$に対して，Modified Gram-Schmidtを適用し，直交基底を求める際の情報をHessenberg行列に格納するアルゴリズムです．&lt;/p&gt;
+
+&lt;p&gt;次の記号を導入します．$Q$は$n\times n$の正規直交基底です．$H$は$(n+1) \times n$のHessenberg行列で，上三角行列に下1行を追加した形です．&lt;/p&gt;
+
+&lt;p&gt;$$
+Q_n = \left[ \begin{array}{c|c|c|c}
+&amp;amp; &amp;amp; &amp;amp; \\&lt;br /&gt;
+&amp;amp; &amp;amp; &amp;amp; \\&lt;br /&gt;
+q_1 &amp;amp; q_2 &amp;amp; \cdots &amp;amp; q_n \\&lt;br /&gt;
+&amp;amp; &amp;amp; &amp;amp; \\&lt;br /&gt;
+&amp;amp; &amp;amp; &amp;amp; \\&lt;br /&gt;
+\end{array} \right], \tilde{H}_n = \left[\begin{array}{cccc}
+h_{11} &amp;amp; h_{12} &amp;amp; \cdots &amp;amp; h_{1n}\\&lt;br /&gt;
+h_{21} &amp;amp; h_{22} &amp;amp; \cdots &amp;amp; h_{2n}\\&lt;br /&gt;
+&amp;amp; \ddots &amp;amp; \ddots &amp;amp; \vdots\\&lt;br /&gt;
+&amp;amp; &amp;amp; h_{n,n-1} &amp;amp; h_{n,n}\\&lt;br /&gt;
+&amp;amp; &amp;amp; &amp;amp; h_{n+1,n}
+\end{array}\right]
+$$&lt;/p&gt;
+
+&lt;p&gt;Arnoldi法は以下の関係式を満たす，$Q_{n}, \tilde{H}_n$を求めます．&lt;/p&gt;
+
+&lt;p&gt;$$
+A Q_n = Q_{n+1} \tilde{H}_n
+$$&lt;/p&gt;
+
+&lt;p&gt;具体的にどのように求めていくのか，それは次のコードのとおりです．&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f8f8f8&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span style=&#34;color: #000000&#34;&gt;Q&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;[:,&lt;/span&gt; &lt;span style=&#34;color: #0000cf; font-weight: bold&#34;&gt;0&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;b&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;/&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;la&lt;/span&gt;&lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;norm&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;b&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;)&lt;/span&gt;
+&lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;for&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;k&lt;/span&gt; &lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;in&lt;/span&gt; &lt;span style=&#34;color: #204a87&#34;&gt;range&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;it&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;):&lt;/span&gt;
+    &lt;span style=&#34;color: #000000&#34;&gt;u&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;A&lt;/span&gt;&lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;dot&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;Q&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;[:,&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;k&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;])&lt;/span&gt;
+    &lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;for&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;j&lt;/span&gt; &lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;in&lt;/span&gt; &lt;span style=&#34;color: #204a87&#34;&gt;range&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;k&lt;/span&gt;&lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;+&lt;/span&gt;&lt;span style=&#34;color: #0000cf; font-weight: bold&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;):&lt;/span&gt;
+        &lt;span style=&#34;color: #000000&#34;&gt;H&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;j&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;,&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;k&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;np&lt;/span&gt;&lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;dot&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;Q&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;[:,&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;j&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;],&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;u&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;)&lt;/span&gt;
+        &lt;span style=&#34;color: #000000&#34;&gt;u&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;u&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;-&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;H&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;j&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;,&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;k&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;*&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;Q&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;[:,&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;j&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;]&lt;/span&gt;
+    
+    &lt;span style=&#34;color: #000000&#34;&gt;H&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;k&lt;/span&gt;&lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;+&lt;/span&gt;&lt;span style=&#34;color: #0000cf; font-weight: bold&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;k&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;la&lt;/span&gt;&lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;norm&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;u&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;)&lt;/span&gt;
+    &lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;H&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;k&lt;/span&gt;&lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;+&lt;/span&gt;&lt;span style=&#34;color: #0000cf; font-weight: bold&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;k&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;&amp;lt;=&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;EPS&lt;/span&gt;
+        &lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;break&lt;/span&gt;
+    &lt;span style=&#34;color: #000000&#34;&gt;Q&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;[:,&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;k&lt;/span&gt;&lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;+&lt;/span&gt;&lt;span style=&#34;color: #0000cf; font-weight: bold&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;u&lt;/span&gt;&lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;/&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;H&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;k&lt;/span&gt;&lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;+&lt;/span&gt;&lt;span style=&#34;color: #0000cf; font-weight: bold&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;k&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;]&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;現在選ばれている全ての直交基底との射影成分を引くことで，新しい直交基底を選んでいます．&lt;br /&gt;
+また基底$Q_j$方向のpowerをHessenberg行列の$H[j, k]$に格納しています．&lt;br /&gt;
+$H[k+1, k]$に格納されるのは，現在の基底で表すことができなかったベクトルのノルムです．&lt;br /&gt;
+つまり$H[k+1, k]$が$0$になれば，現在の基底で表す事が可能なので，新しい基底を作らずにループを抜けます．&lt;/p&gt;
+
+&lt;h2 id=&#34;射影での解釈&#34;&gt;射影での解釈&lt;/h2&gt;
+
+&lt;p&gt;$Q^{*}_{n} Q_{n+1}$という行列を考えると，これは対角に$1$が並ぶ$n \times (n+1)$の行列です．&lt;br /&gt;
+なぜなら$Q$は直交基底なので，$q_i$と$q_j$の内積は，$i == j$の時に$1$(正規)，それ以外の時に$0$(直交)だからです．&lt;br /&gt;
+そのため$Q^{*}_{n} Q_{n+1}\hat{H}_{n}$は，$n+1$行目を削除した$n \times n$の行列になります．&lt;/p&gt;
+
+&lt;p&gt;$$
+Q^*_n Q_{n+1} \tilde{H}_n = H_n = \left[\begin{array}{cccc}
+h_{11} &amp;amp; h_{12} &amp;amp; \cdots &amp;amp; h_{1n}\\&lt;br /&gt;
+h_{21} &amp;amp; h_{22} &amp;amp; \cdots &amp;amp; h_{2n}\\&lt;br /&gt;
+&amp;amp; \ddots &amp;amp; \ddots &amp;amp; \vdots\\&lt;br /&gt;
+&amp;amp; &amp;amp; h_{n,n-1} &amp;amp; h_{n,n}\\&lt;br /&gt;
+\end{array}\right]
+$$&lt;/p&gt;
+
+&lt;p&gt;先に述べた式に戻り，左から$Q^{*}_{n}$をかける．&lt;/p&gt;
+
+&lt;p&gt;$$
+A Q_n = Q_{n+1} \tilde{H}_n \\&lt;br /&gt;
+Q^{*}_{n} A Q_n = Q^{*}_n Q_{n+1} \tilde{H}_n\\&lt;br /&gt;
+Q^{*}_{n} A Q_n = H_n \hspace{3.0em}
+$$&lt;/p&gt;
+
+&lt;p&gt;$Q_n$は$\mathcal{K}_n$の正規直交基底なので，$H_n$は$\mathcal{K}_n$上に$A$を射影した行列となります．&lt;br /&gt;
+そのため$H_n$の固有値は，$A$の固有値と関係があります．&lt;br /&gt;
+$H_n$の固有値は，$\textit{Arnoldi eigenvalue estimates}$，または$\textit{Ritz values}$と呼ばれ，$A$のスペクトル半径に近い固有値を近似します．&lt;/p&gt;
+
+&lt;p&gt;これを確かめるために，$n=25, 40$の時に$n \times n$の実数ランダム行列$A$を作成し，Arnoldi法を適用してみました．&lt;br /&gt;
+右の図の青のxが$A$の固有値で，オレンジのoが$H_n$の固有値です．&lt;br /&gt;
+左の図は$A$を&lt;code&gt;imshow&lt;/code&gt;で出した結果です．&lt;br /&gt;
+こうみると，徐々に固有値を近似していく($A$の固有値の上に収まる)様子が分かります．&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://ry0u.github.io/images/arnoldi_n20.gif&#34; width=&#34;80%&#34;/&gt;
+&lt;img src=&#34;http://ry0u.github.io/images/arnoldi_n40.gif&#34; width=&#34;80%&#34;/&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;arnoldi法と多項式近似&#34;&gt;Arnoldi法と多項式近似&lt;/h2&gt;
+
+&lt;p&gt;Kyrolov部分空間$\mathcal{K}$上の任意のベクトルは次式で表せます．&lt;/p&gt;
+
+&lt;p&gt;$$
+x = c_0 b + c_1 Ab + c_2 A^2 b + \cdots + c_{n-1} A^{n-1}b
+$$&lt;/p&gt;
+
+&lt;p&gt;ここで多項式$q(z)$を導入します．すると$x$は次のように書けます．&lt;/p&gt;
+
+&lt;p&gt;$$
+q(z) = c_0 + c_1 z + \cdots + c_{n-1} z^{n-1}\\&lt;br /&gt;
+x = q(A) b
+$$&lt;/p&gt;
+
+&lt;p&gt;$q(z)$の中で$P^n$をmonicな$n$次多項式($n$次の項の係数が$1$)とした時，Arnoldi法は次の問題を解いていると見れます．&lt;/p&gt;
+
+&lt;p&gt;$$
+\text{Find } p^n \in P^n, \text{such that } \|p^n (A) b\| = minimum
+$$&lt;/p&gt;
+
+&lt;p&gt;また$p^n \in P^n$の場合，$p^n(A)b = A^n b - Q_n y$となるので，次のような言い換えができます．&lt;/p&gt;
+
+&lt;p&gt;$$
+\text{Find } y, \|A^n b - Q_n y\| = minimum
+$$&lt;/p&gt;
+
+&lt;p&gt;これを幾何学的に理解するには，p.260に載っている図が分かりやすいです．(&lt;strong&gt;引用 p.260 Figure 34.1 The least squares polynomial approximation problem underlying the Arnoldi iteration.&lt;/strong&gt;)&lt;/p&gt;
+
+&lt;p&gt;&lt;center&gt;
+&lt;img src=&#34;http://ry0u.github.io/images/20180613_001.png&#34; width=&#34;60%&#34;/&gt;
+&lt;/center&gt;&lt;/p&gt;
+
+&lt;p&gt;$A^n b$を見る時は，既に$n$本の直交基底$Q_n$で表現されるKyrolov部分空間$\mathcal{K}_n$があり，Krylov列/基底の$n+1$本目を見ている場合です．&lt;br /&gt;
+つまり，この多項式$p(A)b$は，現在の基底$Q_n$で表せないベクトルを表しています．&lt;br /&gt;
+そしてArnoldi法は，ベクトルの最小化を行ないます．&lt;/p&gt;
+
+&lt;h1 id=&#34;arnoldi-lemniscates&#34;&gt;Arnoldi Lemniscates&lt;/h1&gt;
+
+&lt;p&gt;Arnoldi法の収束過程は，複素平面に$\textit{lemniscates}$を描くことで幾何学的に見ることができます．&lt;br /&gt;
+これは$\textit{Arnoldi lemniscates}$と呼ばれ，次の式で描くことができます．&lt;/p&gt;
+
+&lt;p&gt;$$
+\{ z \in \mathbb{C} : |p(z)| = C\} \\&lt;br /&gt;
+C = \frac{\|p^n (A) b \|}{\|b\|}
+$$&lt;/p&gt;
+
+&lt;p&gt;さてここで本題となりますが，どのようにすれば$p(z)$を導出できるのでしょうか．&lt;br /&gt;
+$p(z)$が分かるというのは，係数$c_0, c_1, &amp;hellip;$が分かっているということです．&lt;br /&gt;
+この係数を求めるために，以下の関係を列形式で書いて，$n=1, 2$の場合を見ていきます．&lt;/p&gt;
+
+&lt;p&gt;$$
+A Q_n = Q_{n+1} \tilde{H}_n
+$$
+$$
+A \left[ \begin{array}{c|c|c|c}
+&amp;amp; &amp;amp; &amp;amp; \\&lt;br /&gt;
+&amp;amp; &amp;amp; &amp;amp; \\&lt;br /&gt;
+q_1 &amp;amp; q_2  &amp;amp; \cdots &amp;amp; q_n \\&lt;br /&gt;
+&amp;amp; &amp;amp; &amp;amp; \\&lt;br /&gt;
+&amp;amp; &amp;amp; &amp;amp; \\&lt;br /&gt;
+\end{array} \right] = \left[ \begin{array}{c|c|c|c|c}
+&amp;amp; &amp;amp; &amp;amp; &amp;amp;\\&lt;br /&gt;
+&amp;amp; &amp;amp; &amp;amp; &amp;amp;\\&lt;br /&gt;
+q_1 &amp;amp; q_2  &amp;amp; \cdots &amp;amp; q_n &amp;amp; q_{n+1} \\&lt;br /&gt;
+&amp;amp; &amp;amp; &amp;amp; &amp;amp;\\&lt;br /&gt;
+&amp;amp; &amp;amp; &amp;amp; &amp;amp;\\&lt;br /&gt;
+\end{array} \right] \left[\begin{array}{cccc}
+h_{11} &amp;amp; h_{12} &amp;amp; \cdots &amp;amp; h_{1n}\\&lt;br /&gt;
+h_{21} &amp;amp; h_{22} &amp;amp; \cdots &amp;amp; h_{2n}\\&lt;br /&gt;
+&amp;amp; \ddots &amp;amp; \ddots &amp;amp; \vdots\\&lt;br /&gt;
+&amp;amp; &amp;amp; h_{n,n-1} &amp;amp; h_{n,n}\\&lt;br /&gt;
+&amp;amp; &amp;amp; &amp;amp; h_{n+1,n}
+\end{array}\right]
+$$&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;$n=1$の時，$q_1 = \frac{b}{\|b\|}$を左辺にだけ代入します．
+$$
+A q_1 = h_{11} q_1 + h_{21} q_2 \\&lt;br /&gt;
+A \frac{b}{\|b\|} = h_{11} q_1 + h_{21} q_{2} \\&lt;br /&gt;
+A b - \|b\|h_{11} q_{1} = \|b\|h_{21} q_{2}
+$$&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;これは$y_1 = \left[\|b\| h_{11} \right]$と見れば左辺は
+$$
+A b - \|b\|h_{11} q_{1} = Ab - Q_1 y_1
+$$&lt;/li&gt;
+&lt;li&gt;となり，「$p^n \in P^n$の場合，$p^n(A)b = A^n b - Q_n y$」を用いれば，$Ab$の係数は$1$なので，右辺が$p^1(A)b$となります．&lt;br /&gt;
+lemniscatesを書く際に求める$C$は，$\|p^n(A)b\|$を$\|b\|$で割るので，自然な感じがします．
+$$
+\|b\|h_{21} q_{2} = p^1(A)b
+$$&lt;/li&gt;
+&lt;li&gt;この右辺が$p^1(A)b$を表すことが分かったので，$c_0 b + c_1 Ab + \cdots + c_{n-1} A^{n-1}$の形にします．
+$$
+A b - \|b\|h_{11} \frac{b}{\|b\|} = \|b\|h_{21} q_{2} \\&lt;br /&gt;
+p^1(A)b = - h_{11} b + A b
+$$&lt;/li&gt;
+&lt;li&gt;$c_0 = -h_{11}$，$c_1 = 1$，$C = h_{21}$となり，これで$p(z) = C$を満たすlemniscatesが書けます．&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;$n=2$の時も同様，$q_{1} = \frac{b}{\|b\|}$，また上記の式から$q_2 = -\frac{h_{11}}{h_{21}\|b\|}b + \frac{1}{h_{21}\|b\|}Ab$を代入します．
+$$
+A q_2 = h_{12} q_1 + h_{22} q_{2} + h_{32} q_{3} \\&lt;br /&gt;
+A \left( -\frac{h_{11}}{h_{21}\|b\|}b + \frac{1}{h_{21}\|b\|}Ab \right) = h_{12} \frac{b}{\|b\|} + h_{22} \left( -\frac{h_{11}}{h_{21}\|b\|}b + \frac{1}{h_{21}\|b\|}Ab \right) + h_{32} q_3 \\&lt;br /&gt;
+-\frac{h_{11}}{h_{21} \|b\|} Ab + \frac{1}{h_{21}\|b\|} A^2 b = \frac{h_{12}}{\|b\|}b - \frac{h_{11} h_{22}}{h_{21} \|b\|} b + \frac{h_{22}}{h_{21}\|b\|} Ab + h_{32} q_3 \\&lt;br /&gt;
+-h_{11} Ab + A^2b = h_{12}h_{21}b - h_{11} h_{22} b + h_{22} Ab + \|b\|h_{21}h_{32} q_3\\&lt;br /&gt;
+\|b\| h_{21}h_{32} q_3 = \left(-h_{12}h_{32} + h_{11}h_{22}\right)b + \left(-h_{11} + h_{22}\right) Ab + A^2 b
+$$&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;$c_0 = -h_{12} h_{32} + h_{11} h_{22}$，$c_{1} = -h_{11} + h_{22}$，$c_2 = 1$，$C = h_{21} h_{32}$&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;これを手順的に行って，プロットしたものが以下の図になります．&lt;br /&gt;
+複素平面にメッシュを作り，$p(z)$の値が$C$以下の場合の等高線を出しました．&lt;br /&gt;
+青が濃くなるほど値が小さく，一番濃い青に囲まれた箇所に近似固有値があることから&lt;br /&gt;
+多項式の解がHessenbergの固有値になる，という性質を満たしているが分かります．&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://ry0u.github.io/images/lemniscates_n10.gif&#34; width=&#34;80%&#34;/&gt;
+&lt;img src=&#34;http://ry0u.github.io/images/lemniscates_n25.gif&#34; width=&#34;80%&#34;/&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;まとめ&#34;&gt;まとめ&lt;/h2&gt;
+
+&lt;p&gt;間違っている記述がある場合は，申し訳ありません．&lt;br /&gt;
+勉強をするので，是非とも教えていただけると嬉しいです．&lt;/p&gt;
+
+&lt;p&gt;多項式の導出には，もっとスマートな方法があるはずです．&lt;br /&gt;
+もっと理解が深められるように進めていきます．&lt;/p&gt;
+</description>
+    </item>
     
     <item>
       <title>Beamer&#43;TikZによるスライド作成のTips その1</title>
@@ -521,169 +760,6 @@ iunmap &lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;&amp;lt;&lt
 &lt;p&gt;先生には論文を読むことが研究であると指摘された．しかし，卒業研究に関するもので読んだ論文は多めに数えても$10$本ぐらいだ．このレベルが研究なのかどうかを考えてみれば，それとは別のもののように思えるし，感覚としては論文の組み合わせ実装による数値解析/HPCの学習である．&lt;/p&gt;
 
 &lt;p&gt;既にまとめの時期に入りながら，このような感覚しか得られていないのは，自分の能力の無さであり非常に残念に思う．&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Multigrid Reduction in Time</title>
-      <link>http://ry0u.github.io/post/2017-04-05-Multigrid-Reduction-in-Time/</link>
-      <pubDate>Wed, 05 Apr 2017 14:03:08 +0900</pubDate>
-      
-      <guid>http://ry0u.github.io/post/2017-04-05-Multigrid-Reduction-in-Time/</guid>
-      <description>
-
-&lt;h2 id=&#34;概要&#34;&gt;概要&lt;/h2&gt;
-
-&lt;p&gt;1次元熱拡散問題をMultigrid Reduction in Timeで解く&lt;/p&gt;
-
-&lt;h2 id=&#34;1次元熱拡散&#34;&gt;1次元熱拡散&lt;/h2&gt;
-
-&lt;p&gt;1次元熱伝導方程式は$u:$温度ベクトル，$k:$熱拡散係数, $S:$熱のわき出しとすると以下の式で表される．
-$$
-\displaystyle \frac{\delta u}{\delta t} = k \frac{\delta ^2 u}{\delta x ^2} + S
-$$&lt;/p&gt;
-
-&lt;p&gt;これを時間を前進，空間を二次中心差分の陽解法で離散化する．上付き文字は時間，下付き文字は空間のindexである．&lt;/p&gt;
-
-&lt;p&gt;$$
-    \frac{u^{n+1}_{i}-u^{n}_{i}}{\Delta t} = k \frac{u ^{n}_{i-1} - 2u^{n}_{i} + u^{n}_{i+1}}{\Delta x ^2} + S^{n}_i
-$$&lt;/p&gt;
-
-&lt;p&gt;整理すると
-$$
-\begin{eqnarray}
-    u^{n+1}_{i} &amp;amp;=&amp;amp; \frac{k \Delta t}{\Delta x^2} (u ^{n}_{i-1} - 2u^{n}_{i} + u^{n}_{i+1}) + u^n_{i} + S^{n}_i\Delta t\\&lt;br /&gt;
-                 &amp;amp;=&amp;amp; \frac{k \Delta t}{\Delta x^2} u^{n}_{i-1} + (1 - \frac{2k\Delta t}{\Delta x^2}) u^{n}_{i} + \frac{k \Delta t}{\Delta x^2} u^{n}_{i+1} + S^{n}_i\Delta t
-\end{eqnarray}
-$$&lt;/p&gt;
-
-&lt;p&gt;これをディリクレ境界条件で行列を用いて表すと以下のようになる
-$$
-\left(
-    \begin{array}{c}
-        u^{n+1}_{0} \\&lt;br /&gt;
-        u^{n+1}_{1} \\&lt;br /&gt;
-        u^{n+1}_{2} \\&lt;br /&gt;
-        u^{n+1}_{3} \\&lt;br /&gt;
-        \vdots \\&lt;br /&gt;
-        u^{n+1}_{N} \\&lt;br /&gt;
-    \end{array}
-\right) = \left(
-    \begin{array}{cccccc}
-        1 &amp;amp;   &amp;amp;   &amp;amp;   &amp;amp;  &amp;amp;   \\&lt;br /&gt;
-        \frac{k \Delta t}{\Delta x^2} &amp;amp; -\frac{2k \Delta t}{\Delta x^2} &amp;amp; \frac{k \Delta t}{\Delta x^2} &amp;amp;   &amp;amp;  &amp;amp;   \\&lt;br /&gt;
-          &amp;amp; \frac{k \Delta t}{\Delta x^2} &amp;amp; -\frac{2k \Delta t}{\Delta x^2} &amp;amp; \frac{k \Delta t}{\Delta x^2} &amp;amp;  &amp;amp;   \\&lt;br /&gt;
-        &amp;amp;  &amp;amp; \frac{k \Delta t}{\Delta x^2} &amp;amp; -\frac{2k \Delta t}{\Delta x^2} &amp;amp; \frac{k \Delta t}{\Delta x^2} &amp;amp; \\&lt;br /&gt;
-          &amp;amp;   &amp;amp;   &amp;amp;   &amp;amp; \ddots &amp;amp;  \\&lt;br /&gt;
-          &amp;amp;   &amp;amp;   &amp;amp;   &amp;amp;  &amp;amp; 1 \\&lt;br /&gt;
-    \end{array}
-\right) \left(
-    \begin{array}{c}
-        u^{n+1}_{0} \\&lt;br /&gt;
-        u^{n+1}_{1} \\&lt;br /&gt;
-        u^{n+1}_{2} \\&lt;br /&gt;
-        u^{n+1}_{3} \\&lt;br /&gt;
-        \vdots \\&lt;br /&gt;
-        u^{n+1}_{N} \\&lt;br /&gt;
-    \end{array}
-\right) + \left(
-    \begin{array}{c}
-        S^{n+1}_{0}\Delta t \\&lt;br /&gt;
-        S^{n+1}_{1}\Delta t \\&lt;br /&gt;
-        S^{n+1}_{2}\Delta t \\&lt;br /&gt;
-        S^{n+1}_{3}\Delta t \\&lt;br /&gt;
-        \vdots \\&lt;br /&gt;
-        S^{n+1}_{N}\Delta t \\&lt;br /&gt;
-    \end{array}
-\right)
-$$&lt;/p&gt;
-
-&lt;p&gt;この係数行列を$\Phi$, 熱のわき出しを$g$を用いて表せば，$u^{n+1} = \Phi u^{n} + g^n$となる．&lt;/p&gt;
-
-&lt;h2 id=&#34;multigrid-reduction-in-time&#34;&gt;Multigrid Reduction in Time&lt;/h2&gt;
-
-&lt;p&gt;タイムステップ$T$まで求めたいとする．$T$が巨大で逐次に1timestepずつ進めることが困難な場合を想定する．これをある区間幅$m$で依存関係を切る事で並列性を抽出する．依存関係を切っているので，誤差が生じる．各々のレベルの緩和法は，そのレベルでの高周波成分は早くに減衰するが，低周波成分はなかなか減衰しない．しかし，問題を粗くすることで上のレベルでは低周波成分だったものが，下のレベルでは高周波成分の振る舞いをする事を利用して，マルチレベルを構成し解を補正する．これを誤差が十分に小さくなるまで行う反復解法である．&lt;/p&gt;
-
-&lt;p&gt;この時間進展を$-\Phi u^{n} + u^{n+1} = g^n$と移項し，行列を用いて表すと以下のようになる．下付き文字は時間のindexとなっていること，初期値が熱のわき出しとなっていることに注意する($u_0 = g_0$)．&lt;/p&gt;
-
-&lt;p&gt;$$
-A(\mathbf{u}) = \left( \begin{array}{cccc}
-I &amp;amp; &amp;amp; &amp;amp; \\&lt;br /&gt;
--\Phi &amp;amp; I &amp;amp; &amp;amp; \\&lt;br /&gt;
- &amp;amp; \ddots &amp;amp; \ddots &amp;amp; \\&lt;br /&gt;
- &amp;amp; &amp;amp; -\Phi&amp;amp; I \\&lt;br /&gt;
-\end{array} \right) \left( \begin{array}{c}
-u_0 \\&lt;br /&gt;
-u_1 \\&lt;br /&gt;
-\cdots \\&lt;br /&gt;
-u_T \\&lt;br /&gt;
-\end{array} \right) = \left( \begin{array}{c}
-g_0 \\&lt;br /&gt;
-g_1 \\&lt;br /&gt;
-\cdots \\&lt;br /&gt;
-g_T \\&lt;br /&gt;
-\end{array} \right) = \mathbf{g}
-$$&lt;/p&gt;
-
-&lt;p&gt;これを粗いレベル$\Delta$に落とす．$T_{\Delta} = \displaystyle \frac{T}{m}$, $\Delta t = m\delta t$とし，この問題を解き，上のレベルの誤差を補正する．
-$$
-A_{\Delta}(\mathbf{u}_{\Delta}) = \left( \begin{array}{cccc}
-I &amp;amp; &amp;amp; &amp;amp; \\&lt;br /&gt;
--\Phi_{\Delta} &amp;amp; I &amp;amp; &amp;amp; \\&lt;br /&gt;
- &amp;amp; \ddots &amp;amp; \ddots &amp;amp; \\&lt;br /&gt;
- &amp;amp; &amp;amp; -\Phi_{\Delta}&amp;amp; I \\&lt;br /&gt;
-\end{array} \right) \left( \begin{array}{c}
-u_{_{\Delta}, 0} \\&lt;br /&gt;
-u_{_{\Delta}, 1} \\&lt;br /&gt;
-\cdots \\&lt;br /&gt;
-u_{_{\Delta}, T_{\Delta}} \\&lt;br /&gt;
-\end{array} \right) = \left( \begin{array}{c}
-g_{_{\Delta}, 0} \\&lt;br /&gt;
-g_{_{\Delta}, 1} \\&lt;br /&gt;
-\cdots \\&lt;br /&gt;
-g_{_{\Delta}, T_{\Delta}} \\&lt;br /&gt;
-\end{array} \right) = \mathbf{g}_{\Delta}
-$$&lt;/p&gt;
-
-&lt;p&gt;ここで時間進展において，$F$-$Point$と$C$-$Point$を定義する．$C$-$Point$は次のレベルに降ろされる点であり，それ以外の点を$F$-$Point$としている．ここで区間幅を$m$とすると，$C$-$Point$となるのは，$u_{0}$, $u_{m}$, $u_{2m}$, $&amp;hellip;$である．&lt;/p&gt;
-
-&lt;p&gt;次に2つの緩和$F$-$relaxation$と$C$-$relaxation$を定義する．$F$-$relaxation$は$F-Point$を更新する緩和で，$C$-$relaxation$は$C$-$Point$を更新する緩和である．最初の区間だけに注目すれば下のようになる．&lt;/p&gt;
-
-&lt;p&gt;$$
-\begin{eqnarray}
-    F-relaxation &amp;amp;:=&amp;amp; u_{0} \xrightarrow{\Phi} u_{1} \xrightarrow{\Phi} &amp;hellip; u_{m-2} \xrightarrow{\Phi} u_{m-1} \\&lt;br /&gt;
-    C-relaxation &amp;amp;:=&amp;amp; u_{m-1} \xrightarrow{\Phi} u_{m}
-\end{eqnarray}
-$$&lt;/p&gt;
-
-&lt;p&gt;アルゴリズムは&lt;a href=&#34;http://computation.llnl.gov/projects/parallel-time-integration-multigrid/strand2d-pit.pdf&#34;&gt;http://computation.llnl.gov/projects/parallel-time-integration-multigrid/strand2d-pit.pdf&lt;/a&gt; のp3にある．&lt;/p&gt;
-
-&lt;ol&gt;
-&lt;li&gt;$FCF$-$relaxation$をする．($F$-$relaxation$, $C$-$relaxation$, $F$-$relaxation$)&lt;/li&gt;
-&lt;li&gt;粗いレベル$\Delta$を作る． $u_{\Delta, i} \leftarrow u_{mi}$, $r_{\Delta, i} \leftarrow g_{mi} - A(u)_{mi} \ \ \ \ \ \mbox{for}\ i = 0, &amp;hellip;, T_{\Delta}$&lt;/li&gt;
-&lt;li&gt;$A_{\Delta}(\mathbf{v}_{\Delta}) = A_{\Delta}(\mathbf{u}_{\Delta}) + \mathbf{r}_{\Delta}$を$v_{\Delta}$について解く&lt;/li&gt;
-&lt;li&gt;errorを計算する．$e_{\Delta} = v_{\Delta} - u_{\Delta}$&lt;/li&gt;
-&lt;li&gt;上のレベルに補正する．$u_{mi} = u_{mi} + e_{\Delta, i}$&lt;/li&gt;
-&lt;li&gt;上のレベルで$F$-$relaxation$をする．&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;p&gt;1について，まず初めに$F$-$relaxation$をすると，右隣の$C$-$Point$に誤差がたまる．しかし，$F$-$relaxation$だけを行っても次の格子へ値が伝搬しないため，$C$-$relaxation$をして格子点を更新する．この状態では$C$-$Point$の右隣の$F$-$Point$に誤差がたまるが，ここで誤差がたまっても下のレベルに落ちないので，もう一回$F$をして，誤差を次の$C$-$Point$にためる．&lt;/p&gt;
-
-&lt;p&gt;2について，ここで粗いレベルを作る．粗いレベルの係数行列は解きたい問題から再度離散化して得られるものとする．&lt;/p&gt;
-
-&lt;p&gt;3について，ここで未知の変数は$\mathbf{v}_{\Delta}$のみで，残差を考慮した状態を右辺ベクトルとして解を求める．マルチレベルの場合は1に戻る．最も粗いレベルになれば，そのレベルでは直接解いてしまう．&lt;/p&gt;
-
-&lt;p&gt;4について，後はどれだけ補正すれば良いかのerrorを計算し，上のレベルに補正する．補正した後は$F$-$relaxation$をすることによって，上のレベルの$\mathbf{u}$を更新する．&lt;/p&gt;
-
-&lt;p&gt;全timestepの誤差が十分に小さくなるまでにこのサイクルを続ける．このサイクルの回数は$m$に依存しているため，同じ$m$であれば，求めたいtimestep, 並列度が変わっても回数は変わらない．(当然時間は変わる)&lt;/p&gt;
-
-&lt;h2 id=&#34;参照したもの&#34;&gt;参照したもの&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;http://computation.llnl.gov/projects/parallel-time-integration-multigrid/strand2d-pit.pdf&#34;&gt;http://computation.llnl.gov/projects/parallel-time-integration-multigrid/strand2d-pit.pdf&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;http://www.math.mun.ca/~smaclachlan/research/spacetimeMG.pdf&#34;&gt;http://www.math.mun.ca/~smaclachlan/research/spacetimeMG.pdf&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;http://conferences.computer.org/pmbs/2016/papers/5218a022.pdf&#34;&gt;http://conferences.computer.org/pmbs/2016/papers/5218a022.pdf&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
 </description>
     </item>
     

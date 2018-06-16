@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Numericalla on ry0u_ydのblog</title>
+    <link>http://ry0u.github.io/categories/numericalla/index.xml</link>
+    <description>Recent content in Numericalla on ry0u_ydのblog</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>ja</language>
+    <atom:link href="http://ry0u.github.io/categories/numericalla/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Arnoldi法と固有値の近似</title>
+      <link>http://ry0u.github.io/post/2018-06-16-arnoldi-and-eigenvalues/</link>
+      <pubDate>Fri, 15 Jun 2018 19:05:00 +0900</pubDate>
+      
+      <guid>http://ry0u.github.io/post/2018-06-16-arnoldi-and-eigenvalues/</guid>
+      <description>
+
+&lt;p&gt;この内容は&lt;a href=&#34;https://www.amazon.co.jp/Numerical-Linear-Algebra-Lloyd-Trefethen/dp/0898713617&#34;&gt;Numerical Linear Algebra&lt;/a&gt;内の以下のLectureに相当します．&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Lecture 33, The Arnoldi Iteration&lt;/li&gt;
+&lt;li&gt;Lecture 34, How Arnoldi Locates Eigenvalues&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;しかし，この本にはどのように多項式$p(z)$を求めるかが(明示的に)書いてありません．&lt;br /&gt;
+また，自分のググり力では，多項式の求め方を見つけることができませんでした．&lt;/p&gt;
+
+&lt;p&gt;考えてみると，こうすれば多項式が求まるのでは，という方法がでました．&lt;br /&gt;
+これが正しいのかは分かりませんが，結果をプロットしてみると，確かに性質を満たしていました．&lt;br /&gt;
+もっとスマートな方法があるに違いないと思いますが，情報をまとめようと思いblogに書きました．&lt;/p&gt;
+
+&lt;h2 id=&#34;arnoldi法&#34;&gt;Arnoldi法&lt;/h2&gt;
+
+&lt;p&gt;Arnoldi法とは，Krylov部分空間$\mathcal{K}(A, b)$に対して正規直交基底を求める方法です．&lt;br /&gt;
+これは単純に$\mathcal{K}(A, b)$に対して，Modified Gram-Schmidtを適用し，直交基底を求める際の情報をHessenberg行列に格納するアルゴリズムです．&lt;/p&gt;
+
+&lt;p&gt;次の記号を導入します．$Q$は$n\times n$の正規直交基底です．$H$は$(n+1) \times n$のHessenberg行列で，上三角行列に下1行を追加した形です．&lt;/p&gt;
+
+&lt;p&gt;$$
+Q_n = \left[ \begin{array}{c|c|c|c}
+&amp;amp; &amp;amp; &amp;amp; \\&lt;br /&gt;
+&amp;amp; &amp;amp; &amp;amp; \\&lt;br /&gt;
+q_1 &amp;amp; q_2 &amp;amp; \cdots &amp;amp; q_n \\&lt;br /&gt;
+&amp;amp; &amp;amp; &amp;amp; \\&lt;br /&gt;
+&amp;amp; &amp;amp; &amp;amp; \\&lt;br /&gt;
+\end{array} \right], \tilde{H}_n = \left[\begin{array}{cccc}
+h_{11} &amp;amp; h_{12} &amp;amp; \cdots &amp;amp; h_{1n}\\&lt;br /&gt;
+h_{21} &amp;amp; h_{22} &amp;amp; \cdots &amp;amp; h_{2n}\\&lt;br /&gt;
+&amp;amp; \ddots &amp;amp; \ddots &amp;amp; \vdots\\&lt;br /&gt;
+&amp;amp; &amp;amp; h_{n,n-1} &amp;amp; h_{n,n}\\&lt;br /&gt;
+&amp;amp; &amp;amp; &amp;amp; h_{n+1,n}
+\end{array}\right]
+$$&lt;/p&gt;
+
+&lt;p&gt;Arnoldi法は以下の関係式を満たす，$Q_{n}, \tilde{H}_n$を求めます．&lt;/p&gt;
+
+&lt;p&gt;$$
+A Q_n = Q_{n+1} \tilde{H}_n
+$$&lt;/p&gt;
+
+&lt;p&gt;具体的にどのように求めていくのか，それは次のコードのとおりです．&lt;/p&gt;
+&lt;div class=&#34;highlight&#34; style=&#34;background: #f8f8f8&#34;&gt;&lt;pre style=&#34;line-height: 125%&#34;&gt;&lt;span style=&#34;color: #000000&#34;&gt;Q&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;[:,&lt;/span&gt; &lt;span style=&#34;color: #0000cf; font-weight: bold&#34;&gt;0&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;b&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;/&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;la&lt;/span&gt;&lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;norm&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;b&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;)&lt;/span&gt;
+&lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;for&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;k&lt;/span&gt; &lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;in&lt;/span&gt; &lt;span style=&#34;color: #204a87&#34;&gt;range&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;it&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;):&lt;/span&gt;
+    &lt;span style=&#34;color: #000000&#34;&gt;u&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;A&lt;/span&gt;&lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;dot&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;Q&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;[:,&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;k&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;])&lt;/span&gt;
+    &lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;for&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;j&lt;/span&gt; &lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;in&lt;/span&gt; &lt;span style=&#34;color: #204a87&#34;&gt;range&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;k&lt;/span&gt;&lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;+&lt;/span&gt;&lt;span style=&#34;color: #0000cf; font-weight: bold&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;):&lt;/span&gt;
+        &lt;span style=&#34;color: #000000&#34;&gt;H&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;j&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;,&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;k&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;np&lt;/span&gt;&lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;dot&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;Q&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;[:,&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;j&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;],&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;u&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;)&lt;/span&gt;
+        &lt;span style=&#34;color: #000000&#34;&gt;u&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;u&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;-&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;H&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;j&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;,&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;k&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;*&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;Q&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;[:,&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;j&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;]&lt;/span&gt;
+    
+    &lt;span style=&#34;color: #000000&#34;&gt;H&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;k&lt;/span&gt;&lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;+&lt;/span&gt;&lt;span style=&#34;color: #0000cf; font-weight: bold&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;k&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;la&lt;/span&gt;&lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;.&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;norm&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;(&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;u&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;)&lt;/span&gt;
+    &lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;if&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;H&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;k&lt;/span&gt;&lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;+&lt;/span&gt;&lt;span style=&#34;color: #0000cf; font-weight: bold&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;k&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;&amp;lt;=&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;EPS&lt;/span&gt;
+        &lt;span style=&#34;color: #204a87; font-weight: bold&#34;&gt;break&lt;/span&gt;
+    &lt;span style=&#34;color: #000000&#34;&gt;Q&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;[:,&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;k&lt;/span&gt;&lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;+&lt;/span&gt;&lt;span style=&#34;color: #0000cf; font-weight: bold&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;]&lt;/span&gt; &lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;=&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;u&lt;/span&gt;&lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;/&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;H&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;[&lt;/span&gt;&lt;span style=&#34;color: #000000&#34;&gt;k&lt;/span&gt;&lt;span style=&#34;color: #ce5c00; font-weight: bold&#34;&gt;+&lt;/span&gt;&lt;span style=&#34;color: #0000cf; font-weight: bold&#34;&gt;1&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;,&lt;/span&gt; &lt;span style=&#34;color: #000000&#34;&gt;k&lt;/span&gt;&lt;span style=&#34;color: #000000; font-weight: bold&#34;&gt;]&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+&lt;p&gt;現在選ばれている全ての直交基底との射影成分を引くことで，新しい直交基底を選んでいます．&lt;br /&gt;
+また基底$Q_j$方向のpowerをHessenberg行列の$H[j, k]$に格納しています．&lt;br /&gt;
+$H[k+1, k]$に格納されるのは，現在の基底で表すことができなかったベクトルのノルムです．&lt;br /&gt;
+つまり$H[k+1, k]$が$0$になれば，現在の基底で表す事が可能なので，新しい基底を作らずにループを抜けます．&lt;/p&gt;
+
+&lt;h2 id=&#34;射影での解釈&#34;&gt;射影での解釈&lt;/h2&gt;
+
+&lt;p&gt;$Q^{*}_{n} Q_{n+1}$という行列を考えると，これは対角に$1$が並ぶ$n \times (n+1)$の行列です．&lt;br /&gt;
+なぜなら$Q$は直交基底なので，$q_i$と$q_j$の内積は，$i == j$の時に$1$(正規)，それ以外の時に$0$(直交)だからです．&lt;br /&gt;
+そのため$Q^{*}_{n} Q_{n+1}\hat{H}_{n}$は，$n+1$行目を削除した$n \times n$の行列になります．&lt;/p&gt;
+
+&lt;p&gt;$$
+Q^*_n Q_{n+1} \tilde{H}_n = H_n = \left[\begin{array}{cccc}
+h_{11} &amp;amp; h_{12} &amp;amp; \cdots &amp;amp; h_{1n}\\&lt;br /&gt;
+h_{21} &amp;amp; h_{22} &amp;amp; \cdots &amp;amp; h_{2n}\\&lt;br /&gt;
+&amp;amp; \ddots &amp;amp; \ddots &amp;amp; \vdots\\&lt;br /&gt;
+&amp;amp; &amp;amp; h_{n,n-1} &amp;amp; h_{n,n}\\&lt;br /&gt;
+\end{array}\right]
+$$&lt;/p&gt;
+
+&lt;p&gt;先に述べた式に戻り，左から$Q^{*}_{n}$をかける．&lt;/p&gt;
+
+&lt;p&gt;$$
+A Q_n = Q_{n+1} \tilde{H}_n \\&lt;br /&gt;
+Q^{*}_{n} A Q_n = Q^{*}_n Q_{n+1} \tilde{H}_n\\&lt;br /&gt;
+Q^{*}_{n} A Q_n = H_n \hspace{3.0em}
+$$&lt;/p&gt;
+
+&lt;p&gt;$Q_n$は$\mathcal{K}_n$の正規直交基底なので，$H_n$は$\mathcal{K}_n$上に$A$を射影した行列となります．&lt;br /&gt;
+そのため$H_n$の固有値は，$A$の固有値と関係があります．&lt;br /&gt;
+$H_n$の固有値は，$\textit{Arnoldi eigenvalue estimates}$，または$\textit{Ritz values}$と呼ばれ，$A$のスペクトル半径に近い固有値を近似します．&lt;/p&gt;
+
+&lt;p&gt;これを確かめるために，$n=25, 40$の時に$n \times n$の実数ランダム行列$A$を作成し，Arnoldi法を適用してみました．&lt;br /&gt;
+右の図の青のxが$A$の固有値で，オレンジのoが$H_n$の固有値です．&lt;br /&gt;
+左の図は$A$を&lt;code&gt;imshow&lt;/code&gt;で出した結果です．&lt;br /&gt;
+こうみると，徐々に固有値を近似していく($A$の固有値の上に収まる)様子が分かります．&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://ry0u.github.io/images/arnoldi_n20.gif&#34; width=&#34;80%&#34;/&gt;
+&lt;img src=&#34;http://ry0u.github.io/images/arnoldi_n40.gif&#34; width=&#34;80%&#34;/&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;arnoldi法と多項式近似&#34;&gt;Arnoldi法と多項式近似&lt;/h2&gt;
+
+&lt;p&gt;Kyrolov部分空間$\mathcal{K}$上の任意のベクトルは次式で表せます．&lt;/p&gt;
+
+&lt;p&gt;$$
+x = c_0 b + c_1 Ab + c_2 A^2 b + \cdots + c_{n-1} A^{n-1}b
+$$&lt;/p&gt;
+
+&lt;p&gt;ここで多項式$q(z)$を導入します．すると$x$は次のように書けます．&lt;/p&gt;
+
+&lt;p&gt;$$
+q(z) = c_0 + c_1 z + \cdots + c_{n-1} z^{n-1}\\&lt;br /&gt;
+x = q(A) b
+$$&lt;/p&gt;
+
+&lt;p&gt;$q(z)$の中で$P^n$をmonicな$n$次多項式($n$次の項の係数が$1$)とした時，Arnoldi法は次の問題を解いていると見れます．&lt;/p&gt;
+
+&lt;p&gt;$$
+\text{Find } p^n \in P^n, \text{such that } \|p^n (A) b\| = minimum
+$$&lt;/p&gt;
+
+&lt;p&gt;また$p^n \in P^n$の場合，$p^n(A)b = A^n b - Q_n y$となるので，次のような言い換えができます．&lt;/p&gt;
+
+&lt;p&gt;$$
+\text{Find } y, \|A^n b - Q_n y\| = minimum
+$$&lt;/p&gt;
+
+&lt;p&gt;これを幾何学的に理解するには，p.260に載っている図が分かりやすいです．(&lt;strong&gt;引用 p.260 Figure 34.1 The least squares polynomial approximation problem underlying the Arnoldi iteration.&lt;/strong&gt;)&lt;/p&gt;
+
+&lt;p&gt;&lt;center&gt;
+&lt;img src=&#34;http://ry0u.github.io/images/20180613_001.png&#34; width=&#34;60%&#34;/&gt;
+&lt;/center&gt;&lt;/p&gt;
+
+&lt;p&gt;$A^n b$を見る時は，既に$n$本の直交基底$Q_n$で表現されるKyrolov部分空間$\mathcal{K}_n$があり，Krylov列/基底の$n+1$本目を見ている場合です．&lt;br /&gt;
+つまり，この多項式$p(A)b$は，現在の基底$Q_n$で表せないベクトルを表しています．&lt;br /&gt;
+そしてArnoldi法は，ベクトルの最小化を行ないます．&lt;/p&gt;
+
+&lt;h1 id=&#34;arnoldi-lemniscates&#34;&gt;Arnoldi Lemniscates&lt;/h1&gt;
+
+&lt;p&gt;Arnoldi法の収束過程は，複素平面に$\textit{lemniscates}$を描くことで幾何学的に見ることができます．&lt;br /&gt;
+これは$\textit{Arnoldi lemniscates}$と呼ばれ，次の式で描くことができます．&lt;/p&gt;
+
+&lt;p&gt;$$
+\{ z \in \mathbb{C} : |p(z)| = C\} \\&lt;br /&gt;
+C = \frac{\|p^n (A) b \|}{\|b\|}
+$$&lt;/p&gt;
+
+&lt;p&gt;さてここで本題となりますが，どのようにすれば$p(z)$を導出できるのでしょうか．&lt;br /&gt;
+$p(z)$が分かるというのは，係数$c_0, c_1, &amp;hellip;$が分かっているということです．&lt;br /&gt;
+この係数を求めるために，以下の関係を列形式で書いて，$n=1, 2$の場合を見ていきます．&lt;/p&gt;
+
+&lt;p&gt;$$
+A Q_n = Q_{n+1} \tilde{H}_n
+$$
+$$
+A \left[ \begin{array}{c|c|c|c}
+&amp;amp; &amp;amp; &amp;amp; \\&lt;br /&gt;
+&amp;amp; &amp;amp; &amp;amp; \\&lt;br /&gt;
+q_1 &amp;amp; q_2  &amp;amp; \cdots &amp;amp; q_n \\&lt;br /&gt;
+&amp;amp; &amp;amp; &amp;amp; \\&lt;br /&gt;
+&amp;amp; &amp;amp; &amp;amp; \\&lt;br /&gt;
+\end{array} \right] = \left[ \begin{array}{c|c|c|c|c}
+&amp;amp; &amp;amp; &amp;amp; &amp;amp;\\&lt;br /&gt;
+&amp;amp; &amp;amp; &amp;amp; &amp;amp;\\&lt;br /&gt;
+q_1 &amp;amp; q_2  &amp;amp; \cdots &amp;amp; q_n &amp;amp; q_{n+1} \\&lt;br /&gt;
+&amp;amp; &amp;amp; &amp;amp; &amp;amp;\\&lt;br /&gt;
+&amp;amp; &amp;amp; &amp;amp; &amp;amp;\\&lt;br /&gt;
+\end{array} \right] \left[\begin{array}{cccc}
+h_{11} &amp;amp; h_{12} &amp;amp; \cdots &amp;amp; h_{1n}\\&lt;br /&gt;
+h_{21} &amp;amp; h_{22} &amp;amp; \cdots &amp;amp; h_{2n}\\&lt;br /&gt;
+&amp;amp; \ddots &amp;amp; \ddots &amp;amp; \vdots\\&lt;br /&gt;
+&amp;amp; &amp;amp; h_{n,n-1} &amp;amp; h_{n,n}\\&lt;br /&gt;
+&amp;amp; &amp;amp; &amp;amp; h_{n+1,n}
+\end{array}\right]
+$$&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;$n=1$の時，$q_1 = \frac{b}{\|b\|}$を左辺にだけ代入します．
+$$
+A q_1 = h_{11} q_1 + h_{21} q_2 \\&lt;br /&gt;
+A \frac{b}{\|b\|} = h_{11} q_1 + h_{21} q_{2} \\&lt;br /&gt;
+A b - \|b\|h_{11} q_{1} = \|b\|h_{21} q_{2}
+$$&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;これは$y_1 = \left[\|b\| h_{11} \right]$と見れば左辺は
+$$
+A b - \|b\|h_{11} q_{1} = Ab - Q_1 y_1
+$$&lt;/li&gt;
+&lt;li&gt;となり，「$p^n \in P^n$の場合，$p^n(A)b = A^n b - Q_n y$」を用いれば，$Ab$の係数は$1$なので，右辺が$p^1(A)b$となります．&lt;br /&gt;
+lemniscatesを書く際に求める$C$は，$\|p^n(A)b\|$を$\|b\|$で割るので，自然な感じがします．
+$$
+\|b\|h_{21} q_{2} = p^1(A)b
+$$&lt;/li&gt;
+&lt;li&gt;この右辺が$p^1(A)b$を表すことが分かったので，$c_0 b + c_1 Ab + \cdots + c_{n-1} A^{n-1}$の形にします．
+$$
+A b - \|b\|h_{11} \frac{b}{\|b\|} = \|b\|h_{21} q_{2} \\&lt;br /&gt;
+p^1(A)b = - h_{11} b + A b
+$$&lt;/li&gt;
+&lt;li&gt;$c_0 = -h_{11}$，$c_1 = 1$，$C = h_{21}$となり，これで$p(z) = C$を満たすlemniscatesが書けます．&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;$n=2$の時も同様，$q_{1} = \frac{b}{\|b\|}$，また上記の式から$q_2 = -\frac{h_{11}}{h_{21}\|b\|}b + \frac{1}{h_{21}\|b\|}Ab$を代入します．
+$$
+A q_2 = h_{12} q_1 + h_{22} q_{2} + h_{32} q_{3} \\&lt;br /&gt;
+A \left( -\frac{h_{11}}{h_{21}\|b\|}b + \frac{1}{h_{21}\|b\|}Ab \right) = h_{12} \frac{b}{\|b\|} + h_{22} \left( -\frac{h_{11}}{h_{21}\|b\|}b + \frac{1}{h_{21}\|b\|}Ab \right) + h_{32} q_3 \\&lt;br /&gt;
+-\frac{h_{11}}{h_{21} \|b\|} Ab + \frac{1}{h_{21}\|b\|} A^2 b = \frac{h_{12}}{\|b\|}b - \frac{h_{11} h_{22}}{h_{21} \|b\|} b + \frac{h_{22}}{h_{21}\|b\|} Ab + h_{32} q_3 \\&lt;br /&gt;
+-h_{11} Ab + A^2b = h_{12}h_{21}b - h_{11} h_{22} b + h_{22} Ab + \|b\|h_{21}h_{32} q_3\\&lt;br /&gt;
+\|b\| h_{21}h_{32} q_3 = \left(-h_{12}h_{32} + h_{11}h_{22}\right)b + \left(-h_{11} + h_{22}\right) Ab + A^2 b
+$$&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;$c_0 = -h_{12} h_{32} + h_{11} h_{22}$，$c_{1} = -h_{11} + h_{22}$，$c_2 = 1$，$C = h_{21} h_{32}$&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;これを手順的に行って，プロットしたものが以下の図になります．&lt;br /&gt;
+複素平面にメッシュを作り，$p(z)$の値が$C$以下の場合の等高線を出しました．&lt;br /&gt;
+青が濃くなるほど値が小さく，一番濃い青に囲まれた箇所に近似固有値があることから&lt;br /&gt;
+多項式の解がHessenbergの固有値になる，という性質を満たしているが分かります．&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&#34;http://ry0u.github.io/images/lemniscates_n10.gif&#34; width=&#34;80%&#34;/&gt;
+&lt;img src=&#34;http://ry0u.github.io/images/lemniscates_n25.gif&#34; width=&#34;80%&#34;/&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;まとめ&#34;&gt;まとめ&lt;/h2&gt;
+
+&lt;p&gt;間違っている記述がある場合は，申し訳ありません．&lt;br /&gt;
+勉強をするので，是非とも教えていただけると嬉しいです．&lt;/p&gt;
+
+&lt;p&gt;多項式の導出には，もっとスマートな方法があるはずです．&lt;br /&gt;
+もっと理解が深められるように進めていきます．&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>
