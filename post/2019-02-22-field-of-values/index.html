@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+<meta name="pinterest" content="nopin">
+<meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+<meta name="generator" content="Hugo 0.19-DEV" />
+
+
+
+<link rel="canonical" href="http://ry0u.github.io/post/2019-02-22-field-of-values/">
+
+
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/solarized_dark.min.css">
+	<link rel="stylesheet" href="//cdn.jsdelivr.net/highlight.js/8.6/styles/">
+<style type="text/css">
+.hljs {
+  background: #F7F7F7;
+}
+
+</style>
+
+    <title>field-of-valuesの近似値算出方法 - ry0u_ydのblog</title>
+    
+<meta name="description" content="この内容は，Numerical Determination of the Field of Values of a General Complex Matrixを読んで実装したものです． 恐らくこの論文のアルゴリズム内の$\theta_j$">
+
+<meta property="og:title" content="field-of-valuesの近似値算出方法 - ry0u_ydのblog">
+<meta property="og:type" content="article">
+<meta property="og:url" content="http://ry0u.github.io/post/2019-02-22-field-of-values/">
+<meta property="og:image" content="http://ry0u.github.io/images/default.png">
+<meta property="og:site_name" content="ry0u_ydのblog">
+<meta property="og:description" content="この内容は，Numerical Determination of the Field of Values of a General Complex Matrixを読んで実装したものです． 恐らくこの論文のアルゴリズム内の$\theta_j$">
+<meta property="og:locale" content="ja_JP">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="ry0u_ydのblog">
+<meta name="twitter:url" content="http://ry0u.github.io/post/2019-02-22-field-of-values/">
+<meta name="twitter:title" content="field-of-valuesの近似値算出方法 - ry0u_ydのblog">
+<meta name="twitter:description" content="この内容は，Numerical Determination of the Field of Values of a General Complex Matrixを読んで実装したものです． 恐らくこの論文のアルゴリズム内の$\theta_j$">
+<meta name="twitter:image" content="http://ry0u.github.io/images/default.png">
+
+
+<script type="application/ld+json">
+  {
+    "@context": "http://schema.org",
+    "@type": "NewsArticle",
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id":"http:\/\/ry0u.github.io\/"
+    },
+    "headline": "field-of-valuesの近似値算出方法 - ry0u_ydのblog",
+    "image": {
+      "@type": "ImageObject",
+      "url": "http:\/\/ry0u.github.io\/images\/default.png",
+      "height": 800,
+      "width": 800
+    },
+    "datePublished": "2019-02-22T17:52:29JST",
+    "dateModified": "2019-02-22T17:52:29JST",
+    "author": {
+      "@type": "Person",
+      "name": "ry0u_ydのblog"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "ry0u_ydのblog",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "http:\/\/ry0u.github.io\/images/logo.png",
+        "width": 600,
+        "height": 60
+      }
+    },
+    "description": "この内容は，Numerical Determination of the Field of Values of a General Complex Matrixを読んで実装したものです． 恐らくこの論文のアルゴリズム内の$\\theta_j$"
+  }
+</script>
+
+
+    <link href="http://ry0u.github.io/css/styles.css" rel="stylesheet">
+	<script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+	</script>
+	<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {
+	inlineMath: [['$','$'], ['\\(','\\)']],
+	displayMath: [['$$','$$'], ['\[','\]']],
+	processEscapes: true,
+	processEnvironments: true,
+	skipTags: ['script', 'noscript', 'style', 'textarea', 'pre'],
+	TeX: { 
+		equationNumbers: { autoNumber: "AMS" },
+		extensions: ["AMSmath.js", "AMSsymbols.js", "noErrors.js"],
+		noErrors : {
+			multiLine: true
+		}
+	}
+  }
+});
+	</script>
+
+  </head>
+
+  <body>
+    
+    
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-65029878-1', 'auto');
+ga('send', 'pageview');
+</script>
+
+    
+
+	<header class="l-header">
+		<nav class="navbar navbar-default">
+			<div class="container">
+				<div class="navbar-header">
+					<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false">
+						<span class="sr-only">Toggle navigation</span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+					</button>
+					<a class="navbar-brand" href="http://ry0u.github.io/" style="padding-right:100px">ry0u_ydのblog</a>
+
+					
+
+					<a class="navbar-brand" href="http://ry0u.github.io/categories" style="font-size:small;padding-left:20px">categories
+					</a>
+					
+
+					<a class="navbar-brand" href="http://ry0u.github.io/tags" style="font-size:small;padding-left:20px">tags
+					</a>
+					
+				</div>
+
+				
+				<div id="navbar" class="collapse navbar-collapse">
+					
+					<ul class="nav navbar-nav navbar-right">
+						
+						
+						<li>
+								<a href="https://github.com/ry0u">
+									
+										<i class="fa fa-github" aria-hidden="true"></i>
+									
+									github
+								</a>
+						</li>
+						
+						
+						
+						<li>
+								<a href="https://twitter.com/ry0u_yd">
+									
+										<i class="fa fa-twitter" aria-hidden="true"></i>
+									
+									twitter
+								</a>
+						</li>
+						
+						
+					</ul>
+					
+				</div>
+				
+
+			</div>
+		</nav>
+	</header>
+
+    <main>
+      <div class="container">
+        
+<div class="row">
+  <div class="col-md-12">
+
+    <nav class="p-crumb">
+      <ol class="breadcrumb">
+        <li><a href="http://ry0u.github.io/"><i class="fa fa-home" aria-hidden="true"></i></a></li>
+        
+        <li itemscope="" itemtype="http://data-vocabulary.org/Breadcrumb"><a href="http://ry0u.github.io/post/" itemprop="url"><span itemprop="title">post</span></a></li>
+        
+        <li class="active">field-of-valuesの近似値算出方法</li>
+      </ol>
+    </nav>
+
+    <article class="single">
+  <header>
+    <ul class="p-facts">
+      <li><i class="fa fa-calendar" aria-hidden="true"></i><time datetime="2019-02-22T17:52:29JST">Feb 22, 2019</time></li>
+      <li><i class="fa fa-bookmark" aria-hidden="true"></i><a href="http://ry0u.github.io/post/">post</a></li>
+      
+    </ul>
+
+    <h1 class="title">field-of-valuesの近似値算出方法</h1>
+  </header>
+
+  
+
+  <div class="article-body"><p>この内容は，<a href="https://epubs.siam.org/doi/10.1137/0715039">Numerical Determination of the Field of Values of a General Complex Matrix</a>を読んで実装したものです．<br />
+恐らくこの論文のアルゴリズム内の$\theta_j$は，$\theta_j = (j-1) / (2 \pi / k)$ではなく，$\theta_j = (j-1) * (2 \pi / k)$だと思います．<br />
+下記の内容に間違っている記述がある場合は，申し訳ありません．是非とも教えて頂けると嬉しいです．</p>
+
+<p>線形方程式$Ax=b$のconvergence boundsを考えます．<br />
+一般には$A$の固有値で抑えたり，固有値分布で評価します．<br />
+また<i>field-of-values</i>を用いて抑える手法もあります．<br />
+<i>field-of-values</i>は他に<i>numerical range</i>，<i>Wertovorrat</i>，<i>Hausdorff domain</i>，<i>range of values</i>とも呼ばれるようです．<br />
+(<a href="https://en.wikipedia.org/wiki/Numerical_range">Wiki</a>では<i>numerical range</i>ですね)</p>
+
+<p><i>field-of-values</i>の定義は次式です．
+これは長さ$1$の単位ベクトルのRayleigh quotientのrangeと見れます．
+$$
+    F(A) = {x^* A x, x^*x = 1, x \in \mathbb{C}^n }
+$$</p>
+
+<p><i>field-of-values</i>は次の性質を持ちます．</p>
+
+<ul>
+<li>aa</li>
+</ul>
+
+<p>また，$A$のHermitian part($H(A)$)の最大固有値は，$F(A)$の境界に乗ります．<br />
+そのため，この最大固有値に対応する固有ベクトル$x$を用いて，$x^* A x$を計算すれば，$F(A)$の境界点が求まります．</p>
+
+<p>この動作を$F(A)$を角度$\theta$で回転を繰り返し，境界点を求めていきます．<br />
+$F(A)$の$\theta$回転は$e^{i\theta}F(A)$ですが，これは$F(e^{i \theta}A)$と一致するので，$H(e^{i \theta}A)$の最大固有値，最大固有値に対応する固有ベクトルが分かれば良くなります．</p>
+
+<p>求めた$F(A)$の境界点で凸多角形を作り，それを$F_{in}(A)$とします．<br />
+$F_{in}(A)$は必ず$F(A)$に内包されます．</p>
+
+<p>また$F(A)$がconvexである条件を用いると，回転角度$\theta_j$で求めた境界点$u$に対して，$F(A)$は直線$u+i\theta_{j}$を跨がないはずなので，$F(A)$を内包する凸多角形$F_{out}(A)$が作れます．</p>
+
+<p>必ず$F(A)$は，$F_{in}(A)$と$F_{out}(A)$に挟まれているので，$F(A)$が存在する範囲を求めることができて<br />
+また，回転角度$\theta_j$を無限に小さくすれば$F(A)=F_{in}(A)=F_{out}(A)$になります．</p>
+
+<p>問題行列としてGRCAR(10, 5)で，$[0, 2\pi]$区間の分割数を$3 \sim 20$まで変えていった場合のプロットを乗せます．<br />
+青点はGRCARの固有値です．<br />
+赤点と赤点線で表される凸多角形は$F_{in}(A)$です．<br />
+青点と青点線で表される凸多角形は$F_{out}(A)$です．<br />
+つまり$F(A)$は赤と青の点線の間にあります．</p>
+
+<p><img src="http://ry0u.github.io/images/grcar_fval.gif" width="80%"/></p>
+
+<p>$[0, 2\pi]$区間の分割数の終了条件は，次の面積比と，基準値$\epsilon$を決めます．<br />
+$$
+    \frac{\text{area}(F_{out}(A)) - \text{area}(F_{in}(A))}{\text{area}(F_{out}(A))} \leq \epsilon
+$$</p>
+
+<p>また収束性解析では，$F(A)$の中で原点と最も距離が小さいものを$\nu(F(A))$として，$\nu(F(A))$と$\nu(F(A^{-1}))$を用います．
+$$
+    \frac{\|r_{n}\|}{\|r_{0}\|} \leq \left(1 - \nu(F(A)) \nu(F(A^{-1}))\right)^{\frac{n}{2}}
+$$</p>
+
+<p>今回の例では$F(A)$に$(0, 0)$が入ってしまって，上手く見積もりとして用いられません．<br />
+その場合は多項式$\|p(A)\|$を用いて見積もるようです．</p>
+<div class="highlight" style="background: #f8f8f8"><pre style="line-height: 125%"><span style="color: #204a87; font-weight: bold">import</span> <span style="color: #000000">numpy</span> <span style="color: #204a87; font-weight: bold">as</span> <span style="color: #000000">np</span>
+<span style="color: #204a87; font-weight: bold">import</span> <span style="color: #000000">matplotlib.pyplot</span> <span style="color: #204a87; font-weight: bold">as</span> <span style="color: #000000">plt</span>
+<span style="color: #204a87; font-weight: bold">import</span> <span style="color: #000000">scipy.linalg</span> <span style="color: #204a87; font-weight: bold">as</span> <span style="color: #000000">LA</span>
+
+<span style="color: #204a87; font-weight: bold">def</span> <span style="color: #000000">H</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">B</span><span style="color: #000000; font-weight: bold">):</span>
+    <span style="color: #000000">B_star</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000">np</span><span style="color: #ce5c00; font-weight: bold">.</span><span style="color: #000000">conjugate</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">B</span><span style="color: #ce5c00; font-weight: bold">.</span><span style="color: #000000">T</span><span style="color: #000000; font-weight: bold">)</span>
+    <span style="color: #204a87; font-weight: bold">return</span> <span style="color: #0000cf; font-weight: bold">0.5</span> <span style="color: #ce5c00; font-weight: bold">*</span> <span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">B</span> <span style="color: #ce5c00; font-weight: bold">+</span> <span style="color: #000000">B_star</span><span style="color: #000000; font-weight: bold">)</span>
+
+<span style="color: #204a87; font-weight: bold">def</span> <span style="color: #000000">lambda_M</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">B</span><span style="color: #000000; font-weight: bold">):</span>
+    <span style="color: #000000">eig</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">vec</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000">LA</span><span style="color: #ce5c00; font-weight: bold">.</span><span style="color: #000000">eig</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">B</span><span style="color: #000000; font-weight: bold">)</span>
+    <span style="color: #000000">index</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000">np</span><span style="color: #ce5c00; font-weight: bold">.</span><span style="color: #000000">argmax</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">eig</span><span style="color: #000000; font-weight: bold">)</span>
+    <span style="color: #204a87; font-weight: bold">return</span> <span style="color: #000000">eig</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">index</span><span style="color: #000000; font-weight: bold">],</span> <span style="color: #000000">vec</span><span style="color: #000000; font-weight: bold">[:,</span> <span style="color: #000000">index</span><span style="color: #000000; font-weight: bold">]</span>
+
+
+<span style="color: #204a87; font-weight: bold">def</span> <span style="color: #000000">field_of_values</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">A</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">number_of_points</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">eps</span><span style="color: #000000; font-weight: bold">):</span>
+    <span style="color: #000000">n</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #204a87">len</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">A</span><span style="color: #000000; font-weight: bold">)</span>
+
+    <span style="color: #8f5902; font-style: italic"># =========== 1. if A is hermitian</span>
+    <span style="color: #000000">is_hermite</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #3465a4">True</span>
+    <span style="color: #204a87; font-weight: bold">for</span> <span style="color: #000000">i</span> <span style="color: #204a87; font-weight: bold">in</span> <span style="color: #204a87">range</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">n</span><span style="color: #000000; font-weight: bold">):</span>
+        <span style="color: #204a87; font-weight: bold">for</span> <span style="color: #000000">j</span> <span style="color: #204a87; font-weight: bold">in</span> <span style="color: #204a87">range</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">i</span><span style="color: #ce5c00; font-weight: bold">+</span><span style="color: #0000cf; font-weight: bold">1</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">n</span><span style="color: #000000; font-weight: bold">):</span>
+            <span style="color: #204a87; font-weight: bold">if</span> <span style="color: #204a87">abs</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">A</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">j</span><span style="color: #000000; font-weight: bold">]</span> <span style="color: #ce5c00; font-weight: bold">-</span> <span style="color: #000000">A</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">j</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">])</span> <span style="color: #ce5c00; font-weight: bold">&lt;=</span> <span style="color: #000000">eps</span><span style="color: #000000; font-weight: bold">:</span>
+                <span style="color: #204a87; font-weight: bold">continue</span>
+            <span style="color: #000000">is_hermite</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #3465a4">False</span>
+
+    <span style="color: #204a87; font-weight: bold">if</span> <span style="color: #000000">is_hermite</span><span style="color: #000000; font-weight: bold">:</span>
+        <span style="color: #000000">eig</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">_</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000">LA</span><span style="color: #ce5c00; font-weight: bold">.</span><span style="color: #000000">eig</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">A</span><span style="color: #000000; font-weight: bold">)</span>
+        <span style="color: #000000">poly</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000; font-weight: bold">[]</span>
+        <span style="color: #000000">poly</span><span style="color: #ce5c00; font-weight: bold">.</span><span style="color: #000000">append</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">np</span><span style="color: #ce5c00; font-weight: bold">.</span><span style="color: #000000">min</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">eig</span><span style="color: #000000; font-weight: bold">))</span>
+        <span style="color: #000000">poly</span><span style="color: #ce5c00; font-weight: bold">.</span><span style="color: #000000">append</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">np</span><span style="color: #ce5c00; font-weight: bold">.</span><span style="color: #000000">max</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">eig</span><span style="color: #000000; font-weight: bold">))</span>
+        <span style="color: #204a87; font-weight: bold">return</span> <span style="color: #000000">np</span><span style="color: #ce5c00; font-weight: bold">.</span><span style="color: #000000">array</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">poly</span><span style="color: #000000; font-weight: bold">)</span>
+
+    <span style="color: #8f5902; font-style: italic"># =========== 2. if A is normal</span>
+    <span style="color: #000000">is_normal</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #3465a4">True</span>
+    <span style="color: #000000">AAT</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000">np</span><span style="color: #ce5c00; font-weight: bold">.</span><span style="color: #000000">dot</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">A</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">A</span><span style="color: #ce5c00; font-weight: bold">.</span><span style="color: #000000">T</span><span style="color: #000000; font-weight: bold">)</span>
+    <span style="color: #000000">ATA</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000">np</span><span style="color: #ce5c00; font-weight: bold">.</span><span style="color: #000000">dot</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">A</span><span style="color: #ce5c00; font-weight: bold">.</span><span style="color: #000000">T</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">A</span><span style="color: #000000; font-weight: bold">)</span>
+    
+    <span style="color: #204a87; font-weight: bold">for</span> <span style="color: #000000">i</span> <span style="color: #204a87; font-weight: bold">in</span> <span style="color: #204a87">range</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">n</span><span style="color: #000000; font-weight: bold">):</span>
+        <span style="color: #204a87; font-weight: bold">for</span> <span style="color: #000000">j</span> <span style="color: #204a87; font-weight: bold">in</span> <span style="color: #204a87">range</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">n</span><span style="color: #000000; font-weight: bold">):</span>
+            <span style="color: #204a87; font-weight: bold">if</span> <span style="color: #204a87">abs</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">AAT</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">j</span><span style="color: #000000; font-weight: bold">]</span> <span style="color: #ce5c00; font-weight: bold">-</span> <span style="color: #000000">ATA</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">i</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">j</span><span style="color: #000000; font-weight: bold">])</span> <span style="color: #ce5c00; font-weight: bold">&lt;=</span> <span style="color: #000000">eps</span><span style="color: #000000; font-weight: bold">:</span>
+                <span style="color: #204a87; font-weight: bold">continue</span>
+            <span style="color: #000000">is_normal</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #3465a4">False</span>
+    
+    <span style="color: #204a87; font-weight: bold">if</span> <span style="color: #000000">is_normal</span><span style="color: #000000; font-weight: bold">:</span>
+        <span style="color: #000000">eig</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">_</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000">LA</span><span style="color: #ce5c00; font-weight: bold">.</span><span style="color: #000000">eig</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">A</span><span style="color: #000000; font-weight: bold">)</span>
+        <span style="color: #204a87; font-weight: bold">return</span> <span style="color: #000000">eig</span>
+
+    <span style="color: #8f5902; font-style: italic"># =========== 3.</span>
+    <span style="color: #000000">k</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000">number_of_points</span>  <span style="color: #8f5902; font-style: italic"># Choose a k-mesh</span>
+    <span style="color: #000000">theta</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000; font-weight: bold">[]</span>
+    <span style="color: #204a87; font-weight: bold">for</span> <span style="color: #000000">j</span> <span style="color: #204a87; font-weight: bold">in</span> <span style="color: #204a87">range</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #0000cf; font-weight: bold">0</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">k</span><span style="color: #000000; font-weight: bold">):</span>
+        <span style="color: #000000">theta</span><span style="color: #ce5c00; font-weight: bold">.</span><span style="color: #000000">append</span><span style="color: #000000; font-weight: bold">((</span><span style="color: #0000cf; font-weight: bold">2</span><span style="color: #ce5c00; font-weight: bold">*</span><span style="color: #000000">np</span><span style="color: #ce5c00; font-weight: bold">.</span><span style="color: #000000">pi</span><span style="color: #ce5c00; font-weight: bold">/</span><span style="color: #000000">k</span><span style="color: #000000; font-weight: bold">)</span> <span style="color: #ce5c00; font-weight: bold">*</span> <span style="color: #000000">j</span><span style="color: #000000; font-weight: bold">)</span>
+    
+    <span style="color: #000000">ps</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000; font-weight: bold">[]</span>
+    <span style="color: #000000">lambdas</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000; font-weight: bold">[]</span>
+    <span style="color: #204a87; font-weight: bold">for</span> <span style="color: #000000">j</span> <span style="color: #204a87; font-weight: bold">in</span> <span style="color: #204a87">range</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #204a87">len</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">theta</span><span style="color: #000000; font-weight: bold">)):</span>
+        <span style="color: #8f5902; font-style: italic"># ===== Determine Fin: p_theta</span>
+        <span style="color: #000000">A_theta</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000">np</span><span style="color: #ce5c00; font-weight: bold">.</span><span style="color: #000000">exp</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #0000cf; font-weight: bold">1j</span> <span style="color: #ce5c00; font-weight: bold">*</span> <span style="color: #000000">theta</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">j</span><span style="color: #000000; font-weight: bold">])</span> <span style="color: #ce5c00; font-weight: bold">*</span> <span style="color: #000000">A</span>
+        <span style="color: #000000">HA</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000">H</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">A_theta</span><span style="color: #000000; font-weight: bold">)</span>
+        <span style="color: #000000">lambda_theta</span><span style="color: #000000; font-weight: bold">,</span> <span style="color: #000000">x_theta</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000">lambda_M</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">HA</span><span style="color: #000000; font-weight: bold">)</span>
+        <span style="color: #000000">p_theta</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000">np</span><span style="color: #ce5c00; font-weight: bold">.</span><span style="color: #000000">dot</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">np</span><span style="color: #ce5c00; font-weight: bold">.</span><span style="color: #000000">dot</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">np</span><span style="color: #ce5c00; font-weight: bold">.</span><span style="color: #000000">conjugate</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">x_theta</span><span style="color: #000000; font-weight: bold">),</span> <span style="color: #000000">A</span><span style="color: #000000; font-weight: bold">),</span> <span style="color: #000000">x_theta</span><span style="color: #000000; font-weight: bold">)</span>
+
+        <span style="color: #000000">lambdas</span><span style="color: #ce5c00; font-weight: bold">.</span><span style="color: #000000">append</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">lambda_theta</span><span style="color: #000000; font-weight: bold">)</span>
+        <span style="color: #000000">ps</span><span style="color: #ce5c00; font-weight: bold">.</span><span style="color: #000000">append</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">p_theta</span><span style="color: #000000; font-weight: bold">)</span>
+
+    <span style="color: #000000">qs</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000; font-weight: bold">[]</span>
+    <span style="color: #204a87; font-weight: bold">for</span> <span style="color: #000000">j</span> <span style="color: #204a87; font-weight: bold">in</span> <span style="color: #204a87">range</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #204a87">len</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">theta</span><span style="color: #000000; font-weight: bold">)):</span>
+        <span style="color: #8f5902; font-style: italic"># ===== Determine Fout: q_theta</span>
+        <span style="color: #000000">theta_one</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000">theta</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">j</span><span style="color: #000000; font-weight: bold">]</span>
+        <span style="color: #000000">theta_two</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000">theta</span><span style="color: #000000; font-weight: bold">[(</span><span style="color: #000000">j</span><span style="color: #ce5c00; font-weight: bold">+</span><span style="color: #0000cf; font-weight: bold">1</span><span style="color: #000000; font-weight: bold">)</span> <span style="color: #ce5c00; font-weight: bold">%</span> <span style="color: #204a87">len</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">theta</span><span style="color: #000000; font-weight: bold">)]</span>
+        <span style="color: #000000">delta</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000">theta_two</span> <span style="color: #ce5c00; font-weight: bold">-</span> <span style="color: #000000">theta_one</span>
+        <span style="color: #000000">lambda_one</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000">lambdas</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">j</span><span style="color: #000000; font-weight: bold">]</span>
+        <span style="color: #000000">lambda_two</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000">lambdas</span><span style="color: #000000; font-weight: bold">[(</span><span style="color: #000000">j</span><span style="color: #ce5c00; font-weight: bold">+</span><span style="color: #0000cf; font-weight: bold">1</span><span style="color: #000000; font-weight: bold">)</span> <span style="color: #ce5c00; font-weight: bold">%</span> <span style="color: #204a87">len</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">lambdas</span><span style="color: #000000; font-weight: bold">)]</span>
+
+        <span style="color: #000000">tmp</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000">lambda_one</span> <span style="color: #ce5c00; font-weight: bold">+</span> <span style="color: #000000; font-weight: bold">((</span><span style="color: #000000">lambda_one</span> <span style="color: #ce5c00; font-weight: bold">*</span> <span style="color: #000000">np</span><span style="color: #ce5c00; font-weight: bold">.</span><span style="color: #000000">cos</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">delta</span><span style="color: #000000; font-weight: bold">)</span> <span style="color: #ce5c00; font-weight: bold">-</span> <span style="color: #000000">lambda_two</span><span style="color: #000000; font-weight: bold">)</span> <span style="color: #ce5c00; font-weight: bold">/</span> <span style="color: #000000">np</span><span style="color: #ce5c00; font-weight: bold">.</span><span style="color: #000000">sin</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">delta</span><span style="color: #000000; font-weight: bold">))</span> <span style="color: #ce5c00; font-weight: bold">*</span> <span style="color: #0000cf; font-weight: bold">1j</span>
+        <span style="color: #000000">q_theta</span> <span style="color: #ce5c00; font-weight: bold">=</span> <span style="color: #000000">np</span><span style="color: #ce5c00; font-weight: bold">.</span><span style="color: #000000">exp</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #ce5c00; font-weight: bold">-</span><span style="color: #0000cf; font-weight: bold">1j</span> <span style="color: #ce5c00; font-weight: bold">*</span> <span style="color: #000000">theta</span><span style="color: #000000; font-weight: bold">[</span><span style="color: #000000">j</span><span style="color: #000000; font-weight: bold">])</span> <span style="color: #ce5c00; font-weight: bold">*</span> <span style="color: #000000">tmp</span>
+        <span style="color: #000000">qs</span><span style="color: #ce5c00; font-weight: bold">.</span><span style="color: #000000">append</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">q_theta</span><span style="color: #000000; font-weight: bold">)</span>
+    
+    <span style="color: #204a87; font-weight: bold">return</span> <span style="color: #000000">np</span><span style="color: #ce5c00; font-weight: bold">.</span><span style="color: #000000">array</span><span style="color: #000000; font-weight: bold">(</span><span style="color: #000000">ps</span><span style="color: #000000; font-weight: bold">)</span>
+</pre></div>
+
+<hr />
+
+<p>参考文献</p>
+
+<ul>
+<li>C.R. Johnson, <a href="https://epubs.siam.org/doi/10.1137/0715039">Numerical Determination of the Field of Values of a General Complex Matrix</a>, (1978)</li>
+<li>Numerical range: (in) a matrix nutshell, <a href="http://www.math.wsu.edu/faculty/tsat/files/short.pdf">http://www.math.wsu.edu/faculty/tsat/files/short.pdf</a></li>
+<li>Convergence analysis of Krylov subspace methods, <a href="http://page.math.tu-berlin.de/~liesen/Publicat/LiTiGAMM.pdf">http://page.math.tu-berlin.de/~liesen/Publicat/LiTiGAMM.pdf</a></li>
+</ul>
+</div>
+
+  <footer class="article-footer">
+    
+    
+    
+	<section class="bordered">
+		
+		
+		
+		<div>
+			<ul class="p-terms">
+				
+					<i class="fa fa-desktop fa-fw" aria-hidden="true"></i>
+				
+				
+				<li><a href="http://ry0u.github.io/categories/numericalla/">NumericalLA</a></li>
+				
+			</ul>
+		</div>
+	</section>
+    
+    
+    
+	<section class="bordered">
+		
+		
+		
+		<div>
+			<ul class="p-terms">
+				
+					<i class="fa fa-tag fa-fw" aria-hidden="true"></i>
+				
+				
+				<li><a href="http://ry0u.github.io/tags/field-of-values/">field-of-values</a></li>
+				
+				<li><a href="http://ry0u.github.io/tags/eigenvalue/">eigenvalue</a></li>
+				
+			</ul>
+		</div>
+	</section>
+    
+    
+  </footer>
+
+</article>
+
+
+	<section class="bordered">
+		<a class="btn btn-default" href="http://twitter.com/intent/tweet?text=field-of-values%e3%81%ae%e8%bf%91%e4%bc%bc%e5%80%a4%e7%ae%97%e5%87%ba%e6%96%b9%e6%b3%95%20http%3a%2f%2fry0u.github.io%2fpost%2f2019-02-22-field-of-values%2f%20%40ry0u_yd" style="font-size:10px"><i class="fa fa-twitter fa-fw"></i>tweet</a>
+	</section>
+
+    
+  </div>
+
+  
+  
+  
+</div>
+
+      </div>
+    </main>
+
+    <footer class="l-footer">
+      <div class="container">
+        <p><span class="h-logo">&copy; ry0u_ydのblog</span></p>
+        <aside>
+          <p>Powered by <a href="https://gohugo.io/">Hugo</a>.</p>
+          <p><a href="https://github.com/dim0627/hugo_theme_beg">Beg</a> designed by <a href="http://yet.unresolved.xyz/">Daisuke Tsuji</a>.</p>
+        </aside>
+      </div>
+    </footer>
+
+    <script src="//code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+  </body>
+</html>
+
